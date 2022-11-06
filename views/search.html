@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+<!-- <link rel="stylesheet" href="/public/stylesheets/search.css"> -->
+</head>
+<body>
+  <div class="container col-6">
+    <div>
+      <h3 class="text-center text-primary mt-3 mb-3">搜尋食物🔍</h3>
+      <input type="text" id="autocomplete_search" class="form-control form-control-lg" placeholder="Type food Name Here" />
+      <span id="search_result"></span>
+    </div>
+    <div id="food_trend" style="margin: 30px 0px; display: flex; justify-content: space-around;">
+    </div>
+    <h4 class="text-primary mt-3 mb-3">猜你喜歡</h4>
+    <div id="guess_user_preference">
+    </div>
+    </div>
+  </div>
+
+  <script>
+  
+  /* 熱門食物排行榜top 4 */
+  const foodTrendElement = document.getElementById('food_trend')
+  async function getFoodTrendInfo() {
+    const foodTrendInfo = await axios.get(`http://${location.host}/api/1.0/food/search`)
+    // console.log('foodTrendInfo', foodTrendInfo);
+    const foodTrend = foodTrendInfo.data.trendFood
+    foodTrend.map(food =>
+      foodTrendElement.innerHTML += `<a href="#" class="btn btn-outline-primary">${food}</a>`
+    )
+  } 
+  getFoodTrendInfo()
+
+  /* 猜你喜歡的三樣食物 */
+  const guessUserElement = document.getElementById('guess_user_preference')
+  async function getUserRecommendation(currentUserId) {
+    const foodRecommenInfo = await axios.get(`http://${location.host}/api/1.0/food/recommend?currentUserId=${currentUserId}`)
+    // console.log('foodRecommenInfo', foodRecommenInfo);
+    const foodRecommendation = foodRecommenInfo.data.recommendFood
+    foodRecommendation.map(recommendation =>
+    guessUserElement.innerHTML += `<div style="width: max;height: 70px; border: 3px rgb(9, 131, 206) solid; margin: 20px 0px;"><p>${recommendation}</p>`
+    )
+  } 
+  getUserRecommendation()
+
+  function load_data(query) {
+    fetch(`/api/1.0/getSearchData?key=${query}`)
+    .then(function(response){
+      return response.json();
+    })
+    .then(function(responseData){
+      let html = '<ul class="list-group">';
+      const len = responseData.length;
+      if(len > 0) {
+        for(let i = 0; i < len; i++) {
+          // RegExp 物件被用來比對符合自訂規則的文字
+          let regular_expression = new RegExp(`(${query})`);
+          // span 中的$1表示搜尋的關鍵字
+          html += `<a href="#" class="list-group-item list-group-item-action" onclick="get_text(this)">${responseData[i].name.replace(regular_expression, '<span class="text-primary fw-bold">$1</span>')}</a>`;
+
+          }
+      } else {
+        html += '<a href="#" class="list-group-item list-group-item-action disabled">No Data Found</a>';
+      }
+      html += '</ul>';
+      document.getElementById('search_result').innerHTML = html;
+    });
+  }
+  
+  let search_element = document.getElementById("autocomplete_search");
+  
+  // 追蹤使用者輸入的字元，並執行query
+  search_element.onkeyup = function(){
+    let query = search_element.value;
+    load_data(query);
+  };
+  
+  // 使用者初次點選input便產生推薦項
+  search_element.onfocus = function(){
+    let query = search_element.value;
+    load_data(query);
+  };
+  
+  function get_text(event) {
+    // console.log('event', event);
+    let food_name = event.textContent;
+    console.log(food_name);
+    document.getElementById('autocomplete_search').value = food_name;
+    document.getElementById('search_result').innerHTML = '';
+  }
+  
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,89 @@
+const db = require('../utils/mysqlconf')
+
+const getUserRecord = async (userId, dateToday) => {
+  const [mealRecords] = await db.execute(
+    'SELECT user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, food.calories, food.carbs, food.protein, food.fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
+    [userId, dateToday]
+  )
+  // console.log('mealRecords', mealRecords)
+  return mealRecords
+}
+
+const getRecommendMeal = async (target, value) => {
+  const condition = { sql: '', binding: [] }
+  if (target === 'calories') {
+    condition.sql =
+      'WHERE recommend_categories_id IS NOT NULL AND calories BETWEEN ? AND ?'
+    condition.binding = [value - 50, value + 50]
+  } else if (target === 'carbs') {
+    condition.sql =
+      'WHERE recommend_categories_id = 1 AND carbs BETWEEN ? AND ?'
+    condition.binding = [value - 5, value + 5]
+  } else if (target === 'protein') {
+    condition.sql =
+      'WHERE recommend_categories_id = 2 AND protein BETWEEN ? AND ?'
+    condition.binding = [value - 5, value + 5]
+  } else if (target === 'fat') {
+    condition.sql = 'WHERE recommend_categories_id = 3 AND fat BETWEEN ? AND ?'
+    condition.binding = [value - 5, value + 5]
+  }
+  const recommendMealQuery =
+    'SELECT name, calories, carbs, protein, fat FROM `food`' + condition.sql
+  const [recommendMealList] = await db.execute(
+    recommendMealQuery,
+    condition.binding
+  )
+  return recommendMealList
+}
+
+const getFoodFromSearchbox = async (keyword) => {
+  const [searchFood] = await db.query(
+    `SELECT name FROM food WHERE name LIKE '%${keyword}%' LIMIT 7`
+  )
+  // console.log('searchFoodM', searchFood)
+  return searchFood
+}
+
+const getFoodTrend = async (periodStart, periodEnd) => {
+  const [trendFood] = await db.execute(
+    'SELECT food_id, COUNT(food_id), food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` LIMIT 4;',
+    [periodStart, periodEnd]
+  )
+  // console.log('trendFood', trendFood)
+  return trendFood
+}
+
+/* 比較使用者之喜好分數計算歐式距離 */
+const getCurrentUserPreference = async (currentUserId) => {
+  const [currentUser] = await db.execute(
+    'SELECT food_id, preference FROM `user_preference` WHERE user_id = ?',
+    [currentUserId]
+  )
+  return currentUser
+}
+
+const getOtherUsersPreference = async (currentUserId) => {
+  const [otherUsers] = await db.execute(
+    'SELECT DISTINCT(user_id) FROM `user_preference` WHERE user_id != (?);',
+    [currentUserId]
+  )
+  return otherUsers
+}
+
+const getAllUserRecords = async (currentUserId) => {
+  const [allRecords] = await db.execute(
+    'SELECT user_preference.user_id, user_preference.preference, food.id AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?);',
+    [currentUserId]
+  )
+  return allRecords
+}
+
+module.exports = {
+  getUserRecord,
+  getRecommendMeal,
+  getFoodFromSearchbox,
+  getFoodTrend,
+  getCurrentUserPreference,
+  getOtherUsersPreference,
+  getAllUserRecords
+}
