@@ -13,8 +13,8 @@ const getRecommendMeal = async (target, value) => {
   const condition = { sql: '', binding: [] }
   if (target === 'calories') {
     condition.sql =
-      'WHERE recommend_categories_id IS NOT NULL AND calories BETWEEN ? AND ?'
-    condition.binding = [value - 50, value + 50]
+      'WHERE (recommend_categories_id = 5 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 1 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 2 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 3) OR (recommend_categories_id = 4);'
+    condition.binding = [value - 30, value + 30, (value * 0.35) - 30, (value * 0.35) + 30, (value * 0.40) - 30, (value * 0.40) + 30]
   } else if (target === 'carbs') {
     condition.sql =
       'WHERE recommend_categories_id = 1 AND carbs BETWEEN ? AND ?'
@@ -28,11 +28,12 @@ const getRecommendMeal = async (target, value) => {
     condition.binding = [value - 5, value + 5]
   }
   const recommendMealQuery =
-    'SELECT name, calories, carbs, protein, fat FROM `food`' + condition.sql
+    'SELECT name, per_serving, calories, carbs, protein, fat, recommend_categories_id FROM `food`' + condition.sql
   const [recommendMealList] = await db.execute(
     recommendMealQuery,
     condition.binding
   )
+  // console.log('recommendMealList', recommendMealList)
   return recommendMealList
 }
 
@@ -46,7 +47,7 @@ const getFoodFromSearchbox = async (keyword) => {
 
 const getFoodTrend = async (periodStart, periodEnd) => {
   const [trendFood] = await db.execute(
-    'SELECT food_id, COUNT(food_id), food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` LIMIT 4;',
+    'SELECT food_id, COUNT(food_id), food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` LIMIT 5;',
     [periodStart, periodEnd]
   )
   // console.log('trendFood', trendFood)

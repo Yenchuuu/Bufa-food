@@ -11,8 +11,36 @@ const generateAMeal = async (req, res) => {
   const { target, meal, value } = req.body
   const recommendMealList = await Food.getRecommendMeal(target, value)
   const len = recommendMealList.length
-  const randomNum = Math.floor(Math.random() * len)
-  const recommendMeal = recommendMealList[randomNum]
+  const recommendMeal = []
+  switch (target) {
+    case 'calories': {
+      const carbsList = recommendMealList.filter(e => e.recommend_categories_id === 1)
+      const carbs = carbsList[Math.floor(Math.random() * carbsList.length)]
+      recommendMeal.push(carbs)
+      const ProteinList = recommendMealList.filter(e => e.recommend_categories_id === 2)
+      const protein = ProteinList[Math.floor(Math.random() * ProteinList.length)]
+      recommendMeal.push(protein)
+      const vegList = recommendMealList.filter(e => e.recommend_categories_id === 4)
+      const veg = vegList[Math.floor(Math.random() * vegList.length)]
+      recommendMeal.push(veg)
+      const fatList = recommendMealList.filter(e => e.recommend_categories_id === 3)
+      const fat = fatList[Math.floor(Math.random() * fatList.length)]
+      console.log('nutrition', recommendMeal)
+      const remainCalories = value - (carbs.calories + protein.calories + veg.calories)
+      const servingOfFat = Math.round(remainCalories / fat.calories * 100)
+      fat.per_serving = servingOfFat
+      fat.calories = remainCalories
+      recommendMeal.push(fat)
+      break
+    }
+    case 'protein':
+    case 'carbs':
+    case 'fat': {
+      const randomNum = Math.floor(Math.random() * len)
+      recommendMeal.push(recommendMealList[randomNum])
+      break
+    }
+  }
   res.json({ meal, recommendMeal })
 }
 

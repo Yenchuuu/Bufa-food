@@ -12,8 +12,8 @@ router.route('/food/gererate').post(wrapAsync(generateAMeal))
 router.get('/search.html', (req, res) => {
   res.sendFile(path.join(__dirname, '/views/search.html'))
 })
-router.route('/getSearchData').get(wrapAsync(getFoodFromKeyword))
-router.route('/food/search').get(wrapAsync(getFoodTrend))
+router.route('/food/search').get(wrapAsync(getFoodFromKeyword))
+router.route('/food/trend').get(wrapAsync(getFoodTrend))
 router.route('/food/recommend').get(wrapAsync(getUserRecommendation))
 
 module.exports = router

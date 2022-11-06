@@ -15,9 +15,10 @@
   <div class="container col-6">
     <div>
       <h3 class="text-center text-primary mt-3 mb-3">搜尋食物🔍</h3>
-      <input type="text" id="autocomplete_search" class="form-control form-control-lg" placeholder="Type food Name Here" />
+      <input type="text" id="autocomplete_search" class="form-control form-control-lg" placeholder="Type food Name Here" style="margin: 30px 0px;" />
       <span id="search_result"></span>
     </div>
+    <h4 class="text-primary mt-3 mb-3">近期熱搜🔥</h4>
     <div id="food_trend" style="margin: 30px 0px; display: flex; justify-content: space-around;">
     </div>
     <h4 class="text-primary mt-3 mb-3">猜你喜歡</h4>
@@ -31,7 +32,7 @@
   /* 熱門食物排行榜top 4 */
   const foodTrendElement = document.getElementById('food_trend')
   async function getFoodTrendInfo() {
-    const foodTrendInfo = await axios.get(`http://${location.host}/api/1.0/food/search`)
+    const foodTrendInfo = await axios.get(`http://${location.host}/api/1.0/food/trend`)
     // console.log('foodTrendInfo', foodTrendInfo);
     const foodTrend = foodTrendInfo.data.trendFood
     foodTrend.map(food =>
@@ -53,7 +54,7 @@
   getUserRecommendation()
 
   function load_data(query) {
-    fetch(`/api/1.0/getSearchData?key=${query}`)
+    fetch(`/api/1.0/food/search?key=${query}`)
     .then(function(response){
       return response.json();
     })
