@@ -9,7 +9,7 @@ const getUserRecord = async (userId, dateToday) => {
   return mealRecords
 }
 
-const getRecommendMeal = async (target, value) => {
+const getRecommendSingleMeal = async (target, value) => {
   const condition = { sql: '', binding: [] }
   if (target === 'calories') {
     condition.sql =
@@ -37,6 +37,14 @@ const getRecommendMeal = async (target, value) => {
   return recommendMealList
 }
 
+const getRecommendMultipleMeals = async () => {
+  const multipleMealsQuery =
+    'SELECT name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE recommend_categories_id BETWEEN 1 AND 4'
+  const [recommendMealsList] = await db.execute(multipleMealsQuery)
+  // console.log('recommendMealsList', recommendMealsList)
+  return recommendMealsList
+}
+
 const getFoodFromSearchbox = async (keyword) => {
   const [searchFood] = await db.query(
     `SELECT name FROM food WHERE name LIKE '%${keyword}%' LIMIT 7`
@@ -50,7 +58,7 @@ const getFoodTrend = async (periodStart, periodEnd) => {
     'SELECT food_id, COUNT(food_id), food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` LIMIT 5;',
     [periodStart, periodEnd]
   )
-  // console.log('trendFood', trendFood)
+  console.log('trendFood', trendFood)
   return trendFood
 }
 
@@ -81,7 +89,8 @@ const getAllUserRecords = async (currentUserId) => {
 
 module.exports = {
   getUserRecord,
-  getRecommendMeal,
+  getRecommendSingleMeal,
+  getRecommendMultipleMeals,
   getFoodFromSearchbox,
   getFoodTrend,
   getCurrentUserPreference,

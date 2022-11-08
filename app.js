@@ -2,7 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const path = require('path')
 const { PORT, API_VERSION } = process.env
-const indexRouter = require('./routes/index')
+// const indexRouter = require('./routes/index')
 // const usersRouter = require('./routes/users')
 
 const app = express()
@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.static('public'))
 app.use('/', express.static(path.join(__dirname, 'views')))
 
-app.use('/', indexRouter)
+// app.use('/', indexRouter)
 // app.use('/users', usersRouter);
 
 /* Build API route */
