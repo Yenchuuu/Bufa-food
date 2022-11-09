@@ -150,6 +150,7 @@ const generateMultipleMeals = async (req, res) => {
   recommendMeal2.push(...vegOne)
   recommendMeal3.push(...vegTwo)
 
+  /* 合計當天不包含脂肪之菜單總熱量與營養素 */
   const allMeals = [].concat(...recommendMeal1, ...recommendMeal2, ...recommendMeal3)
   const caloriesTotal = allMeals.reduce((acc, item) => {
     return acc + item.calories

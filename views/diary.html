@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/stylesheets/style.css">
+<link rel="stylesheet" href="/stylesheets/diary.css">
+
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <nav style="background-color: #4D555E;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">BUFA FOOD | 不發福</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-md-end" id="navbarsExample04">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">食物庫</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled">|</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">我的食物</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled">|</a>
+          </li>
+          <li class="nav-item">
+            <a class="active" href="#"><img src="/icons/member-mobile.png"></a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <main class="d-flex flex-nowrap mt-5 mb-5">
+  <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
+    <div class="sidebar">
+      <a href="#home"><i class="fa fa-fw fa-home"></i> Home</a>
+      <a href="#services"><i class="fa fa-fw fa-wrench"></i> Profile</a>
+      <a href="#clients"><i class="fa fa-fw fa-user"></i> Diary</a>
+      <a href="#contact"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
+    </div>
+  </div>
+  
+  <div style="border: 2px #4D555E solid;" class="container col-lg-6 p-3">
+    <div class="container d-grid gap-3">
+      <div class="row">
+        <div class="input-group mb-4">
+          <select class="custom-select col-2" id="inputGroupSelecMeal">
+            <option selected>選餐</option>
+            <option value="1">早餐</option>
+            <option value="2">午餐</option>
+            <option value="3">晚餐</option>
+            <option value="4">點心</option>
+          </select>
+          <select class="custom-select col-lg-2" id="inputGroupSelectTarget">
+            <option selected>選目標</option>
+            <option value="1">熱量(kcal)</option>
+            <option value="2">碳水化合物(g)</option>
+            <option value="3">蛋白質(g)</option>
+            <option value="4">脂肪(g)</option>
+          </select>
+          <div class="input-group-append">
+            <input type="text" class="form-control" aria-label="Text input with dropdown button">
+            <button class="btn btn-outline-secondary col-4" type="button">建立</button>
+          </div>
+            <button class="btn btn-outline-secondary justify-content-md-end" type="button">一日菜單</button>
+        </div>
+      </div>
+      <div class="row flex-wrap justify-content-between">
+        <div class="col-2"><p>早餐</p></div>
+        <div class="col-10">食物卡片</div>
+      </div>
+      <div class="row flex-wrap justify-content-between">
+        <div class="col-2"><p>午餐</p></div>
+        <div class="col-10">食物卡片</div>
+      </div>
+      <div class="row flex-wrap justify-content-between">
+        <div class="col-2"><p>晚餐</p></div>
+        <div class="col-10">食物卡片</div>
+      </div>
+      <div class="row flex-wrap justify-content-between">
+        <div class="col-2"><p>點心</p></div>
+        <div class="col-10">食物卡片</div>
+      </div>
+    </div>
+  </div>
+  <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
+    <div class="sidebar">
+      <div class="card-body">
+        <p>Pie Chart of nutrition</p>
+        <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="footer-dark">
+  <footer>
+      <div class="container">
+          <div class="row">
+              <div class="col-sm-6 col-md-3 item">
+                  <h3>Services</h3>
+                  <ul>
+                      <li><a href="#">Web design</a></li>
+                      <li><a href="#">Development</a></li>
+                      <li><a href="#">Hosting</a></li>
+                  </ul>
+              </div>
+              <div class="col-sm-6 col-md-3 item">
+                  <h3>About</h3>
+                  <ul>
+                      <li><a href="#">Company</a></li>
+                      <li><a href="#">Team</a></li>
+                      <li><a href="#">Careers</a></li>
+                  </ul>
+              </div>
+              <div class="col-md-6 item text">
+                  <h3>BUFA FOOD</h3>
+                  <p>Praesent sed lobortis mi. Suspendisse vel placerat ligula. Vivamus ac sem lacus. Ut vehicula rhoncus elementum. Etiam quis tristique lectus. Aliquam in arcu eget velit pulvinar dictum vel in justo.</p>
+              </div>
+              <div class="col item social"><a href="#"><i class="icon ion-social-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a></div>
+          </div>
+          <p class="copyright">BUFA FOOD © 2022</p>
+      </div>
+  </footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+</body>
+</html>
