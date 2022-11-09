@@ -65,7 +65,7 @@ const generateMultipleMeals = async (req, res) => {
   // console.log('userInfo', userInfo)
   const [{ diet_goal: dietGoal, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userInfo
   
-  const multipleMealsList = await Food.getRecommendMultipleMeals()
+  const multipleMealsList = await Food.getRecommendMultipleMeals(currentUserId)
   /* recommendmeal 1~3 分別為早中晚三餐，點心則不在推薦範圍內 */
   const recommendMeal1 = []
   const recommendMeal2 = []

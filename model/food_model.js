@@ -36,11 +36,11 @@ const getRecommendSingleMeal = async (target, value) => {
   // console.log('recommendMealList', recommendMealList)
   return recommendMealList
 }
-
-const getRecommendMultipleMeals = async () => {
+/* 選出所有recommend食物，排除該使用者不喜歡的食物 */
+const getRecommendMultipleMeals = async (currentUserId) => {
   const multipleMealsQuery =
-    'SELECT name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE recommend_categories_id BETWEEN 1 AND 4'
-  const [recommendMealsList] = await db.execute(multipleMealsQuery)
+    'SELECT name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
+  const [recommendMealsList] = await db.execute(multipleMealsQuery, [currentUserId])
   // console.log('recommendMealsList', recommendMealsList)
   return recommendMealsList
 }
@@ -65,15 +65,15 @@ const getFoodTrend = async (periodStart, periodEnd) => {
 /* 比較使用者之喜好分數計算歐式距離 */
 const getCurrentUserPreference = async (currentUserId) => {
   const [currentUser] = await db.execute(
-    'SELECT food_id, preference FROM `user_preference` WHERE user_id = ?',
+    'SELECT food_id, preference FROM `user_preference` WHERE user_id = ? AND preference NOT IN (1, 2)',
     [currentUserId]
   )
   return currentUser
 }
 
-const getOtherUsersPreference = async (currentUserId) => {
+const getOtherUsersList = async (currentUserId) => {
   const [otherUsers] = await db.execute(
-    'SELECT DISTINCT(user_id) FROM `user_preference` WHERE user_id != (?);',
+    'SELECT DISTINCT(user_id) FROM `user_preference` WHERE user_id != (?) AND preference NOT IN (1, 2);',
     [currentUserId]
   )
   return otherUsers
@@ -81,10 +81,18 @@ const getOtherUsersPreference = async (currentUserId) => {
 
 const getAllUserRecords = async (currentUserId) => {
   const [allRecords] = await db.execute(
-    'SELECT user_preference.user_id, user_preference.preference, food.id AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?);',
+    'SELECT user_preference.user_id, user_preference.preference, food.id AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?) AND preference NOT IN (1, 2);',
     [currentUserId]
   )
   return allRecords
+}
+
+const getDistinctFoodList = async (currentUserId) => {
+  const [distinctFood] = await db.execute(
+    'SELECT DISTINCT(food.id) AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?);',
+    [currentUserId]
+  )
+  return distinctFood
 }
 
 module.exports = {
@@ -94,6 +102,7 @@ module.exports = {
   getFoodFromSearchbox,
   getFoodTrend,
   getCurrentUserPreference,
-  getOtherUsersPreference,
-  getAllUserRecords
+  getOtherUsersList,
+  getAllUserRecords,
+  getDistinctFoodList
 }
