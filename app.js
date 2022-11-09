@@ -20,7 +20,7 @@ app.use('/', express.static(path.join(__dirname, 'views')))
 // app.use('/users', usersRouter);
 
 /* Build API route */
-app.use('/api/' + API_VERSION, [require('./routes/food_route')])
+app.use('/api/' + API_VERSION, [require('./routes/food_route'), require('./routes/user_route')])
 
 // catch 404 and forward to error handler
 // app.use(function (req, res, next) {

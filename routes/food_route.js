@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const path = require('path')
-const wrapAsync = require('../utils/util')
+const { wrapAsync } = require('../utils/util')
 const { getDiaryRecord, generateSingleMeal, generateMultipleMeals, getFoodFromKeyword, getFoodTrend, getUserRecommendation } = require('../controller/food_controller')
 
 /* Diet plan page */
