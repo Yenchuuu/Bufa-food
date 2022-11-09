@@ -37,7 +37,10 @@ const signUp = async (name, email, password) => {
     )
     user.access_token = accessToken
 
-    const [result] = await conn.query('INSERT INTO `user` (name, email, password, provider) VALUES (?, ?, ?, ?)', [user.name, user.email, user.password, user.provider])
+    const [result] = await conn.execute(
+      'INSERT INTO `user` (name, email, password, provider) VALUES (?, ?, ?, ?)',
+      [user.name, user.email, user.password, user.provider]
+    )
     user.id = result.insertId
     return { user }
   } catch (error) {
@@ -51,4 +54,10 @@ const signUp = async (name, email, password) => {
   }
 }
 
-module.exports = { getUserInfo, signUp }
+const nativeSignIn = async (email, password) => {
+  const [user] = await db.query('SELECT * FROM user WHERE email = ?', [
+    email
+  ])
+  return user
+}
+module.exports = { getUserInfo, signUp, nativeSignIn }
