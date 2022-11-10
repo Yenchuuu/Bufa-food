@@ -63,7 +63,7 @@ const generateMultipleMeals = async (req, res) => {
   console.log('currentUserId', currentUserId)
   const userInfo = await User.getUserInfo(currentUserId)
   // console.log('userInfo', userInfo)
-  const [{ diet_goal: dietGoal, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userInfo
+  const [{ goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userInfo
   
   const multipleMealsList = await Food.getRecommendMultipleMeals(currentUserId)
   /* recommendmeal 1~3 分別為早中晚三餐，點心則不在推薦範圍內 */
@@ -74,6 +74,12 @@ const generateMultipleMeals = async (req, res) => {
   /* 將每種營養素的array都隨機排序，隨後取出前兩樣 -> 達到不重複且不會每次都取到一樣的前兩項 */
   const shuffleArray = (arr) => arr.sort(() => 0.5 - Math.random())
 
+  /* 早餐推薦水果 */
+  const suffleFruitArray = shuffleArray(multipleMealsList.filter(
+    (e) => e.food_categories_id === 2
+  ))
+  recommendMeal1.push(suffleFruitArray.pop())
+  
   /* 定義每餐各種營養素之熱量佔比，並確認其營養素是否符合目標 */
   const carbsCalories = goalCarbs * 4
   const suffleCarbsArray = shuffleArray(multipleMealsList.filter(
@@ -81,33 +87,27 @@ const generateMultipleMeals = async (req, res) => {
   ))
   // console.log('suffleCarbsArray', suffleCarbsArray)
 
-  /* 早餐推薦水果 */
-  const suffleDrinkArray = shuffleArray(multipleMealsList.filter(
-    (e) => e.food_categories_id === 2
-  ))
-  recommendMeal1.push(suffleDrinkArray.pop())
-  
   /* 隨機取出兩項澱粉，計算其熱量與分配之熱量比例，推算應攝取幾份 */
   const carbsCaloriesMeal2 = Math.round(carbsCalories * 0.45)
   const carbsOne = suffleCarbsArray.pop()
   const carbsTwo = suffleCarbsArray.pop()
-  const servingAmountC1 = Math.round(carbsCaloriesMeal2 / carbsOne.calories * 100)
-  carbsOne.per_serving = servingAmountC1
+  const servingAmountCarbsOne = Math.round(carbsCaloriesMeal2 / carbsOne.calories * 100)
+  carbsOne.per_serving = servingAmountCarbsOne
   carbsOne.calories = carbsCaloriesMeal2
-  carbsOne.carbs = Math.round(carbsOne.carbs * (servingAmountC1 / 100))
-  carbsOne.protein = Math.round(carbsOne.protein * (servingAmountC1 / 100))
-  carbsOne.fat = Math.round(carbsOne.fat * (servingAmountC1 / 100))
-
+  carbsOne.carbs = Math.round(carbsOne.carbs * (servingAmountCarbsOne / 100))
+  carbsOne.protein = Math.round(carbsOne.protein * (servingAmountCarbsOne / 100))
+  carbsOne.fat = Math.round(carbsOne.fat * (servingAmountCarbsOne / 100))
+  /* 把第一個碳水塞進午餐 */
   recommendMeal2.push(carbsOne)
 
   const carbsCaloriesMeal3 = Math.round(carbsCalories * 0.45)
-  const servingAmountC2 = Math.round(carbsCaloriesMeal3 / carbsTwo.calories * 100)
-  carbsTwo.per_serving = servingAmountC2
+  const servingAmountCarbsTwo = Math.round(carbsCaloriesMeal3 / carbsTwo.calories * 100)
+  carbsTwo.per_serving = servingAmountCarbsTwo
   carbsTwo.calories = carbsCaloriesMeal3
-  carbsTwo.carbs = Math.round(carbsTwo.carbs * servingAmountC2 / 100)
-  carbsTwo.protein = Math.round(carbsTwo.protein * servingAmountC2 / 100)
-  carbsTwo.fat = Math.round(carbsTwo.fat * servingAmountC2 / 100)
-
+  carbsTwo.carbs = Math.round(carbsTwo.carbs * servingAmountCarbsTwo / 100)
+  carbsTwo.protein = Math.round(carbsTwo.protein * servingAmountCarbsTwo / 100)
+  carbsTwo.fat = Math.round(carbsTwo.fat * servingAmountCarbsTwo / 100)
+  /* 把第二個碳水塞進晚餐 */
   recommendMeal3.push(carbsTwo)
 
   const proteinCalories = goalProtein * 4
@@ -127,7 +127,7 @@ const generateMultipleMeals = async (req, res) => {
   proteinOne.carbs = Math.round(proteinOne.carbs * servingAmountP1 / 100)
   proteinOne.protein = proteinPortionMeal2
   proteinOne.fat = Math.round(proteinOne.fat * servingAmountP1 / 100)
-
+  /* 把第一個蛋白質塞進午餐 */
   recommendMeal2.push(proteinOne)
 
   // const proteinCaloriesMeal3 = Math.round(proteinCalories * 0.45)
@@ -138,7 +138,7 @@ const generateMultipleMeals = async (req, res) => {
   proteinTwo.carbs = Math.round(proteinTwo.carbs * (servingAmountP2 / 100))
   proteinTwo.protein = proteinPortionMeal3
   proteinTwo.fat = Math.round(proteinTwo.fat * (servingAmountP2 / 100))
-
+  /* 把第二個蛋白質塞進晚餐 */
   recommendMeal3.push(proteinTwo)
 
   const suffleVegArray = shuffleArray(multipleMealsList.filter(
@@ -152,19 +152,20 @@ const generateMultipleMeals = async (req, res) => {
 
   /* 合計當天不包含脂肪之菜單總熱量與營養素 */
   const allMeals = [].concat(...recommendMeal1, ...recommendMeal2, ...recommendMeal3)
-  const caloriesTotal = allMeals.reduce((acc, item) => {
+  let caloriesTotal = allMeals.reduce((acc, item) => {
     return acc + item.calories
   }, 0)
-  const carbsTotal = allMeals.reduce((acc, item) => {
+  let carbsTotal = allMeals.reduce((acc, item) => {
     return acc + item.carbs
   }, 0)
-  const proteinTotal = allMeals.reduce((acc, item) => {
+  let proteinTotal = allMeals.reduce((acc, item) => {
     return acc + item.protein
   }, 0)
-  const fatTotal = allMeals.reduce((acc, item) => {
+  let fatTotal = allMeals.reduce((acc, item) => {
     return acc + item.fat
   }, 0)
 
+  console.log('含脂肪前', goalCarbs, carbsTotal, goalProtein, proteinTotal, goalFat, fatTotal, goalCalories, caloriesTotal)
   // console.log('allMeals', allMeals)
   const fatList = multipleMealsList.filter(
     (e) => e.recommend_categories_id === 3
@@ -173,17 +174,26 @@ const generateMultipleMeals = async (req, res) => {
   const fat = fatList[Math.floor(Math.random() * fatList.length)]
 
   const remainCalories = goalCalories - caloriesTotal
-  const servingOfFat = Math.round((remainCalories / fat.calories) * 100)
-  fat.per_serving = servingOfFat
-  fat.calories = remainCalories
-  fat.carbs = Math.round(fat.carbs * (servingOfFat / 100))
-  fat.protein = Math.round(fat.protein * (servingOfFat / 100))
-  fat.fat = Math.round(fat.fat * (servingOfFat / 100))
-  recommendMeal2.push(fat)
+  if (remainCalories < 0) {
+    return res.json({ recommendMeal1, recommendMeal2, recommendMeal3 })
+  } else {
+    const servingOfFat = Math.round((remainCalories / fat.calories) * 100)
+    fat.per_serving = servingOfFat
+    fat.calories = remainCalories
+    fat.carbs = Math.round(fat.carbs * (servingOfFat / 100))
+    fat.protein = Math.round(fat.protein * (servingOfFat / 100))
+    fat.fat = Math.round(fat.fat * (servingOfFat / 100))
+    recommendMeal2.push(fat)
 
-  console.log(goalCarbs, carbsTotal, goalProtein, proteinTotal, goalFat, fatTotal, goalCalories, caloriesTotal)
+    caloriesTotal += fat.calories
+    carbsTotal += fat.carbs
+    proteinTotal += fat.protein
+    fatTotal += fat.fat
 
-  res.json({ recommendMeal1, recommendMeal2, recommendMeal3 })
+    console.log('含脂肪後', goalCarbs, carbsTotal, goalProtein, proteinTotal, goalFat, fatTotal, goalCalories, caloriesTotal)
+
+    return res.json({ recommendMeal1, recommendMeal2, recommendMeal3 })
+  }
 }
 
 const getFoodFromKeyword = async (req, res) => {
