@@ -25,10 +25,50 @@ const getUserDetail = async (email) => {
   return userDetail
 }
 
-// TODO: update user profile info
-// const updateUserProfile = async (email) => {
-//   const [result] = await db.execute('UPDATE ') 
-// }
+/* PATCH account相關資訊 */
+const updateUserProfile = async (updateData, userId) => {
+  console.log('updateData', updateData)
+  if (Object.keys(updateData).length === 0) return
+  let sql = 'UPDATE user SET'
+  Object.entries(updateData).forEach(([key, value]) => {
+    const valueToSet = typeof updateData[key] === 'string' ? `'${value}'` : value
+    sql += ` ${key}=${valueToSet},`
+  })
+  sql = sql.slice(0, -1) // Remove last ","
+  sql += ` WHERE id = ${userId};`
+  const [result] = await db.execute(sql)
+  return result
+}
+
+/* PATCH TDEE相關參數 */
+const updateUserBodyInfo = async (updateData, userId) => {
+  console.log('updateData', updateData)
+  if (Object.keys(updateData).length === 0) return
+  let sql = 'UPDATE user_bodyInfo SET'
+  Object.entries(updateData).forEach(([key, value]) => {
+    const valueToSet = typeof updateData[key] === 'string' ? `'${value}'` : value
+    sql += ` ${key}=${valueToSet},`
+  })
+  sql = sql.slice(0, -1) // Remove last ","
+  sql += ` WHERE user_id = ${userId};`
+  const [result] = await db.execute(sql)
+  return result
+}
+
+/* PATCH 目標營養素比例or目標熱量 */
+const updateNutritionTarget = async (updateData, userId) => {
+  console.log('updateData', updateData)
+  if (Object.keys(updateData).length === 0) return
+  let sql = 'UPDATE user_bodyInfo SET'
+  Object.entries(updateData).forEach(([key, value]) => {
+    const valueToSet = typeof updateData[key] === 'string' ? `'${value}'` : value
+    sql += ` ${key}=${valueToSet},`
+  })
+  sql = sql.slice(0, -1) // Remove last ","
+  sql += ` WHERE user_id = ${userId};`
+  const [result] = await db.execute(sql)
+  return result
+}
 
 const signUp = async (name, email, password) => {
   const conn = await db.getConnection()
@@ -78,4 +118,4 @@ const nativeSignIn = async (email) => {
   return user
 }
 
-module.exports = { getUserInfo, setUserTarget, getUserDetail, signUp, nativeSignIn }
+module.exports = { signUp, nativeSignIn, getUserInfo, setUserTarget, getUserDetail, updateUserProfile, updateUserBodyInfo, updateNutritionTarget }
