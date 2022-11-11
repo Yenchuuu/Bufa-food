@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const User = require('../model/user_model')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
@@ -186,7 +187,7 @@ const updateUserBodyInfo = async (req, res) => {
   // console.log('userDetail', userId, originBirthday, originHeight, originWeight, originGender, originDietType, originDietGoal, originActivityLevel, originGoalCalories, originGoalCarbs, originGoalProtein, originGoalFat, originTDEE)
 
   if (id !== userId) return res.status(401).json({ errorMessage: 'Authentication failed to do any updates.' })
-  let BMR, goal_carbs, goal_protein, goal_fat
+  let BMR, goal_carbs, goal_protein, goal_fat, goal_calories
   try {
     if (!height) height = originHeight
     if (!weight) weight = originWeight
@@ -195,7 +196,7 @@ const updateUserBodyInfo = async (req, res) => {
     if (!diet_type) diet_type = originDietType
     if (!activity_level) activity_level = originActivityLevel
     if (!diet_goal) diet_goal = originDietGoal
-    
+
     const date = new Date()
     const today = date.toISOString().split('T')[0]
     const age = parseInt(today) - parseInt(birthday)
@@ -276,7 +277,7 @@ const updateNutritionTarget = async (req, res) => {
   console.log('nutrition target', goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage)
   const data = await User.getUserDetail(email)
   const userId = data[0].id
-
+  let goal_carbs, goal_protein, goal_fat
   try {
     if (id !== userId) return res.status(401).json({ errorMessage: 'Authentication failed to do any updates.' })
 
@@ -286,9 +287,9 @@ const updateNutritionTarget = async (req, res) => {
     /* validate: 目標營養素比例相加必須等於一百 */
     if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) return res.status(400).json({ errorMessage: 'Nutrition proportions must equal 100!' })
     goal_calories = Math.round((goal_calories))
-    goal_carbs = Math.round((goal_calories * (goal_carbs_percantage/100)) / 4)
-    goal_protein = Math.round((goal_calories * (goal_protein_percantage/100)) / 4)
-    goal_fat = Math.round((goal_calories * (goal_fat_percantage/100)) / 9)
+    goal_carbs = Math.round((goal_calories * (goal_carbs_percantage / 100)) / 4)
+    goal_protein = Math.round((goal_calories * (goal_protein_percantage / 100)) / 4)
+    goal_fat = Math.round((goal_calories * (goal_fat_percantage / 100)) / 9)
 
     const updateData = { goal_calories, goal_carbs, goal_protein, goal_fat }
     const updateInfo = await User.updateNutritionTarget(updateData, userId)

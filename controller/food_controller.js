@@ -64,7 +64,7 @@ const generateMultipleMeals = async (req, res) => {
   const userInfo = await User.getUserInfo(currentUserId)
   // console.log('userInfo', userInfo)
   const [{ goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userInfo
-  
+
   const multipleMealsList = await Food.getRecommendMultipleMeals(currentUserId)
   /* recommendmeal 1~3 分別為早中晚三餐，點心則不在推薦範圍內 */
   const recommendMeal1 = []
@@ -79,7 +79,7 @@ const generateMultipleMeals = async (req, res) => {
     (e) => e.food_categories_id === 2
   ))
   recommendMeal1.push(suffleFruitArray.pop())
-  
+
   /* 定義每餐各種營養素之熱量佔比，並確認其營養素是否符合目標 */
   const carbsCalories = goalCarbs * 4
   const suffleCarbsArray = shuffleArray(multipleMealsList.filter(

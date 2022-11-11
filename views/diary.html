@@ -42,16 +42,28 @@
   <main class="d-flex flex-nowrap mt-5 mb-5">
   <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
     <div class="sidebar">
-      <a href="#home"><i class="fa fa-fw fa-home"></i> Home</a>
-      <a href="#services"><i class="fa fa-fw fa-wrench"></i> Profile</a>
-      <a href="#clients"><i class="fa fa-fw fa-user"></i> Diary</a>
-      <a href="#contact"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
+      <a href="#"><i class="fa fa-fw fa-home"></i> Home</a>
+      <a href="#"><i class="fa fa-fw fa-wrench"></i> Profile</a>
+      <a href="#"><i class="fa fa-fw fa-user"></i> Diary</a>
+      <a href="#"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
     </div>
   </div>
   
-  <div style="border: 2px #4D555E solid;" class="container col-lg-6 p-3">
+  <div style="border: 2px #4D555E solid; border-radius: 3%;" class="container col-lg-6 p-3">
+    <div class="diary-head">
+      <div class="center-box">
+        <h3>Food Diary</h3>
+      </div> 
+      <div id="date_controls" class="center-box">
+        <form>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="previousDay">前一天</button>
+          <span>TODAY</span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="followingDay">後一天</button>
+        </form>
+    </div>
+  </div>
     <div class="container d-grid gap-3">
-      <div class="row">
+      <div class="row gap-3">
         <div class="input-group mb-4">
           <select class="custom-select col-2" id="inputGroupSelecMeal">
             <option selected>選餐</option>
@@ -74,7 +86,10 @@
             <button class="btn btn-outline-secondary justify-content-md-end" type="button">一日菜單</button>
         </div>
       </div>
-      <div class="row flex-wrap justify-content-between">
+    </div>
+    <div class="container d-grid gap-3">
+
+      <!-- <div class="row flex-wrap justify-content-between">
         <div class="col-2"><p>早餐</p></div>
         <div class="col-10">食物卡片</div>
       </div>
@@ -89,9 +104,9 @@
       <div class="row flex-wrap justify-content-between">
         <div class="col-2"><p>點心</p></div>
         <div class="col-10">食物卡片</div>
+      </div> -->
       </div>
     </div>
-  </div>
   <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
     <div class="sidebar">
       <div class="card-body">
@@ -132,7 +147,7 @@
       </div>
   </footer>
 </div>
-
+<script src="/javascripts/diary.js"></script>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
