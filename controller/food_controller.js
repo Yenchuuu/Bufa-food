@@ -58,12 +58,10 @@ const generateSingleMeal = async (req, res) => {
 }
 
 const generateMultipleMeals = async (req, res) => {
-  // TODO: 目前先以亂數模擬登入之使用者，後續應改用解析jwt token辨識user_id
-  const currentUserId = Math.floor(Math.random() * 15) + 1
-  console.log('currentUserId', currentUserId)
-  const userInfo = await User.getUserInfo(currentUserId)
-  // console.log('userInfo', userInfo)
-  const [{ goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userInfo
+  const { email } = req.user
+  const userDetail = await User.getUserDetail(email)
+  const [{ id: currentUserId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
+  // console.log('userInfo', currentUserId, goalCalories, goalCarbs, goalProtein, goalFat)
 
   const multipleMealsList = await Food.getRecommendMultipleMeals(currentUserId)
   /* recommendmeal 1~3 分別為早中晚三餐，點心則不在推薦範圍內 */
@@ -218,8 +216,9 @@ const getFoodTrend = async (req, res) => {
 }
 
 const getUserRecommendation = async (req, res) => {
-  // TODO: 目前先以亂數模擬登入之使用者，後續應改用解析jwt token辨識user_id
-  const currentUserId = Math.floor(Math.random() * 15) + 1
+  const { email } = req.user
+  const userDetail = await User.getUserDetail(email)
+  const currentUserId = userDetail[0].id
   const recommendFood = await Euc.getUserPreference(currentUserId)
   const foodNutritionInfo = await Food.getFoodNutritionInfo(recommendFood)
   res.json({ foodNutritionInfo })

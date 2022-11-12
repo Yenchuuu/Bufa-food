@@ -5,14 +5,6 @@ const jwt = require('jsonwebtoken')
 const salt = parseInt(process.env.BCRYPT_SALT)
 const { TOKEN_EXPIRE, TOKEN_SECRET } = process.env // 30 days by seconds
 
-const getUserInfo = async (currentUserId) => {
-  const [userInfo] = await db.execute(
-    'SELECT diet_goal, goal_calories, goal_carbs, goal_protein, goal_fat FROM `user_bodyInfo` WHERE id = ?',
-    [currentUserId]
-  )
-  return userInfo
-}
-
 // (birthday, height, weight, gender, diet_type, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 
 const setUserTarget = async (userId, userInfo) => {
@@ -118,4 +110,4 @@ const nativeSignIn = async (email) => {
   return user
 }
 
-module.exports = { signUp, nativeSignIn, getUserInfo, setUserTarget, getUserDetail, updateUserProfile, updateUserBodyInfo, updateNutritionTarget }
+module.exports = { signUp, nativeSignIn, setUserTarget, getUserDetail, updateUserProfile, updateUserBodyInfo, updateNutritionTarget }
