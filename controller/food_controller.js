@@ -221,7 +221,8 @@ const getUserRecommendation = async (req, res) => {
   // TODO: 目前先以亂數模擬登入之使用者，後續應改用解析jwt token辨識user_id
   const currentUserId = Math.floor(Math.random() * 15) + 1
   const recommendFood = await Euc.getUserPreference(currentUserId)
-  res.json({ recommendFood })
+  const foodNutritionInfo = await Food.getFoodNutritionInfo(recommendFood)
+  res.json({ foodNutritionInfo })
 }
 
 module.exports = {

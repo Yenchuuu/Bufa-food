@@ -1,10 +1,15 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/stylesheets/style.css">
-<link rel="stylesheet" href="/stylesheets/diary.css">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="/stylesheets/diary.css">
 
 </head>
 <body>
@@ -49,72 +54,8 @@
       <a href="/footprint.html"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
     </div>
   </div>
-  
-  <div style="border: 2px #4D555E solid; border-radius: 3%;" class="container col-lg-6 p-3">
-    <div class="diary-head">
-      <div class="center-box">
-        <h3>Food Diary</h3>
-      </div> 
-      <div id="date_controls" class="center-box">
-        <form>
-          <button type="button" class="btn btn-outline-secondary btn-sm" id="previousDay">前一天</button>
-          <span>TODAY</span>
-          <button type="button" class="btn btn-outline-secondary btn-sm" id="followingDay">後一天</button>
-        </form>
-    </div>
-  </div>
-    <div class="container d-grid gap-3">
-      <div class="row gap-3">
-        <div class="input-group mb-4">
-          <select class="custom-select col-2" id="inputGroupSelecMeal">
-            <option selected>選餐</option>
-            <option value="1">早餐</option>
-            <option value="2">午餐</option>
-            <option value="3">晚餐</option>
-            <option value="4">點心</option>
-          </select>
-          <select class="custom-select col-lg-2" id="inputGroupSelectTarget">
-            <option selected>選目標</option>
-            <option value="1">熱量(kcal)</option>
-            <option value="2">碳水化合物(g)</option>
-            <option value="3">蛋白質(g)</option>
-            <option value="4">脂肪(g)</option>
-          </select>
-          <div class="input-group-append">
-            <input type="text" class="form-control" aria-label="Text input with dropdown button">
-            <button class="btn btn-outline-secondary col-4" type="button">建立</button>
-          </div>
-            <button class="btn btn-outline-secondary justify-content-md-end" type="button">一日菜單</button>
-        </div>
-      </div>
-    </div>
-    <div class="container d-grid gap-3">
-
-      <!-- <div class="row flex-wrap justify-content-between">
-        <div class="col-2"><p>早餐</p></div>
-        <div class="col-10">食物卡片</div>
-      </div>
-      <div class="row flex-wrap justify-content-between">
-        <div class="col-2"><p>午餐</p></div>
-        <div class="col-10">食物卡片</div>
-      </div>
-      <div class="row flex-wrap justify-content-between">
-        <div class="col-2"><p>晚餐</p></div>
-        <div class="col-10">食物卡片</div>
-      </div>
-      <div class="row flex-wrap justify-content-between">
-        <div class="col-2"><p>點心</p></div>
-        <div class="col-10">食物卡片</div>
-      </div> -->
-      </div>
-    </div>
-  <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
-    <div class="sidebar">
-      <div class="card-body">
-        <p>Pie Chart of nutrition</p>
-        <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-      </div>
-    </div>
+  <div class="container">
+    <h1>Show user collection and created-food record.</h1>
   </div>
 </main>
 
@@ -148,9 +89,9 @@
       </div>
   </footer>
 </div>
-<script src="/javascripts/diary.js"></script>
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js" integrity="sha384-lpyLfhYuitXl2zRZ5Bn2fqnhNAKOAaM/0Kr9laMspuaMiZfGmfwRNFh8HlMy49eQ" crossorigin="anonymous"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
 </body>
 </html>

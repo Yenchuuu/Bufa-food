@@ -2,6 +2,41 @@ body {
   font-family: 'Alegreya Sans', sans-serif, 'Microsoft JhengHei';
 }
 
+p {
+  font-family: 'Alegreya Sans', sans-serif, 'Microsoft JhengHei';
+}
+
+.click_icon {
+  width: 25px;
+  margin: 0 8px;
+}
+
+.nav-card-title{
+  width: 50px;
+  margin: 0 10px;
+}
+
+.nav-card-title > p{
+  margin-bottom: 0px;
+  font-family: 'Alegreya Sans', sans-serif, 'Microsoft JhengHei';
+}
+
+.card-body-title {
+  justify-content: end; align-items: flex-end;
+  margin: 10px 0;
+  padding-bottom: 1rem;
+  border-bottom: #b7b5b5 solid 2px;
+}
+
+.card-body-text{
+  align-content: flex-start;
+}
+
+
+.card{
+  margin: 1.5rem 0;
+}
+
 .footer-dark {
   padding:50px 0;
   color:#f0f9ff;
@@ -102,4 +137,8 @@ body {
 
 .sidebar a:hover {
   color: #E2D8B0;
+}
+
+.footer-icon{
+  width: 25px;
 }

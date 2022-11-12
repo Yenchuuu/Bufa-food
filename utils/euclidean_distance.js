@@ -35,7 +35,7 @@ const getUserPreference = async (currentUserId) => {
   /* 尚未有喜好紀錄之使用者將由系統隨機推薦 */
   if (currentUser.length === 0) {
     const ran = shuffleFood.slice(0, 3)
-    const recommendFood = ran.map(e => e.food_name)
+    const recommendFood = ran.map(e => e.food_id)
     return recommendFood
   } else {
     /* 把currentUser的食物紀錄&偏好分數變成一個array */
@@ -95,10 +95,10 @@ const getUserPreference = async (currentUserId) => {
     /* 找出allUserEuc 的index再回頭與 otherUsers array 比對 user_id */
     const mostRelatedUserId =
       otherUsers[allUsersEuc.indexOf(Math.min(...allUsersEuc))].user_id
-    // console.log('mostRelatedUserId', mostRelatedUserId)
+    console.log('mostRelatedUserId', mostRelatedUserId)
 
     let usersRecord = allRecords.filter((e) => e.user_id === mostRelatedUserId)
-    let recommendFood = usersRecord.map((e) => e.food_name)
+    let recommendFood = usersRecord.map((e) => e.food_id)
 
     /* 依mostRelatedUserScore由大到小排序，並取前三名，若不足3則random補數 */
     const usersRecordLen = usersRecord.length
@@ -111,7 +111,7 @@ const getUserPreference = async (currentUserId) => {
     } else if (usersRecordLen < 3) {
       for (let i = 0; i < 3 - usersRecordLen; i++) {
         const ran = Math.floor(Math.random() * allRecordsLen)
-        recommendFood.push(allRecords[ran].food_name)
+        recommendFood.push(allRecords[ran].food_id)
       }
       return recommendFood
     }

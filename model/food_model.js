@@ -95,6 +95,11 @@ const getDistinctFoodList = async (currentUserId) => {
   return distinctFood
 }
 
+const getFoodNutritionInfo = async (recommendFood) => {
+  const [foodNutritionInfo] = await db.execute('SELECT name, calories, carbs, protein, fat FROM `food` WHERE id IN (?, ?, ?)', [recommendFood[0], recommendFood[1], recommendFood[2]])
+  return foodNutritionInfo
+}
+
 module.exports = {
   getUserRecord,
   getRecommendSingleMeal,
@@ -104,5 +109,6 @@ module.exports = {
   getCurrentUserPreference,
   getOtherUsersList,
   getAllUserRecords,
-  getDistinctFoodList
+  getDistinctFoodList,
+  getFoodNutritionInfo
 }

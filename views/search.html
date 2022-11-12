@@ -10,27 +10,28 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <nav style="background-color: #4D555E;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">BUFA FOOD | 不發福</a>
+      <a class="navbar-brand" href="/index.html">BUFA FOOD | 不發福</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse justify-content-md-end" id="navbarsExample04">
+      <!-- 把div的 class="collapse navbar-collapse justify-content-md-end" 拿掉，就可以達到置右對齊了 -->
+      <div id="navbarsExample04">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item">
-            <a class="nav-link active" href="#">食物庫</a>
+            <a class="nav-link active" href="/search.html">食物庫</a>
           </li>
           <li class="nav-item">
             <a class="nav-link disabled">|</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="#">我的食物</a>
+            <a class="nav-link active" href="/mine.html">我的食物</a>
           </li>
           <li class="nav-item">
             <a class="nav-link disabled">|</a>
           </li>
           <li class="nav-item">
-            <a class="active" href="#"><img src="/icons/member-mobile.png"></a>
+            <a class="active" href="/profile.html"><img src="/icons/member-mobile.png"></a>
           </li>
 
         </ul>
@@ -38,13 +39,13 @@
     </div>
   </nav>
   
-  <main class="d-flex flex-nowrap">
+  <main class="d-flex flex-nowrap mt-5 mb-5">
   <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
     <div class="sidebar">
-      <a href="#home"><i class="fa fa-fw fa-home"></i> Home</a>
-      <a href="#services"><i class="fa fa-fw fa-wrench"></i> Profile</a>
-      <a href="#clients"><i class="fa fa-fw fa-user"></i> Diary</a>
-      <a href="#contact"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
+      <a href="/index.html"><i class="fa fa-fw fa-home"></i> Home</a>
+      <a href="/profile.html"><i class="fa fa-fw fa-wrench"></i> Profile</a>
+      <a href="/diary.html"><i class="fa fa-fw fa-user"></i> Diary</a>
+      <a href="/footprint.html"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
     </div>
   </div>
   
@@ -58,26 +59,65 @@
     <div id="food_trend" style="margin: 30px 0px; display: flex; flex-wrap:wrap; justify-content: space-around;">
     </div>
     <h4 class="text-secondary mt-3 mb-3">猜你喜歡</h4>
-    <div id="guess_user_preference">
-      <div class="card text-center">
-        <div class="card-header">
-          <ul class="nav nav-pills card-header-pills">
+    <div class="g-3" id="guess_user_preference">
+      <!-- <div class="card text-center">
+        <div style="padding:5px" class="card-header">
+          <ul style="justify-content: end; align-items: center;" class="nav nav-pills">
             <li class="nav-item">
-              <a class="nav-link active" href="#">Active</a>
+              <img src="/icons/thumb_up.png" class="click_icon" id="thumb_up">
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
+              <img src="/icons/thumb_down.png" class="click_icon" id="thumb_down">
             </li>
             <li class="nav-item">
-              <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+              <img src="/icons/empty_heart.webp" class="click_icon" id="add_collection">
+            </li>
+            <li class="nav-item">
+              <img src="/icons/add.png" class="click_icon" id="add_diary">
             </li>
           </ul>
         </div>
         <div class="card-body">
-          <h5 class="card-title">Special title treatment</h5>
-          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+          <div class="row card-body-title">
+            <div class="col-4"></div>
+            <div class="col-8">
+            <ul class="nav nav-pills">
+              <li class="nav-card-title">
+                <p class="text-secondary">熱量<br>kcal</br></p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">碳水化合物</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">蛋白質</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">脂肪</p>
+              </li>
+            </ul>
+            </div>
+          </div>
+          <div class="row card-body-title">
+            <div class="col-4 text-secondary card-body-text">漢堡</div>
+            <div class="col-8">
+              <ul class="nav nav-pills">
+                <li class="nav-card-title">
+                  <p class="text-secondary">350</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">80g</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">12g</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">8g</p>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
+      </div> -->
     </div>
     </div>
   </div>
@@ -133,9 +173,9 @@
   async function getUserRecommendation(currentUserId) {
     const foodRecommenInfo = await axios.get(`http://${location.host}/api/1.0/food/recommend?currentUserId=${currentUserId}`)
     // console.log('foodRecommenInfo', foodRecommenInfo);
-    const foodRecommendation = foodRecommenInfo.data.recommendFood
+    const foodRecommendation = foodRecommenInfo.data.foodNutritionInfo
     foodRecommendation.map(recommendation =>
-    guessUserElement.innerHTML += `<div style="width: max;height: 70px; border: 3px #84887B solid; margin: 20px 0px;"><p>${recommendation}</p>`
+    guessUserElement.innerHTML += `<div class="card text-center"><div style="padding:5px" class="card-header"><ul style="justify-content: end; align-items: center;" class="nav nav-pills"><li class="nav-item"><img src="/icons/thumb_up.png" class="click_icon" id="thumb_up"></li><li class="nav-item"><img src="/icons/thumb_down.png" class="click_icon" id="thumb_down"></li><li class="nav-item"><img src="/icons/empty_heart.webp" class="click_icon" id="add_collection"></li><li class="nav-item"><img src="/icons/add.png" class="click_icon" id="add_diary"></li></ul></div><div class="card-body"><div class="row card-body-title"><div class="col-4"></div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">熱量<br>kcal</br></p></li><li class="nav-card-title"><p class="text-secondary">碳水化合物</p></li><li class="nav-card-title"><p class="text-secondary">蛋白質</p></li><li class="nav-card-title"><p class="text-secondary">脂肪</p></li></ul></div></div><div class="row card-body-title"><div class="col-4 text-secondary card-body-text">${recommendation.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${recommendation.calories}</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.carbs}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.protein}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.fat}g</p></li></ul></div></div></div>`
     )
   } 
   getUserRecommendation()
