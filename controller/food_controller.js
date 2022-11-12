@@ -1,6 +1,7 @@
 const Food = require('../model/food_model')
 const User = require('../model/user_model')
 const Euc = require('../utils/euclidean_distance')
+const Util = require('../utils/util')
 
 const getDiaryRecord = async (req, res) => {
   const { userId, dateToday } = req.body
@@ -216,6 +217,7 @@ const getFoodTrend = async (req, res) => {
 }
 
 const getUserRecommendation = async (req, res) => {
+  // FIXME: 如果沒有帶token的時候應該顯示其他文字
   const { email } = req.user
   const userDetail = await User.getUserDetail(email)
   const currentUserId = userDetail[0].id

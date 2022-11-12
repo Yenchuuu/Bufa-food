@@ -58,7 +58,6 @@ const getFoodTrend = async (periodStart, periodEnd) => {
     'SELECT food_id, COUNT(food_id), food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` LIMIT 5;',
     [periodStart, periodEnd]
   )
-  console.log('trendFood', trendFood)
   return trendFood
 }
 

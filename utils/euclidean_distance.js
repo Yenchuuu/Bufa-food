@@ -3,29 +3,16 @@ const Food = require('../model/food_model')
 
 let euc
 const getUserPreference = async (currentUserId) => {
-  console.log('currentUserId', currentUserId)
-  /* 假設currentUser為user_id = 7，試算與另一user間的係數 */
-  // const [currentUser] = await db.execute(
-  //   'SELECT food_id, preference FROM `user_preference` WHERE user_id = ?',
-  //   [currentUserId]
-  // )
+  // console.log('currentUserId', currentUserId)
   const currentUser = await Food.getCurrentUserPreference(currentUserId)
-  // const [otherUsers] = await db.execute(
-  //   'SELECT DISTINCT(user_id) FROM `user_preference` WHERE user_id != (?);',
-  //   [currentUserId]
-  // )
-  console.log('currentUser', currentUser)
+  // console.log('currentUser', currentUser)
   const otherUsers = await Food.getOtherUsersList(currentUserId)
-  console.log('otherUsers', otherUsers)
+  // console.log('otherUsers', otherUsers)
 
   /* 撈出資料並排除currentUser以外使用者的所有食物紀錄 */
-  // const [allRecords] = await db.execute(
-  //   'SELECT user_preference.user_id, user_preference.preference, food.id AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?);',
-  //   [currentUserId]
-  // )
   const allRecords = await Food.getAllUserRecords(currentUserId)
   const allRecordsLen = allRecords.length
-  // console.log('allRecords', allRecords)
+  // // console.log('allRecords', allRecords)
 
   /* 為了不要推薦重複項目，故先將DB之食物紀錄整理成distinct array並以亂數排列，讓每次出現的推薦都不盡相同 */
   const distinctFood = await Food.getDistinctFoodList(currentUserId)
@@ -55,43 +42,43 @@ const getUserPreference = async (currentUserId) => {
       usersFood = allRecords
         .filter((e) => e.user_id === otherUsers.user_id)
         .map((e) => e.food_id)
-      // console.log('recordsByUser', recordsByUser)
-      // console.log('usersScore', usersScore, 'usersFood', usersFood)
+      // // console.log('recordsByUser', recordsByUser)
+      // // console.log('usersScore', usersScore, 'usersFood', usersFood)
 
       /* 將各使用者之食物紀錄&偏好分數組成一個object */
       const objectOfUsers = combineArrays(usersFood, usersScore)
       return objectOfUsers
     })
-    // console.log('allusersFoodScore', allusersFoodScore)
-    // console.log('objectOfUsers', objectOfUsers)
+    // // console.log('allusersFoodScore', allusersFoodScore)
+    // // console.log('objectOfUsers', objectOfUsers)
 
     /* 每個使用者的食物評分 */
     for (const userFoodScores of allusersFoodScore) {
       const usersCompare = []
       /* currentUser的每項食物id */
       for (const foodId of currentUserFood) {
-        // console.log('foodId', foodId)
+        // // console.log('foodId', foodId)
 
         const itemScore = userFoodScores[foodId.toString()]
-        // console.log('itemScore', itemScore)
+        // // console.log('itemScore', itemScore)
         if (itemScore === undefined) {
           usersCompare.push(0)
         } else {
           usersCompare.push(itemScore)
         }
       }
-      // console.log('usersCompare', usersCompare)
+      // // console.log('usersCompare', usersCompare)
       allUsersCompare.push(usersCompare)
     }
-    console.log('currentUserScore', currentUserScore)
-    console.log('allUsersCompare', allUsersCompare)
+    // console.log('currentUserScore', currentUserScore)
+    // console.log('allUsersCompare', allUsersCompare)
 
     const allUsersEuc = []
     for (let i = 0; i < allUsersCompare.length; i++) {
       euc = await getEucDistance(currentUserScore, allUsersCompare[i])
       allUsersEuc.push(euc)
     }
-    console.log('allUsersEuc', allUsersEuc)
+    // console.log('allUsersEuc', allUsersEuc)
     /* 找出allUserEuc 的index再回頭與 otherUsers array 比對 user_id */
     const mostRelatedUserId =
       otherUsers[allUsersEuc.indexOf(Math.min(...allUsersEuc))].user_id
@@ -116,7 +103,7 @@ const getUserPreference = async (currentUserId) => {
       return recommendFood
     }
 
-    console.log('recommendFood', recommendFood)
+    // console.log('recommendFood', recommendFood)
     return recommendFood
   }
 }
