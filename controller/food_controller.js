@@ -7,8 +7,8 @@ const moment = require('moment')
 const createMealRecord = async (req, res) => {
   const { email } = req.user
   const userDetail = await User.getUserDetail(email)
-  const currentUserId = userDetail[0].id
-  const createdRecord = await Food.createMealRecord(currentUserId)
+  const userId = userDetail[0].id
+  const createdRecord = await Food.createMealRecord(userId)
   res.json({ createdRecord })
 }
 
@@ -19,19 +19,31 @@ const getDiaryRecord = async (req, res) => {
   const getDate = req.query.date
   // const getDate = queryDate
   let date
-  console.log('getDate', typeof getDate, getDate)
+  // console.log('getDate', typeof getDate, getDate)
   const today = moment().format('YYYY-MM-DD')
-  console.log('today', today)
+  // console.log('today', today)
   if (!getDate || typeof getDate === 'undefined') {
     date = today
   } else {
     date = getDate
   }
-  console.log('date', date)
+  // console.log('date', date)
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
   const mealRecords = await Food.getUserRecord(userId, date)
-  res.json({ mealRecords })
+  const caloriesTotal = mealRecords.reduce((acc, item) => {
+    return acc + parseInt(item.calories)
+  }, 0)
+  const carbsTotal = mealRecords.reduce((acc, item) => {
+    return acc + parseInt(item.carbs)
+  }, 0)
+  const proteinTotal = mealRecords.reduce((acc, item) => {
+    return acc + parseInt(item.protein)
+  }, 0)
+  const fatTotal = mealRecords.reduce((acc, item) => {
+    return acc + parseInt(item.fat)
+  }, 0)
+  res.json({ mealRecords, caloriesTotal, carbsTotal, proteinTotal, fatTotal })
 }
 
 const getFoodDetail = async (req, res) => {
@@ -42,7 +54,12 @@ const getFoodDetail = async (req, res) => {
 
 // TODO: code好醜，應優化
 const generateSingleMeal = async (req, res) => {
-  const { target, meal, value } = req.body
+  const { target, meal, value, date } = req.body
+  const { email } = req.user
+
+  const userDetail = await User.getUserDetail(email)
+  const userId = userDetail[0].id
+
   const recommendMealList = await Food.getRecommendSingleMeal(target, value)
   const len = recommendMealList.length
   const recommendMeal = []
@@ -69,7 +86,7 @@ const generateSingleMeal = async (req, res) => {
         (e) => e.recommend_categories_id === 3
       )
       const fat = fatList[Math.floor(Math.random() * fatList.length)]
-      console.log('nutrition', recommendMeal)
+      // console.log('nutrition', recommendMeal)
       const remainCaloriesV1 =
         value - (carbs.calories + protein.calories + veg.calories)
       const servingOfFat = Math.round((remainCaloriesV1 / fat.calories) * 100)
@@ -86,20 +103,23 @@ const generateSingleMeal = async (req, res) => {
       break
     }
   }
-  res.json({ meal, recommendMeal })
+  const setMealRecord = await Food.setRecommendSingleMeal(userId, meal, recommendMeal, date)
+  // console.log('InfoC', userId, recommendMeal, date)
+  return res.json({ meal, recommendMeal })
 }
 
 const generateMultipleMeals = async (req, res) => {
   const { email } = req.user
+  const { date } = req.body
   const userDetail = await User.getUserDetail(email)
-  const [{ id: currentUserId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
-  console.log('userInfo', currentUserId, goalCalories, goalCarbs, goalProtein, goalFat)
+  const [{ id: userId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
+  console.log('userInfo', userId, goalCalories, goalCarbs, goalProtein, goalFat)
 
   // TODO: 設條件：如過當天無任何飲食紀錄才可以產生一日菜單，若已有紀錄則不行
-  // const mealRecords = await Food.getUserRecord
-  // if () 
+  // const mealRecords = await Food.getUserRecord(date, userId)
+  // if (mealRecords.length !== 0) return res.json({ message: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！' })
 
-  const multipleMealsList = await Food.getRecommendMultipleMeals(currentUserId)
+  const multipleMealsList = await Food.getRecommendMultipleMeals(userId)
 
   /* recommendmeal 1~3 分別為早中晚三餐，點心則不在推薦範圍內 */
   const recommendBreakfast = []
@@ -281,12 +301,15 @@ const generateMultipleMeals = async (req, res) => {
     return acc + item.fat
   }, 0)
 
-  // console.log('當日菜單與目標差距:', goalCalories, caloriesTotal, goalCarbs, carbsTotal, goalProtein, proteinTotal, goalFat, fatTotal)
   console.log('當日菜單與目標差距: 熱量', goalCalories - caloriesTotal, 'kcal 碳水', goalCarbs - carbsTotal, 'g 蛋白質', goalProtein - proteinTotal, 'g 脂肪', goalFat - fatTotal, 'g')
-
-  //   return res.json({ recommendBreakfast, recommendLunch, recommendDinner })
-  // }
-  return res.json({ recommendBreakfast, recommendLunch, recommendDinner })
+  try {
+    const setMealsRecords = await Food.setRecommendMultipleMeals(userId, recommendBreakfast, recommendLunch, recommendDinner, date)
+    console.log('Meals write into DB successfully.')
+    return res.json({ recommendBreakfast, recommendLunch, recommendDinner })
+  } catch (err) {
+    console.error(err)
+    return res.json({ errorMessage: 'Failed to write the meals records.'})
+  }
 }
 
 const getFoodFromKeyword = async (req, res) => {

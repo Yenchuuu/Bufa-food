@@ -6,7 +6,7 @@ const { createMealRecord, getDiaryRecord, generateSingleMeal, generateMultipleMe
 /* Diet plan page */
 router.route('/food/diary').get(authentication(), wrapAsync(getDiaryRecord))
 router.route('/food/single').post(authentication(), wrapAsync(generateSingleMeal))
-router.route('/food/multiple').get(authentication(), wrapAsync(generateMultipleMeals))
+router.route('/food/multiple').post(authentication(), wrapAsync(generateMultipleMeals))
 
 /* search page */
 router.route('/food/search').get(wrapAsync(getFoodFromKeyword))

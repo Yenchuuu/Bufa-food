@@ -5,6 +5,7 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/stylesheets/style.css">
   <link rel="stylesheet" href="/stylesheets/diary.css">
+  <script src="https://cdn.plot.ly/plotly-2.14.0.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -52,7 +53,7 @@
     </div>
   </div>
   
-  <div style="border: 2px #4D555E solid; border-radius: 3%;" class="container col-lg-6 p-3">
+  <div style="border: 2px #4D555E solid; border-radius: 1em;" class="container col-lg-6 p-3">
     <div style="justify-content: center;" class="col-12 diary-head">
       <div style="justify-content: center;" class="center-box">
         <h4 class="text-secondary">飲食紀錄</h4>
@@ -71,16 +72,16 @@
   </div>
     <div class="container d-grid gap-3">
       <!-- <div class="col-12"></div> -->
-      <div class="row gap-3">
-        <div class="input-group mb-4">
-          <select class="custom-select col-2" id="inputGroupSelecMeal">
+      <!-- <div class="row gap-3"> -->
+        <div style="justify-content: center;" class="input-group mb-4">
+          <select class="custom-select col-3" id="inputGroupSelecMeal">
             <option selected>選餐</option>
             <option value="1">早餐</option>
             <option value="2">午餐</option>
             <option value="3">晚餐</option>
             <option value="4">點心</option>
           </select>
-          <select class="custom-select col-lg-2" id="inputGroupSelectTarget">
+          <select class="custom-select col-lg-4" id="inputGroupSelectTarget">
             <option selected>選目標</option>
             <option value="calories">熱量(kcal)</option>
             <option value="carbs">碳水化合物(g)</option>
@@ -88,13 +89,14 @@
             <option value="fat">脂肪(g)</option>
           </select>
           <div class="input-group-append">
-            <input type="text" class="form-control" aria-label="Text input with dropdown button">
+            <input type="text" class="form-control" aria-label="Text input with dropdown button" id="inputTargetValue" placeholder="請輸入數字">
             <button class="btn btn-outline-secondary col-4" type="button" id="generateOneMeal">建立</button>
           </div>
         </div>
-        <div class="row gap-3">
-          <button class="btn btn-outline-secondary justify-content-md-end" type="button" id="generateDayMeals">一日菜單</button>
-        </div>
+      <!-- </div> -->
+      <div style="justify-content: center; align-items: baseline;" class="center-box gap-3">
+        <div><h6 class="text-secondary">不知道要吃什麼嗎？點我產生一日菜單✨</h6></div>
+        <div><button class="btn btn-outline-secondary justify-content-md-end" type="button" id="generateDayMeals">一日菜單</button></div>
       </div>
     </div>
     <div class="container d-grid gap-3">
@@ -259,29 +261,30 @@
                   </ul>
                   </div>
                 </div>
-                  <div class="row" id="dailyTotal"></div>
+                  <div class="row" id="dailyTotal">
                     <div class="col-4 text-secondary card-body-text">當日總計</div>
                       <div class="col-8">
                         <ul class="nav nav-pills">
                           <li class="nav-card-title"><p class="text-secondary"></p></li>
                           <li class="nav-card-title" id="dailyCaloriesTotal"></li>
                           <li class="nav-card-title" id="dailyCarbsTotal"></li>
-                          <li class="nav-card-title" id="dailyProteinsTotal"></li>
+                          <li class="nav-card-title" id="dailyProteinTotal"></li>
                           <li class="nav-card-title" id="dailyFatTotal"></li>
                         </ul>
                       </div>
                     </div>
+                  </div>
                   </div>
                 </div>
               </div>
 
       </div>
     </div>
-  <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
+  <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 24EM;">
     <div class="sidebar">
-      <div class="card-body">
-        <p>Pie Chart of nutrition</p>
-        <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+      <!-- <div class="card-body"> -->
+        <!-- <p>Pie Chart of nutrition</p> -->
+        <div id="pieChart"  style="width:100%; height:500px;"></div>
       </div>
     </div>
   </div>
@@ -321,6 +324,83 @@
   // $(function() {
   //   $( "#datepicker" ).datepicker();
   // });
+
+  $("#generateOneMeal").click(async function(){
+    let values = []
+    const meal = $("#inputGroupSelecMeal").val()
+    const target = $("#inputGroupSelectTarget").val()
+    const targetValue = $("#inputTargetValue").val()
+    let webUrl = window.location.search
+    let splitUrl = webUrl.split('=')
+    let date = splitUrl[1]
+    const d = new Date()
+    if (!date) {
+      date = d.toISOString().split('T')[0]
+    }
+    if (!meal) {
+      alert('請選擇要建立於哪一餐‼️')
+      return
+    } else if (!target) {
+      alert('請選擇要建立之目標‼️')
+      return
+    } else if (isNaN(targetValue) || !targetValue) {
+      alert('請輸入有效之目標數值‼️')
+      return
+    }
+    values.push(parseInt(meal), target, parseInt(targetValue))
+    console.log(values)
+    /* 判斷選擇哪一餐&目標打api */
+    const targetMeal = await axios.post(`http://${location.host}/api/1.0/food/single`, { meal: values[0], target: values[1], value: values[2], date })
+    // console.log('targetMeal', targetMeal)
+    // if ()
+    const recommendMeal = targetMeal.data.recommendMeal
+    // console.log('recommendMeal', recommendMeal)
+
+    let switchMeal
+    switch (targetMeal.data.meal){
+      case 1: {
+        switchMeal = 'breakfast'
+        break
+      }
+      case 2: {
+        switchMeal = 'lunch'
+        break
+      }
+      case 3: {
+        switchMeal = 'dinner'
+        break
+      }
+      case 4: {
+        switchMeal = 'snack'
+        break
+      }
+    }
+    console.log('switchMeal', switchMeal)
+    recommendMeal.map(food => $(`#${switchMeal}Record`).append += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.per_serving}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`)
+    window.location.href = `http://${location.host}/diary.html?date=${date}`
+  })
+    
+ 
+ $('#generateDayMeals').click(async function(){
+    let webUrl = window.location.search
+    let splitUrl = webUrl.split('=')
+    let date = splitUrl[1]
+    const d = new Date()
+    if (!date) {
+      date = d.toISOString().split('T')[0]
+    }
+    const getDailyRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`)
+    console.log('getDailyRecord', getDailyRecord)
+    if (getDailyRecord.data.mealRecords.length !== 0) {
+      alert('當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！')
+      return
+    } else {
+    const getMeal = await axios.post(`http://${location.host}/api/1.0/food/multiple`, {date: date})
+    console.log('getMeal', getMeal, 'date', date)
+    window.location.href = `http://${location.host}/diary.html?date=${date}`
+    }
+  })
+
   let webUrl = window.location.search
   let splitUrl = webUrl.split('=')
   let date = splitUrl[1]
@@ -463,10 +543,23 @@
     // const dailyProteinTotal = breakfastProteinTotal + lunchProteinTotal + dinnerProteinTotal + snackProteinTotal
     // const dailyFatTotal = breakfastFatTotal + lunchFatTotal + dinnerFatTotal + snackFatTotal
 
-    // document.querySelector('#dailyCaloriesTotal').innerHTML = `<p class="text-secondary">${dailyCaloriesTotal}g</p>`
-    // document.querySelector('#dailyCarbsTotal').innerHTML = `<p class="text-secondary">${dailyCarbsTotal}g</p>`
-    // document.querySelector('#dailyProteinTotal').innerHTML = `<p class="text-secondary">${dailyProteinTotal}g</p>`
-    // document.querySelector('#dailyFatTotal').innerHTML = `<p class="text-secondary">${dailyFatTotal}g</p>`
+    document.querySelector('#dailyCaloriesTotal').innerHTML = `<p class="text-secondary">${diaryRecord.data.caloriesTotal}</p>`
+    document.querySelector('#dailyCarbsTotal').innerHTML = `<p class="text-secondary">${diaryRecord.data.carbsTotal}g</p>`
+    document.querySelector('#dailyProteinTotal').innerHTML = `<p class="text-secondary">${diaryRecord.data.proteinTotal}g</p>`
+    document.querySelector('#dailyFatTotal').innerHTML = `<p class="text-secondary">${diaryRecord.data.fatTotal}g</p>`
+    const carbsPercentage = diaryRecord.data.carbsTotal *4 /diaryRecord.data.caloriesTotal
+    const proteinPercentage = diaryRecord.data.proteinTotal *4 /diaryRecord.data.caloriesTotal
+    const fatPercentage = diaryRecord.data.fatTotal *9 /diaryRecord.data.caloriesTotal
+    const pieData = [{
+      values: [carbsPercentage, proteinPercentage, fatPercentage],
+      labels: ['碳水化合物', '蛋白質', '脂肪'],
+      type: 'pie',
+      marker: {
+        colors: ['#607D8B', '#9E9E9E', '#EF9A9A']
+      }
+    }]
+    pie = document.querySelector('#pieChart')
+    Plotly.newPlot(pie, pieData);
   }
 
 </script>

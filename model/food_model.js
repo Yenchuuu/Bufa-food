@@ -38,19 +38,67 @@ const getRecommendSingleMeal = async (target, value) => {
     condition.binding = [value - 5, value + 5]
   }
   const recommendMealQuery =
-    'SELECT name, per_serving, calories, carbs, protein, fat, recommend_categories_id FROM `food`' + condition.sql
+    'SELECT id, name, per_serving, calories, carbs, protein, fat, recommend_categories_id FROM `food`' + condition.sql
   const [recommendMealList] = await db.execute(
     recommendMealQuery,
     condition.binding
   )
-  // console.log('recommendMealList', recommendMealList)
+  // console.log('recommendMealList', recommendMealList
   return recommendMealList
 }
+
+const setRecommendSingleMeal = async (userId, meal, recommendMeal, date) => {
+  // console.log('Info', userId, typeof meal, meal, recommendMeal, date)
+  const conn = await db.getConnection()
+  const writeRecommendMeals = []
+  try {
+    await conn.query('START TRANSACTION')
+    for (let i = 0; i < recommendMeal.length; i++) {
+      const [writeRecommendMeal] = await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, meal, recommendMeal[i].per_serving / 100, recommendMeal[i].id, date])
+      writeRecommendMeals.push(writeRecommendMeal)
+    }
+    await conn.query('COMMIT')
+    return writeRecommendMeals
+  } catch (err) {
+    await conn.query('ROLLBACK')
+    console.error(err)
+    return
+  } finally {
+    await conn.release()
+  }
+}
+
+const setRecommendMultipleMeals = async (userId, recommendBreakfast, recommendLunch, recommendDinner, date) => {
+  // console.log('Info', userId, recommendBreakfast, recommendLunch, recommendDinner, date)
+  const conn = await db.getConnection()
+  // const writeRecommendMeals = []
+  try {
+    await conn.query('START TRANSACTION')
+    for (let i = 0; i < recommendBreakfast.length; i++) {
+      const [writeRecommendBreakfast] = await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 1, recommendBreakfast[i].per_serving / 100, recommendBreakfast[i].id, date])
+    }
+    for (let i = 0; i < recommendLunch.length; i++) {
+      const [writeRecommendLunch] = await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 2, recommendLunch[i].per_serving / 100, recommendLunch[i].id, date])
+    }
+    for (let i = 0; i < recommendDinner.length; i++) {
+      const [writeRecommendDinner] = await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 3, recommendDinner[i].per_serving / 100, recommendDinner[i].id, date])
+    }
+    await conn.query('COMMIT')
+    return
+  } catch (err) {
+    await conn.query('ROLLBACK')
+    console.error(err)
+    return
+  } finally {
+    await conn.release()
+  }
+}
+
 /* 選出所有recommend食物，排除該使用者不喜歡的食物 */
-const getRecommendMultipleMeals = async (currentUserId) => {
+const getRecommendMultipleMeals = async (userId) => {
   const multipleMealsQuery =
-    'SELECT name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id, (carbs * 4 /calories) AS carbsPercentage, (fat * 9 /calories) AS fatPercentage, (protein * 4 /calories) AS proteinPercentage FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
-  const [recommendMealsList] = await db.execute(multipleMealsQuery, [currentUserId])
+    'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id, (carbs * 4 /calories) AS carbsPercentage, (fat * 9 /calories) AS fatPercentage, (protein * 4 /calories) AS proteinPercentage FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
+  const [recommendMealsList] = await db.execute(multipleMealsQuery, [userId])
   // console.log('recommendMealsList', recommendMealsList)
   return recommendMealsList
 }
@@ -209,7 +257,7 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
   } catch (err) {
     await conn.query('ROLLBACK')
     console.error(err)
-    process.exit()
+    return
   } finally {
     await conn.release()
   }
@@ -220,7 +268,9 @@ module.exports = {
   getUserRecord,
   getFoodDetail,
   getRecommendSingleMeal,
+  setRecommendSingleMeal,
   getRecommendMultipleMeals,
+  setRecommendMultipleMeals,
   getFoodFromSearchbox,
   getFoodTrend,
   getCurrentUserPreference,
