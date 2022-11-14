@@ -49,7 +49,7 @@ const getRecommendSingleMeal = async (target, value) => {
 /* 選出所有recommend食物，排除該使用者不喜歡的食物 */
 const getRecommendMultipleMeals = async (currentUserId) => {
   const multipleMealsQuery =
-    'SELECT name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
+    'SELECT name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id, (carbs * 4 /calories) AS carbsPercentage, (fat * 9 /calories) AS fatPercentage, (protein * 4 /calories) AS proteinPercentage FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
   const [recommendMealsList] = await db.execute(multipleMealsQuery, [currentUserId])
   // console.log('recommendMealsList', recommendMealsList)
   return recommendMealsList
