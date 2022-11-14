@@ -217,7 +217,7 @@ const generateMultipleMeals = async (req, res) => {
     return acc + item.fat
   }, 0)
 
-  console.log('早餐&午餐(含晚餐的蔬果)', goalCalories, caloriesSubtotal, goalCarbs, carbsSubtotal, goalProtein, proteinSubtotal, goalFat, fatSubtotal)
+  // console.log('早餐&午餐(含晚餐的蔬果)', goalCalories, caloriesSubtotal, goalCarbs, carbsSubtotal, goalProtein, proteinSubtotal, goalFat, fatSubtotal)
 
   /* 因推薦食物類別中的脂肪食品營養素較多元，故設定先將脂肪克數逼近達標之後再看其餘營養素剩下多少 */
   const fatGramDinner = Math.round((goalFat - fatSubtotal) * 0.9) // 暫時抓90%，留一些buffer
@@ -281,7 +281,8 @@ const generateMultipleMeals = async (req, res) => {
     return acc + item.fat
   }, 0)
 
-  console.log('當日菜單與目標差距: kcal, C, P, F', goalCalories, caloriesTotal, goalCarbs, carbsTotal, goalProtein, proteinTotal, goalFat, fatTotal)
+  // console.log('當日菜單與目標差距:', goalCalories, caloriesTotal, goalCarbs, carbsTotal, goalProtein, proteinTotal, goalFat, fatTotal)
+  console.log('當日菜單與目標差距: 熱量', goalCalories - caloriesTotal, 'kcal 碳水', goalCarbs - carbsTotal, 'g 蛋白質', goalProtein - proteinTotal, 'g 脂肪', goalFat - fatTotal, 'g')
 
   //   return res.json({ recommendBreakfast, recommendLunch, recommendDinner })
   // }

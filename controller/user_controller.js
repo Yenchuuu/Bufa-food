@@ -300,4 +300,13 @@ const updateNutritionTarget = async (req, res) => {
   }
 }
 
-module.exports = { signUp, nativeSignIn, getUserTarget, getUserProfile, updateUserProfile, updateUserBodyInfo, updateNutritionTarget }
+const getUserPreference = async (req, res) => {
+  const { email } = req.user
+  const userDetail = await User.getUserDetail(email)
+  // console.log('userDetail', userDetail)
+  const userId = userDetail[0].id
+  const preference = await User.getUserPreference(userId)
+  res.status(200).json({ preference })
+}
+
+module.exports = { signUp, nativeSignIn, getUserTarget, getUserProfile, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }

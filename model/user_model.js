@@ -62,6 +62,11 @@ const updateNutritionTarget = async (updateData, userId) => {
   return result
 }
 
+const getUserPreference = async (userId) => {
+  const [preference] = await db.execute('SELECT * FROM `user_preference` WHERE user_id = ?', [userId])
+  return preference
+}
+
 const signUp = async (name, email, password) => {
   const conn = await db.getConnection()
   try {
@@ -110,4 +115,4 @@ const nativeSignIn = async (email) => {
   return user
 }
 
-module.exports = { signUp, nativeSignIn, setUserTarget, getUserDetail, updateUserProfile, updateUserBodyInfo, updateNutritionTarget }
+module.exports = { signUp, nativeSignIn, setUserTarget, getUserDetail, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
