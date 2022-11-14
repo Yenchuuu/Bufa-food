@@ -28,7 +28,7 @@ const getUserPreference = async (currentUserId) => {
     /* 把currentUser的食物紀錄&偏好分數變成一個array */
     const currentUserScore = currentUser.map((e) => e.preference)
     const currentUserFood = currentUser.map((e) => e.food_id)
-    console.log('currentUserFood', currentUserFood)
+    // console.log('currentUserFood', currentUserFood)
 
     let usersScore
     let usersFood
@@ -82,7 +82,7 @@ const getUserPreference = async (currentUserId) => {
     /* 找出allUserEuc 的index再回頭與 otherUsers array 比對 user_id */
     const mostRelatedUserId =
       otherUsers[allUsersEuc.indexOf(Math.min(...allUsersEuc))].user_id
-    console.log('mostRelatedUserId', mostRelatedUserId)
+    // console.log('mostRelatedUserId', mostRelatedUserId)
 
     let usersRecord = allRecords.filter((e) => e.user_id === mostRelatedUserId)
     let recommendFood = usersRecord.map((e) => e.food_id)
@@ -93,7 +93,7 @@ const getUserPreference = async (currentUserId) => {
       usersRecord = usersRecord.sort(function (a, b) {
         return a.preference < b.preference ? 1 : -1
       })
-      console.log('usersRecord', usersRecord)
+      // console.log('usersRecord', usersRecord)
       recommendFood = recommendFood.splice(0, 3)
     } else if (usersRecordLen < 3) {
       for (let i = 0; i < 3 - usersRecordLen; i++) {

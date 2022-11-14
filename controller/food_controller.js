@@ -2,11 +2,42 @@ const Food = require('../model/food_model')
 const User = require('../model/user_model')
 const Euc = require('../utils/euclidean_distance')
 const Util = require('../utils/util')
+const moment = require('moment')
+
+const createMealRecord = async (req, res) => {
+  const { email } = req.user
+  const userDetail = await User.getUserDetail(email)
+  const currentUserId = userDetail[0].id
+  const createdRecord = await Food.createMealRecord(currentUserId)
+  res.json({ createdRecord })
+}
 
 const getDiaryRecord = async (req, res) => {
-  const { userId, dateToday } = req.body
-  const mealRecords = await Food.getUserRecord(userId, dateToday)
+  // TODO: 若沒帶token要跳出alert並跳轉回首頁
+  const { email } = req.user
+  // FIXME: getDate一直是2022-11-13??? WHY???
+  const getDate = req.query.date
+  // const getDate = queryDate
+  let date
+  console.log('getDate', typeof getDate, getDate)
+  const today = moment().format('YYYY-MM-DD')
+  console.log('today', today)
+  if (!getDate || typeof getDate === 'undefined') {
+    date = today
+  } else {
+    date = getDate
+  }
+  console.log('date', date)
+  const userDetail = await User.getUserDetail(email)
+  const userId = userDetail[0].id
+  const mealRecords = await Food.getUserRecord(userId, date)
   res.json({ mealRecords })
+}
+
+const getFoodDetail = async (req, res) => {
+  const foodId = req.query.id
+  const foodDetail = await Food.getFoodDetail(foodId)
+  res.json({ foodDetail })
 }
 
 // TODO: code好醜，應優化
@@ -204,14 +235,10 @@ const getFoodFromKeyword = async (req, res) => {
 
 const getFoodTrend = async (req, res) => {
   /* 設定撈取熱門食物之區間 */
-  const startDate = new Date()
-  const endDate = new Date()
-  const periodStart = new Date(startDate.setDate(startDate.getDate() - 7))
-    .toISOString()
-    .split('T')[0]
-  const periodEnd = endDate.toISOString().split('T')[0]
-  const trendFoodInfo = await Food.getFoodTrend(periodStart, periodEnd)
-  const trendFood = trendFoodInfo.map((e) => e.name)
+  const periodStart = moment().add(-7, 'days').format('YYYY-MM-DD')
+  const periodEnd = moment().format('YYYY-MM-DD')
+  const trendFood = await Food.getFoodTrend(periodStart, periodEnd)
+  // const trendFood = trendFoodInfo.map((e) => e.name)
   // console.log('trendFood', trendFood)
   res.json({ trendFood })
 }
@@ -226,11 +253,29 @@ const getUserRecommendation = async (req, res) => {
   res.json({ foodNutritionInfo })
 }
 
+const updateFoodPreference = async (req, res) => {
+  try {
+    const { email } = req.user
+    const userDetail = await User.getUserDetail(email)
+    const foodId = req.query.id
+    const { clickedBtn } = req.body
+    const userId = userDetail[0].id
+    console.log(userId, foodId, clickedBtn)
+    const preferenceScore = await Food.updateFoodPreference(userId, foodId, clickedBtn)
+    res.json({ message: 'Preference score updated successfully.' })
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 module.exports = {
+  createMealRecord,
   getDiaryRecord,
+  getFoodDetail,
   generateSingleMeal,
   getFoodFromKeyword,
   getFoodTrend,
   getUserRecommendation,
-  generateMultipleMeals
+  generateMultipleMeals,
+  updateFoodPreference
 }

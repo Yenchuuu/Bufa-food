@@ -1,14 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/stylesheets/style.css">
-<link rel="stylesheet" href="/stylesheets/diary.css">
-
+  <meta charset="utf-8">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/diary.css">
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script> -->
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <nav style="background-color: #4D555E;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
       <a class="navbar-brand" href="/index.html">BUFA FOOD | 不發福</a>
@@ -51,19 +53,24 @@
   </div>
   
   <div style="border: 2px #4D555E solid; border-radius: 3%;" class="container col-lg-6 p-3">
-    <div class="diary-head">
-      <div class="center-box">
-        <h3>Food Diary</h3>
+    <div style="justify-content: center;" class="col-12 diary-head">
+      <div style="justify-content: center;" class="center-box">
+        <h4 class="text-secondary">飲食紀錄</h4>
       </div> 
       <div id="date_controls" class="center-box">
         <form>
           <button type="button" class="btn btn-outline-secondary btn-sm" id="previousDay">前一天</button>
-          <span>TODAY</span>
+        </form>
+          <div id="showDate">
+            <!-- <input type="text" id="datepicker"> -->
+          </div>  
+        <form>
           <button type="button" class="btn btn-outline-secondary btn-sm" id="followingDay">後一天</button>
         </form>
     </div>
   </div>
     <div class="container d-grid gap-3">
+      <!-- <div class="col-12"></div> -->
       <div class="row gap-3">
         <div class="input-group mb-4">
           <select class="custom-select col-2" id="inputGroupSelecMeal">
@@ -75,37 +82,199 @@
           </select>
           <select class="custom-select col-lg-2" id="inputGroupSelectTarget">
             <option selected>選目標</option>
-            <option value="1">熱量(kcal)</option>
-            <option value="2">碳水化合物(g)</option>
-            <option value="3">蛋白質(g)</option>
-            <option value="4">脂肪(g)</option>
+            <option value="calories">熱量(kcal)</option>
+            <option value="carbs">碳水化合物(g)</option>
+            <option value="protein">蛋白質(g)</option>
+            <option value="fat">脂肪(g)</option>
           </select>
           <div class="input-group-append">
             <input type="text" class="form-control" aria-label="Text input with dropdown button">
-            <button class="btn btn-outline-secondary col-4" type="button">建立</button>
+            <button class="btn btn-outline-secondary col-4" type="button" id="generateOneMeal">建立</button>
           </div>
-            <button class="btn btn-outline-secondary justify-content-md-end" type="button">一日菜單</button>
+        </div>
+        <div class="row gap-3">
+          <button class="btn btn-outline-secondary justify-content-md-end" type="button" id="generateDayMeals">一日菜單</button>
         </div>
       </div>
     </div>
     <div class="container d-grid gap-3">
 
-      <!-- <div class="row flex-wrap justify-content-between">
-        <div class="col-2"><p>早餐</p></div>
-        <div class="col-10">食物卡片</div>
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="row card-body-title">
+            <div class="col-4"><h4 class="text-secondary">早餐</h4></div>
+            <div class="col-8">
+            <ul class="nav nav-pills">
+              <li class="nav-card-title">
+                <p class="text-secondary">份數</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">熱量<br>kcal</br></p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">碳水化合物</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">蛋白質</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">脂肪</p>
+              </li>
+            </ul>
+            </div>
+          </div>
+          <div class="row card-body-title" id="breakfastRecord">
+            <!-- <div class="col-4 text-secondary card-body-text">漢堡</div>
+            <div class="col-8">
+              <ul class="nav nav-pills">
+                <li class="nav-card-title">
+                  <p class="text-secondary">1.0</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">350</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">80g</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">12g</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">8g</p>
+                </li>
+              </ul>
+            </div> -->
+          </div>
+          <div class="row" id="breakfastTotal"></div>
+        </div>
       </div>
-      <div class="row flex-wrap justify-content-between">
-        <div class="col-2"><p>午餐</p></div>
-        <div class="col-10">食物卡片</div>
-      </div>
-      <div class="row flex-wrap justify-content-between">
-        <div class="col-2"><p>晚餐</p></div>
-        <div class="col-10">食物卡片</div>
-      </div>
-      <div class="row flex-wrap justify-content-between">
-        <div class="col-2"><p>點心</p></div>
-        <div class="col-10">食物卡片</div>
-      </div> -->
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="row card-body-title">
+            <div class="col-4"><h4 class="text-secondary">午餐</h4></div>
+            <div class="col-8">
+            <ul class="nav nav-pills">
+              <li class="nav-card-title">
+                <p class="text-secondary">份數</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">熱量<br>kcal</br></p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">碳水化合物</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">蛋白質</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">脂肪</p>
+              </li>
+            </ul>
+            </div>
+          </div>
+            <div class="row card-body-title" id="lunchRecord">
+            </div>
+            <div class="row" id="lunchTotal">
+            </div>
+          </div>
+        </div>
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="row card-body-title">
+              <div class="col-4"><h4 class="text-secondary">晚餐</h4></div>
+              <div class="col-8">
+              <ul class="nav nav-pills">
+                <li class="nav-card-title">
+                  <p class="text-secondary">份數</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">熱量<br>kcal</br></p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">碳水化合物</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">蛋白質</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">脂肪</p>
+                </li>
+              </ul>
+              </div>
+            </div>
+              <div class="row card-body-title" id="dinnerRecord"></div>
+              <div class="row" id="dinnerTotal"></div>
+            </div>
+          </div>
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="row card-body-title">
+                <div class="col-4"><h4 class="text-secondary">點心</h4></div>
+                <div class="col-8">
+                <ul class="nav nav-pills">
+                  <li class="nav-card-title">
+                    <p class="text-secondary">份數</p>
+                  </li>
+                  <li class="nav-card-title">
+                    <p class="text-secondary">熱量<br>kcal</br></p>
+                  </li>
+                  <li class="nav-card-title">
+                    <p class="text-secondary">碳水化合物</p>
+                  </li>
+                  <li class="nav-card-title">
+                    <p class="text-secondary">蛋白質</p>
+                  </li>
+                  <li class="nav-card-title">
+                    <p class="text-secondary">脂肪</p>
+                  </li>
+                </ul>
+                </div>
+              </div>
+                <div class="row card-body-title" id="snackRecord"></div>
+                <div class="row" id="snackTotal"></div>
+              </div>
+            </div>
+
+            <div class="card text-center">
+              <div class="card-body">
+                <div class="row card-body-title">
+                  <div class="col-4"><h4 class="text-secondary"></h4></div>
+                  <div class="col-8">
+                  <ul class="nav nav-pills">
+                    <li class="nav-card-title">
+                      <p class="text-secondary"></p>
+                    </li>
+                    <li class="nav-card-title">
+                      <p class="text-secondary">熱量<br>kcal</br></p>
+                    </li>
+                    <li class="nav-card-title">
+                      <p class="text-secondary">碳水化合物</p>
+                    </li>
+                    <li class="nav-card-title">
+                      <p class="text-secondary">蛋白質</p>
+                    </li>
+                    <li class="nav-card-title">
+                      <p class="text-secondary">脂肪</p>
+                    </li>
+                  </ul>
+                  </div>
+                </div>
+                  <div class="row" id="dailyTotal"></div>
+                    <div class="col-4 text-secondary card-body-text">當日總計</div>
+                      <div class="col-8">
+                        <ul class="nav nav-pills">
+                          <li class="nav-card-title"><p class="text-secondary"></p></li>
+                          <li class="nav-card-title" id="dailyCaloriesTotal"></li>
+                          <li class="nav-card-title" id="dailyCarbsTotal"></li>
+                          <li class="nav-card-title" id="dailyProteinsTotal"></li>
+                          <li class="nav-card-title" id="dailyFatTotal"></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
       </div>
     </div>
   <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
@@ -148,9 +317,160 @@
       </div>
   </footer>
 </div>
+<script>
+  // $(function() {
+  //   $( "#datepicker" ).datepicker();
+  // });
+  let webUrl = window.location.search
+  let splitUrl = webUrl.split('=')
+  let date = splitUrl[1]
+  const d = new Date()
+  if (!date) {
+    date = d.toISOString().split('T')[0]
+  }
+  getDiaryRecord(date)
+
+  /* 往前按一天 */
+  document.querySelector('#previousDay').addEventListener('click', function (changeDate) {
+    let currenDate = document.querySelector('#currentDate').textContent
+    let dateA = new Date(currenDate)
+    let dateB = new Date(dateA - (1000 * 60 * 60 * 24))
+    let previousDate = dateB.toISOString().split('T')[0]
+    // console.log('dateB', dateB, 'previousDate', previousDate)
+    let date = previousDate
+    window.location.href = `http://${location.host}/diary.html?date=${date}`
+  })
+  
+  /* 往後按一天 */
+  document.querySelector('#followingDay').addEventListener('click', function (changeDate) {
+    let currenDate = document.querySelector('#currentDate').textContent
+    let dateA = new Date(currenDate)
+    let dateB = new Date(dateA.getTime() + (1000 * 60 * 60 * 24))
+    let followingDate = dateB.toISOString().split('T')[0]
+    console.log('dateB', dateB, 'followingDate', followingDate)
+    let date = followingDate
+    window.location.href = `http://${location.host}/diary.html?date=${date}`
+  })
+
+  $('#generateOneMeal').click(function() {
+    
+    let currenDate = $('#currentDate').val()
+    let dateA = new Date(currenDate)
+    let dateB = dateA - (1000 * 60 * 60 * 24)
+    console.log('dateB', dateB)
+  })  
+  // getDiaryRecord(date)
+  // onclick="changeDate(this)"
+
+  /* 取得飲食紀錄資訊 */
+  const getDate = document.querySelector('#showDate')
+  const getBreakfast = document.getElementById('breakfastRecord')
+  const getLunch = document.getElementById('lunchRecord')
+  const getDinner = document.getElementById('dinnerRecord')
+  const getSnack = document.getElementById('snackRecord')
+  async function getDiaryRecord(date) {
+    const diaryRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`)
+    console.log('date', date);
+    
+    // let breakfastCaloriesTotal, lunchCaloriesTotal, dinnerCaloriesTotal, snackCaloriesTotal, breakfastCarbsTotal, lunchCarbsTotal, dinnerCarbsTotal, snackCarbsTotal, breakfastProteinTotal, lunchProteinTotal, dinnerProteinTotal, snackProteinTotal, breakfastFatTotal, lunchFatTotal, dinnerFatTotal, snackFatTotal
+
+    getDate.innerHTML = `<span class="text-secondary" id="currentDate">${date}</span>`
+    const breakfast = diaryRecord.data.mealRecords.filter(e => e.meal === 1)
+    if (breakfast.length ===0) {
+      getBreakfast.innerHTML = '<div class="col-12 text-secondary card-body-text"><p>今日還沒有早餐紀錄喔～</p></div>'
+    } else {
+      breakfast.map(food => getBreakfast.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
+      )
+      let breakfastCaloriesTotal = breakfast.reduce((acc, item) => {
+        return acc + parseInt(item.calories)
+      }, 0)
+      let breakfastCarbsTotal = breakfast.reduce((acc, item) => {
+        return acc + parseInt(item.carbs)
+      }, 0)
+      let breakfastProteinTotal = breakfast.reduce((acc, item) => {
+        return acc + parseInt(item.protein)
+      }, 0)
+      let breakfastFatTotal = breakfast.reduce((acc, item) => {
+        return acc + parseInt(item.fat)
+      }, 0) 
+      document.querySelector('#breakfastTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${breakfastCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastFatTotal}g</p></li></ul></div></div></div>`
+    }
+
+    const lunch = diaryRecord.data.mealRecords.filter(e => e.meal === 2)
+    if (lunch.length ===0) {
+      getLunch.innerHTML = '<div class="col-12 text-secondary card-body-text"><p>今日還沒有午餐紀錄喔～</p></div>'
+    } else {
+      lunch.map(food => getLunch.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
+      )
+      let lunchCaloriesTotal = lunch.reduce((acc, item) => {
+        return acc + parseInt(item.calories)
+      }, 0)
+      let lunchCarbsTotal = lunch.reduce((acc, item) => {
+        return acc + parseInt(item.carbs)
+      }, 0)
+      let lunchProteinTotal = lunch.reduce((acc, item) => {
+        return acc + parseInt(item.protein)
+      }, 0)
+      let lunchFatTotal = lunch.reduce((acc, item) => {
+        return acc + parseInt(item.fat)
+      }, 0) 
+      document.querySelector('#lunchTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${lunchCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${lunchCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${lunchProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${lunchFatTotal}g</p></li></ul></div></div></div>`
+    }  
+    const dinner = diaryRecord.data.mealRecords.filter(e => e.meal === 3)
+    if (dinner.length ===0) {
+      getDinner.innerHTML = '<div class="col-12 text-secondary card-body-text"><p>今日還沒有晚餐紀錄喔～</p></div>'
+    } else {
+      dinner.map(food => getDinner.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
+      )
+      let dinnerCaloriesTotal = dinner.reduce((acc, item) => {
+        return acc + parseInt(item.calories)
+      }, 0)
+      let dinnerCarbsTotal = dinner.reduce((acc, item) => {
+        return acc + parseInt(item.carbs)
+      }, 0)
+      let dinnerProteinTotal = dinner.reduce((acc, item) => {
+        return acc + parseInt(item.protein)
+      }, 0)
+      let dinnerFatTotal = dinner.reduce((acc, item) => {
+        return acc + parseInt(item.fat)
+      }, 0) 
+      document.querySelector('#dinnerTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${dinnerCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerFatTotal}g</p></li></ul></div></div></div>`
+    } 
+
+    const snack = diaryRecord.data.mealRecords.filter(e => e.meal === 4)
+    if (snack.length ===0) {
+      getSnack.innerHTML = '<div class="col-12 text-secondary card-body-text"><p>今日還沒有點心紀錄喔～</p></div>'
+    } else {
+      snack.map(food => getSnack.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
+      )
+      let snackCaloriesTotal = snack.reduce((acc, item) => {
+        return acc + parseInt(item.calories)
+      }, 0)
+      let snackCarbsTotal = snack.reduce((acc, item) => {
+        return acc + parseInt(item.carbs)
+      }, 0)
+      let snackProteinTotal = snack.reduce((acc, item) => {
+        return acc + parseInt(item.protein)
+      }, 0)
+      let snackFatTotal = snack.reduce((acc, item) => {
+        return acc + parseInt(item.fat)
+      }, 0) 
+      document.querySelector('#snackTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${snackCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${snackCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${snackProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${snackFatTotal}g</p></li></ul></div></div></div>`
+    }
+
+    // const dailyCaloriesTotal = breakfastCaloriesTotal + lunchCaloriesTotal + dinnerCaloriesTotal + snackCaloriesTotal
+    // const dailyCarbsTotal = breakfastCarbsTotal + lunchCarbsTotal + dinnerCarbsTotal + snackCarbsTotal
+    // const dailyProteinTotal = breakfastProteinTotal + lunchProteinTotal + dinnerProteinTotal + snackProteinTotal
+    // const dailyFatTotal = breakfastFatTotal + lunchFatTotal + dinnerFatTotal + snackFatTotal
+
+    // document.querySelector('#dailyCaloriesTotal').innerHTML = `<p class="text-secondary">${dailyCaloriesTotal}g</p>`
+    // document.querySelector('#dailyCarbsTotal').innerHTML = `<p class="text-secondary">${dailyCarbsTotal}g</p>`
+    // document.querySelector('#dailyProteinTotal').innerHTML = `<p class="text-secondary">${dailyProteinTotal}g</p>`
+    // document.querySelector('#dailyFatTotal').innerHTML = `<p class="text-secondary">${dailyFatTotal}g</p>`
+  }
+
+</script>
 <script src="/javascripts/diary.js"></script>
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
 </body>
 </html>

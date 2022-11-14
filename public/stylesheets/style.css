@@ -28,6 +28,12 @@ p {
   border-bottom: #b7b5b5 solid 2px;
 }
 
+.detail-card-body{
+  justify-content: space-between; align-items: flex-end;
+  /* margin: 10px 0;
+  padding-bottom: 1rem; */
+}
+
 .card-body-text{
   align-content: flex-start;
 }
