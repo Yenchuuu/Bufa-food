@@ -113,7 +113,50 @@
     </div>
     <div class="container d-grid gap-3">
 
-      <div class="card text-center">
+      <!-- 範例code -->
+        <!-- <table>
+          <tr>
+            <td class="title-name"><h4>早餐</h4></td><td class="title-item">份數</td><td class="title-item">熱量</td><td class="title-item">碳水化合物</td><td class="title-item">蛋白質</td><td class="title-item">脂肪</td>
+          </tr>
+          <tr class="display-data">
+            <td class="show-food">egg</td><td class="show-serving">1.00</td><td class="show-calories">350kcal</td><td class="show-carbs">80g</td><td class="show-protein">10g</td><td class="show-fat">30g</td>
+          </tr>
+          <tr class="edit-data" style="display:none">
+            <td class="hidden-food">egg</td>
+            <td><input type="number" name="serving" value="1.00" class="hidden-serving" /></td>
+            <td class="hidden-calories">350kcal</td>
+            <td class="hidden-carbs">80g</td>
+            <td class="hidden-protein">10g</td>
+            <td class="hidden-fat">30g</td>
+            <td><button class="save-btn">save</button></td>
+          </tr>
+        </table> -->
+
+        <table>
+          <tr>
+            <td class="title-name"><h4>早餐</h4></td><td class="title-item">份數</td><td class="title-item">熱量<br>kcal</td><td class="title-item">碳水化合物</td><td class="title-item">蛋白質</td><td class="title-item">脂肪</td>
+          </tr>
+          <tr class="display-data" hidden>
+            <td class="show-food"></td>
+            <td class="show-serving"></td>
+            <td class="show-calories"></td>
+            <td class="show-carbs">g</td>
+            <td class="show-protein">g</td>
+            <td class="show-fat">g</td>
+          </tr>
+          <tr class="edit-data" style="display:none">
+            <td class="hidden-food"></td>
+            <td><input type="number" name="serving" value="1.00" class="hidden-serving" /></td>
+            <td class="hidden-calories"></td>
+            <td class="hidden-carbs">g</td>
+            <td class="hidden-protein">g</td>
+            <td class="hidden-fat">g</td>
+            <td><button class="save-btn">save</button></td>
+          </tr>
+        </table>
+
+
+        <div class="card text-center">
         <div class="card-body">
           <div class="row card-body-title">
             <div class="col-4"><h4 class="text-secondary">早餐</h4></div>
@@ -138,7 +181,7 @@
             </div>
           </div>
           <div class="row card-body-title" id="breakfastRecord">
-            <!-- <div class="col-4 text-secondary card-body-text">漢堡</div>
+            <div class="col-4 text-secondary card-body-text">漢堡</div>
             <div class="col-8">
               <ul class="nav nav-pills">
                 <li class="nav-card-title">
@@ -157,12 +200,12 @@
                   <p class="text-secondary">8g</p>
                 </li>
               </ul>
-            </div> -->
+            </div>
           </div>
           <div class="row" id="breakfastTotal"></div>
         </div>
       </div>
-      <div class="card text-center">
+      <!-- <div class="card text-center">
         <div class="card-body">
           <div class="row card-body-title">
             <div class="col-4"><h4 class="text-secondary">午餐</h4></div>
@@ -291,14 +334,14 @@
               </div>
 
       </div>
-    </div>
+    </div> -->
   <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 24EM;">
     <div class="sidebar">
-      <!-- <div class="card-body"> -->
+   <div class="card-body">
         <!-- <p>Pie Chart of nutrition</p> -->
         <div id="pieChart"  style="width:100%; height:500px;"></div>
       </div>
-    </div>
+    </div> 
   </div>
 </main>
 
@@ -333,10 +376,36 @@
       </div>
   </footer>
 </div>
-<!-- <script>
-  // $(function() {
-  //   $( "#datepicker" ).datepicker();
-  // });
+<script>
+  $(document).ready(function(){
+  
+    
+  $("#addBtn").click(function(){
+  	
+    let newDom = $(".display-data").first().clone();
+    newDom.children(".show-food").text("tomato");
+    newDom.children(".show-serving").text("80g");
+    newDom.show();
+    $("#demoTable").append(newDom);
+
+  });
+  
+  $(".display-data").click((e)=>{
+  	let clickedTr = $(e.target).parent();
+    clickedTr.hide();
+    clickedTr.next().show();
+  });
+  
+  $(".save-btn").click((e)=>{
+  	let btn = $(e.target);
+	  let clickedTr = btn.parents(".edit-data");
+    
+    clickedTr.hide();
+  	clickedTr.prev().children('.show-serving').text(clickedTr.find('input[name="serving"]').val());
+    clickedTr.prev().show();
+  });
+});
+
 
   $("#generateOneMeal").click(async function(){
     let values = []
@@ -353,19 +422,19 @@
     if (!meal || meal === '選餐') {
       Swal.fire({
         icon: 'warning',
-        title: '請選擇要建立於哪一餐‼️'
+        text: '請選擇要建立於哪一餐‼️'
       })
       return
     } else if (!target) {
       Swal.fire({
         icon: 'warning',
-        title: '請選擇要建立之目標‼️'
+        text: '請選擇要建立之目標‼️'
       })
       return
     } else if (isNaN(targetValue) || !targetValue) {
       Swal.fire({
         icon: 'warning',
-        title: '請輸入有效之數字‼️'
+        text: '請輸入有效之數字‼️'
       })
       return
     }
@@ -595,7 +664,7 @@
     Plotly.newPlot(pie, pieData);
   }
 
-</script> -->
+</script>
 <script src="/javascripts/diary.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
 </body>

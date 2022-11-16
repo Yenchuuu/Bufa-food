@@ -184,9 +184,7 @@ const generateMultipleMeals = async (req, res) => {
   const [{ id: userId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
   console.log('userInfo', userId, goalCalories, goalCarbs, goalProtein, goalFat)
 
-  // TODO: 設條件：如過當天無任何飲食紀錄才可以產生一日菜單，若已有紀錄則不行
   const mealRecords = await Food.getUserRecord(userId, date)
-  console.log('mealRecords', mealRecords.length)
   if (mealRecords.length !== 0) {
     return res.json({ errorMessage: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！' })
   } else {

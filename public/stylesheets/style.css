@@ -6,6 +6,10 @@ p {
   font-family: 'Alegreya Sans', sans-serif, 'Microsoft JhengHei';
 }
 
+.brand-logo {
+  width: 100px;
+}
+
 .click_icon {
   width: 25px;
   margin: 0 8px;
@@ -46,7 +50,7 @@ p {
 .footer-dark {
   padding:50px 0;
   color:#f0f9ff;
-  background-color:#4D555E;
+  background-color:#495464;
 }
 
 .footer-dark h3 {
