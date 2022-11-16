@@ -1,13 +1,18 @@
 const db = require('../utils/mysqlconf')
 
-const createMealRecord = async (userId, foodId, mealInfo) => {
-  const [result] = await db.execute('INSERT INTO `user_meal` (user_id, food_id, meal, serving_amount, date_record) VALUES (?, ?, ?, ?)', [userId, foodId, mealInfo])
+const createMealRecord = async (userId, foodId, meal, servingAmount, date) => {
+  const [result] = await db.execute('INSERT INTO `user_meal` (user_id, food_id, meal, serving_amount, date_record) VALUES (?, ?, ?, ?, ?)', [userId, foodId, meal, servingAmount, date])
+  return result
+}
+
+const updateMealRecord = async (userId, foodId, meal, servingAmount, date) => {
+  const [result] = await db.execute('UPDATE `user_meal` SET serving_amount = ? WHERE user_id = ? AND food_id = ? AND meal = ?', [servingAmount, userId, foodId, meal])
   return result
 }
 
 const getUserRecord = async (userId, date) => {
   const [mealRecords] = await db.execute(
-    'SELECT user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, (food.calories * serving_amount) AS calories, (food.carbs * serving_amount) AS carbs, (food.protein * serving_amount) AS protein, (food.fat * serving_amount) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
+    'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, (food.calories * serving_amount) AS calories, (food.carbs * serving_amount) AS carbs, (food.protein * serving_amount) AS protein, (food.fat * serving_amount) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
     [userId, date]
   )
   // console.log('mealRecords', mealRecords)
@@ -71,17 +76,16 @@ const setRecommendSingleMeal = async (userId, meal, recommendMeal, date) => {
 const setRecommendMultipleMeals = async (userId, recommendBreakfast, recommendLunch, recommendDinner, date) => {
   // console.log('Info', userId, recommendBreakfast, recommendLunch, recommendDinner, date)
   const conn = await db.getConnection()
-  // const writeRecommendMeals = []
   try {
     await conn.query('START TRANSACTION')
     for (let i = 0; i < recommendBreakfast.length; i++) {
-      const [writeRecommendBreakfast] = await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 1, recommendBreakfast[i].per_serving / 100, recommendBreakfast[i].id, date])
+      await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 1, recommendBreakfast[i].per_serving / 100, recommendBreakfast[i].id, date])
     }
     for (let i = 0; i < recommendLunch.length; i++) {
-      const [writeRecommendLunch] = await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 2, recommendLunch[i].per_serving / 100, recommendLunch[i].id, date])
+      await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 2, recommendLunch[i].per_serving / 100, recommendLunch[i].id, date])
     }
     for (let i = 0; i < recommendDinner.length; i++) {
-      const [writeRecommendDinner] = await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 3, recommendDinner[i].per_serving / 100, recommendDinner[i].id, date])
+      await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 3, recommendDinner[i].per_serving / 100, recommendDinner[i].id, date])
     }
     await conn.query('COMMIT')
     return
@@ -162,7 +166,7 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
   try {
     await conn.query('START TRANSACTION')
     const [getUserPreference] = await conn.execute('SELECT * FROM `user_preference` WHERE food_id = ? AND user_id = ?', [foodId, userId])
-    console.log('getUserPreference', getUserPreference)
+    // console.log('getUserPreference', getUserPreference)
 
     // const score = { collection: 16, likeIt: 8, createdIt: 4, dislikeIt: 2, exclusion: 1 }
     let preferenceScore
@@ -227,7 +231,6 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
         preferenceScore = getUserPreference[0].preference + 2
         condition.sql = 'SET preference = ?, dislikeIt = 1 WHERE food_id = ? AND user_id = ?;'
       }
-      // TODO: 目前還沒有可以加入挑食項目的按鈕
     } else if (clickedBtn === 'add_exclusiion') {
       if (getUserPreference.length === 0) {
         preferenceScore = 1
@@ -265,6 +268,7 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
 
 module.exports = {
   createMealRecord,
+  updateMealRecord,
   getUserRecord,
   getFoodDetail,
   getRecommendSingleMeal,

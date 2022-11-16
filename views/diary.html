@@ -74,14 +74,14 @@
       <!-- <div class="col-12"></div> -->
       <!-- <div class="row gap-3"> -->
         <div style="justify-content: center;" class="input-group mb-4">
-          <select class="custom-select col-3" id="inputGroupSelecMeal">
+          <select class="custom-select col-3 text-secondary" id="inputGroupSelectMeal">
             <option selected>選餐</option>
             <option value="1">早餐</option>
             <option value="2">午餐</option>
             <option value="3">晚餐</option>
             <option value="4">點心</option>
           </select>
-          <select class="custom-select col-lg-4" id="inputGroupSelectTarget">
+          <select class="custom-select col-lg-4 text-secondary" id="inputGroupSelectTarget">
             <option selected>選目標</option>
             <option value="calories">熱量(kcal)</option>
             <option value="carbs">碳水化合物(g)</option>
@@ -95,7 +95,7 @@
         </div>
       <!-- </div> -->
       <div style="justify-content: center; align-items: baseline;" class="center-box gap-3">
-        <div><h6 class="text-secondary">不知道要吃什麼嗎？點我產生一日菜單✨</h6></div>
+        <div><h6 class="text-secondary">不知道要吃什麼嗎？點我✨</h6></div>
         <div><button class="btn btn-outline-secondary justify-content-md-end" type="button" id="generateDayMeals">一日菜單</button></div>
       </div>
     </div>
@@ -327,7 +327,7 @@
 
   $("#generateOneMeal").click(async function(){
     let values = []
-    const meal = $("#inputGroupSelecMeal").val()
+    const meal = $("#inputGroupSelectMeal").val()
     const target = $("#inputGroupSelectTarget").val()
     const targetValue = $("#inputTargetValue").val()
     let webUrl = window.location.search

@@ -6,7 +6,7 @@ const { signUp, nativeSignIn, getUserTarget, getUserProfile, updateUserProfile, 
 router.route('/user/signup').post(wrapAsync(signUp))
 router.route('/user/nativesignin').post(wrapAsync(nativeSignIn))
 router.route('/user/target').post(authentication(), wrapAsync(getUserTarget))
-router.route('/user/mine').get(authentication(), wrapAsync(getUserPreference))
+router.route('/user/preference').get(authentication(), wrapAsync(getUserPreference))
 router.route('/user/profile').get(authentication(), wrapAsync(getUserProfile))
 router.route('/user/profile/account/:id').patch(authentication(), wrapAsync(updateUserProfile))
 router.route('/user/profile/bodyinfo/:id').patch(authentication(), wrapAsync(updateUserBodyInfo))

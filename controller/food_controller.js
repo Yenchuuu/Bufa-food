@@ -3,25 +3,48 @@ const User = require('../model/user_model')
 const Euc = require('../utils/euclidean_distance')
 const Util = require('../utils/util')
 const moment = require('moment')
+// FIXME: date是倫敦時間
 
-const createMealRecord = async (req, res) => {
+const addMealRecord = async (req, res) => {
   const { email } = req.user
+  let foodId = req.query.id
+  let { meal, servingAmount, date } = req.body
+  meal = parseInt(meal)
+  foodId = parseInt(foodId)
+  /* req.body接近來的serving amount單位是g，故應以food table之per_serving計算到底有幾份 */
+  const data = await Food.getFoodDetail(foodId)
+  const perServing = data[0].per_serving
+  servingAmount = parseFloat((servingAmount / perServing).toFixed(2))
+  // console.log('servingAmount', servingAmount, 'perServing', perServing)
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
-  const createdRecord = await Food.createMealRecord(userId)
-  res.json({ createdRecord })
+  const mealRecords = await Food.getUserRecord(userId, date)
+  // console.log(userId, foodId, meal, servingAmount, date)
+  try {
+    /* 若當天飲食紀錄已有此餐點 -> 調整份數；若無則建立 */
+    const findItem = mealRecords.filter(e => e.meal === meal).filter(e => e.food_id === foodId)
+    // console.log('findItem', findItem)
+    if (findItem.length !== 0) {
+      servingAmount += parseFloat((findItem[0].serving_amount))
+      servingAmount.toFixed(2)
+      // console.log('servingAmount', servingAmount, servingAmount.toFixed(2))
+      await Food.updateMealRecord(userId, foodId, meal, servingAmount, date)
+    } else {
+      await Food.createMealRecord(userId, foodId, meal, servingAmount, date)
+    }
+    res.json({ message: 'Record updated successfully.' })
+  } catch (err) {
+    console.error(err)
+    res.json({ errorMessage: 'Record cannot be updated.' })
+  }
 }
 
 const getDiaryRecord = async (req, res) => {
   // TODO: 若沒帶token要跳出alert並跳轉回首頁
   const { email } = req.user
-  // FIXME: getDate一直是2022-11-13??? WHY???
   const getDate = req.query.date
-  // const getDate = queryDate
   let date
-  // console.log('getDate', typeof getDate, getDate)
   const today = moment().format('YYYY-MM-DD')
-  // console.log('today', today)
   if (!getDate || typeof getDate === 'undefined') {
     date = today
   } else {
@@ -308,7 +331,7 @@ const generateMultipleMeals = async (req, res) => {
     return res.json({ recommendBreakfast, recommendLunch, recommendDinner })
   } catch (err) {
     console.error(err)
-    return res.json({ errorMessage: 'Failed to write the meals records.'})
+    return res.json({ errorMessage: 'Failed to write the meals records.' })
   }
 }
 
@@ -355,7 +378,7 @@ const updateFoodPreference = async (req, res) => {
 }
 
 module.exports = {
-  createMealRecord,
+  addMealRecord,
   getDiaryRecord,
   getFoodDetail,
   generateSingleMeal,
