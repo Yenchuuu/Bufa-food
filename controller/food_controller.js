@@ -79,9 +79,14 @@ const getFoodDetail = async (req, res) => {
 const generateSingleMeal = async (req, res) => {
   const { target, meal, value, date } = req.body
   const { email } = req.user
-
   const userDetail = await User.getUserDetail(email)
-  const userId = userDetail[0].id
+  const [{ id: userId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
+  // const userId = userDetail[0].id
+  if (target === 'calories' && value < goalCalories * 0.1) return res.json({ errorMessage: '為求飲食均衡，一餐熱量不建議低於TDEE 10%喔！請重新輸入' })
+  /* 計算使用者C P F的目標營養素分別對總熱量佔比為多少 */
+  const userCarbsPercentage = Math.round((goalCarbs * 4) / goalCalories * 100) / 100
+  const userProteinPercentage = Math.round((goalProtein * 4) / goalCalories * 100) / 100
+  const userFatPercentage = Math.round((goalFat * 9) / goalCalories * 100) / 100
 
   const recommendMealList = await Food.getRecommendSingleMeal(target, value)
   const len = recommendMealList.length
@@ -93,28 +98,69 @@ const generateSingleMeal = async (req, res) => {
         (e) => e.recommend_categories_id === 1
       )
       const carbs = carbsList[Math.floor(Math.random() * carbsList.length)]
+      /* 依目標碳水比例乘以總熱量，計算碳水應攝取幾份 */
+      const carbsCalories = Math.round(value * userCarbsPercentage * 0.9) // 留 10% buffer
+      const servingAmountCarbs = Math.round(carbsCalories / carbs.calories * 100)
+      console.log('carbsCalories', carbsCalories, 'servingAmountCarbs', servingAmountCarbs)
+      carbs.per_serving = servingAmountCarbs
+      carbs.calories = carbsCalories
+      carbs.carbs = Math.round(carbs.carbs * (servingAmountCarbs / 100))
+      carbs.protein = Math.round(carbs.protein * (servingAmountCarbs / 100))
+      carbs.fat = Math.round(carbs.fat * (servingAmountCarbs / 100))
       recommendMeal.push(carbs)
+
       const ProteinList = recommendMealList.filter(
         (e) => e.recommend_categories_id === 2
       )
-      const protein =
-        ProteinList[Math.floor(Math.random() * ProteinList.length)]
+      const protein = ProteinList[Math.floor(Math.random() * ProteinList.length)]
+      const proteinCalories = Math.round(value * userProteinPercentage * 0.9) // 留 10% buffer
+      const servingAmountProtein = Math.round(proteinCalories / protein.calories * 100)
+      protein.per_serving = servingAmountProtein
+      protein.calories = proteinCalories
+      protein.carbs = Math.round(protein.carbs * servingAmountProtein / 100)
+      protein.protein = Math.round(protein.protein * servingAmountProtein / 100)
+      protein.fat = Math.round(protein.fat * servingAmountProtein / 100)
       recommendMeal.push(protein)
+
       const vegList = recommendMealList.filter(
         (e) => e.recommend_categories_id === 4
       )
       const veg = vegList[Math.floor(Math.random() * vegList.length)]
       recommendMeal.push(veg)
+
+      /* 計算剩餘的熱量，將脂肪成算份量以符合需求 */
+      const caloriesSubtotal = recommendMeal.reduce((acc, item) => {
+        return acc + item.calories
+      }, 0)
+      const carbsSubtotal = recommendMeal.reduce((acc, item) => {
+        return acc + item.carbs
+      }, 0)
+      const proteinSubtotal = recommendMeal.reduce((acc, item) => {
+        return acc + item.protein
+      }, 0)
+      const fatSubtotal = recommendMeal.reduce((acc, item) => {
+        return acc + item.fat
+      }, 0)
+
+      const remainCaloriesV1 = value - caloriesSubtotal
+      const remainCarbsV1 = value * userCarbsPercentage - carbsSubtotal
+      const remainProteinV1 = value * userProteinPercentage - proteinSubtotal
+      const remainFatV1 = value * userFatPercentage - fatSubtotal
+      console.log('remaining:', remainCaloriesV1, remainCarbsV1, remainProteinV1, remainFatV1)
+
+
       const fatList = recommendMealList.filter(
         (e) => e.recommend_categories_id === 3
       )
       const fat = fatList[Math.floor(Math.random() * fatList.length)]
       // console.log('nutrition', recommendMeal)
-      const remainCaloriesV1 =
-        value - (carbs.calories + protein.calories + veg.calories)
+
       const servingOfFat = Math.round((remainCaloriesV1 / fat.calories) * 100)
       fat.per_serving = servingOfFat
       fat.calories = remainCaloriesV1
+      fat.carbs = Math.round(fat.carbs * (servingOfFat / 100))
+      fat.protein = Math.round(fat.protein * (servingOfFat / 100))
+      fat.fat = Math.round(fat.fat * (servingOfFat / 100))
       recommendMeal.push(fat)
       break
     }
@@ -127,7 +173,7 @@ const generateSingleMeal = async (req, res) => {
     }
   }
   const setMealRecord = await Food.setRecommendSingleMeal(userId, meal, recommendMeal, date)
-  // console.log('InfoC', userId, recommendMeal, date)
+  console.log('InfoC', userId, recommendMeal, date)
   return res.json({ meal, recommendMeal })
 }
 

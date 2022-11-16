@@ -8,6 +8,7 @@
   <script src="https://cdn.plot.ly/plotly-2.14.0.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script> -->
 </head>
@@ -337,47 +338,64 @@
     if (!date) {
       date = d.toISOString().split('T')[0]
     }
-    if (!meal) {
-      alert('請選擇要建立於哪一餐‼️')
+    if (!meal || meal === '選餐') {
+      Swal.fire({
+        icon: 'warning',
+        title: '請選擇要建立於哪一餐‼️'
+      })
       return
     } else if (!target) {
-      alert('請選擇要建立之目標‼️')
+      Swal.fire({
+        icon: 'warning',
+        title: '請選擇要建立之目標‼️'
+      })
       return
     } else if (isNaN(targetValue) || !targetValue) {
-      alert('請輸入有效之目標數值‼️')
+      Swal.fire({
+        icon: 'warning',
+        title: '請輸入有效之數字‼️'
+      })
       return
     }
     values.push(parseInt(meal), target, parseInt(targetValue))
     console.log(values)
     /* 判斷選擇哪一餐&目標打api */
     const targetMeal = await axios.post(`http://${location.host}/api/1.0/food/single`, { meal: values[0], target: values[1], value: values[2], date })
-    // console.log('targetMeal', targetMeal)
-    // if ()
-    const recommendMeal = targetMeal.data.recommendMeal
-    // console.log('recommendMeal', recommendMeal)
+    console.log('targetMeal', targetMeal)
+    if (target === 'calories' && targetMeal.data.errorMessage){
+      Swal.fire({
+        icon: 'warning',
+        text: '為求飲食均衡，一餐熱量不建議低於TDEE 10%喔！\b請重新輸入'
+      })
+      return
+    } else {
 
-    let switchMeal
-    switch (targetMeal.data.meal){
-      case 1: {
-        switchMeal = 'breakfast'
-        break
+      const recommendMeal = targetMeal.data.recommendMeal
+      // console.log('recommendMeal', recommendMeal)
+
+      let switchMeal
+      switch (targetMeal.data.meal){
+        case 1: {
+          switchMeal = 'breakfast'
+          break
+        }
+        case 2: {
+          switchMeal = 'lunch'
+          break
+        }
+        case 3: {
+          switchMeal = 'dinner'
+          break
+        }
+        case 4: {
+          switchMeal = 'snack'
+          break
+        }
       }
-      case 2: {
-        switchMeal = 'lunch'
-        break
-      }
-      case 3: {
-        switchMeal = 'dinner'
-        break
-      }
-      case 4: {
-        switchMeal = 'snack'
-        break
-      }
+      console.log('switchMeal', switchMeal)
+      recommendMeal.map(food => $(`#${switchMeal}Record`).append += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.per_serving}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`)
+      window.location.href = `http://${location.host}/diary.html?date=${date}`
     }
-    console.log('switchMeal', switchMeal)
-    recommendMeal.map(food => $(`#${switchMeal}Record`).append += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.per_serving}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`)
-    window.location.href = `http://${location.host}/diary.html?date=${date}`
   })
     
  
@@ -392,11 +410,14 @@
     const getDailyRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`)
     console.log('getDailyRecord', getDailyRecord)
     if (getDailyRecord.data.mealRecords.length !== 0) {
-      alert('當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！')
+      Swal.fire({
+        icon: 'warning',
+        title: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！'
+      })
       return
     } else {
     const getMeal = await axios.post(`http://${location.host}/api/1.0/food/multiple`, {date: date})
-    console.log('getMeal', getMeal, 'date', date)
+    // console.log('getMeal', getMeal, 'date', date)
     window.location.href = `http://${location.host}/diary.html?date=${date}`
     }
   })
