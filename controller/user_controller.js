@@ -94,13 +94,14 @@ const nativeSignIn = async (req, res) => {
   }
 }
 
-const getUserTarget = async (req, res) => {
+const setUserTarget = async (req, res) => {
   // const { birthday, height, weight, gender, diet_type: dietType, diet_goal: dietGoal, activity_level: activityLevel, goalCalories: goalCalories, goalCarbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE } = req.body
 
-  const { email } = req.user
-  const userDetail = await User.getUserDetail(email)
-  // console.log('userDetail', userDetail)
-  const userId = userDetail[0].id
+  const { id: userId } = req.user
+  // const { email } = req.user
+  // const userDetail = await User.getUserDetail(email)
+  // // console.log('userDetail', userDetail)
+  // const userId = userDetail[0].id
   const userInfo = {
     birthday: req.body.birthday,
     height: req.body.height,
@@ -120,13 +121,13 @@ const getUserTarget = async (req, res) => {
 }
 
 const getUserProfile = async (req, res) => {
-  const { provider, name, email, picture } = req.user
+  const { name, email, picture } = req.user
   const userDetail = await User.getUserDetail(email)
   const [{ birthday, height, weight, gender, diet_type: dietType, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE }] = userDetail
   // console.log('userDetail', userDetail)
   res.status(200).json({
     data: {
-      provider,
+      // provider,
       name,
       email,
       picture,
@@ -307,4 +308,4 @@ const getUserPreference = async (req, res) => {
   res.status(200).json({ preference })
 }
 
-module.exports = { signUp, nativeSignIn, getUserTarget, getUserProfile, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
+module.exports = { signUp, nativeSignIn, setUserTarget, getUserProfile, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }

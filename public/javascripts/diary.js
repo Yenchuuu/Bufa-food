@@ -1,3 +1,16 @@
+// const userName = window.localStorage.getItem('userName');
+const userId = window.localStorage.getItem('userId')
+const userEmail = window.localStorage.getItem('userEmail')
+
+const accessToken = window.localStorage.getItem('accessToken')
+if (!accessToken) {
+  Swal.fire({
+    icon: 'warning',
+    text: '請先登入'
+  })
+  window.location.href = `http://${location.host}/index.html`
+}
+
 $('#generateOneMeal').click(async function () {
   const values = []
   const meal = $('#inputGroupSelectMeal').val()
@@ -32,7 +45,7 @@ $('#generateOneMeal').click(async function () {
   values.push(parseInt(meal), target, parseInt(targetValue))
   console.log(values)
   /* 判斷選擇哪一餐&目標打api */
-  const targetMeal = await axios.post(`http://${location.host}/api/1.0/food/single`, { meal: values[0], target: values[1], value: values[2], date })
+  const targetMeal = await axios.post(`http://${location.host}/api/1.0/food/single`, { meal: values[0], target: values[1], value: values[2], date }, { headers: { Authorization: `Bearer ${accessToken}` } })
   console.log('targetMeal', targetMeal)
   if (target === 'calories' && targetMeal.data.errorMessage) {
     Swal.fire({
@@ -76,7 +89,7 @@ $('#generateDayMeals').click(async function () {
   if (!date) {
     date = d.toISOString().split('T')[0]
   }
-  const getDailyRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`)
+  const getDailyRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
   // console.log('getDailyRecord', getDailyRecord)
   if (getDailyRecord.data.mealRecords !== 0) {
     Swal.fire({
@@ -84,7 +97,7 @@ $('#generateDayMeals').click(async function () {
       text: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！'
     })
   } else {
-    const getMeal = await axios.post(`http://${location.host}/api/1.0/food/multiple`, { date })
+    const getMeal = await axios.post(`http://${location.host}/api/1.0/food/multiple`, { date }, { headers: { Authorization: `Bearer ${accessToken}` } })
     // console.log('getMeal', getMeal, 'date', date)
     window.location.href = `http://${location.host}/diary.html?date=${date}`
   }
@@ -192,7 +205,7 @@ const getDinner = document.getElementById('dinnerRecord')
 const getSnack = document.getElementById('snackRecord')
 
 async function getDiaryRecord(date) {
-  const diaryRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`)
+  const diaryRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
   console.log('diaryRecord', diaryRecord)
   getDate.innerHTML = `<span class="text-secondary" id="currentDate">${date}</span>`
 
@@ -217,14 +230,13 @@ async function getDiaryRecord(date) {
       { type: 'control' }
     ],
 
-    // TODO: 還沒設localstorage 所以先寫死token
     controller: {
       updateItem: function (item) {
         // console.log('item: ', item)
         return $.ajax({
           headers: {
             'Content-Type': 'application/json',
-            // Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm92aWRlciI6Im5hdGl2ZSIsIm5hbWUiOiJ0ZXN0MjIyIiwiZW1haWwiOiJ0ZXN0MjIyQHRlc3QuY29tIiwicGljdHVyZSI6bnVsbCwiaWF0IjoxNjY4MDU5OTA5fQ.fw0FcYmx8bfMfQadJapya1PJ9zwbRFAVEpPT3o_VFpo',
+            Authorization: `Bearer ${accessToken}`,
             accept: 'application/json'
           },
           type: 'PATCH',
@@ -238,8 +250,7 @@ async function getDiaryRecord(date) {
 }
 
 // async function getDiaryRecord(date) {
-//   const diaryRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`)
-//   // TODO: 還沒有登入的人要用 diaryRecord.status === 401 or 403 把他導回登入頁
+//   const diaryRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
 //   // console.log('diaryRecord', diaryRecord);
 //   console.log('date', date)
 

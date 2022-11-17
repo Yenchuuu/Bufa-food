@@ -129,12 +129,20 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js" integrity="sha384-lpyLfhYuitXl2zRZ5Bn2fqnhNAKOAaM/0Kr9laMspuaMiZfGmfwRNFh8HlMy49eQ" crossorigin="anonymous"></script>
 
 <script>
-  const webUrl = window.location.search
-  const splitUrl = webUrl.split('=')
-  let userId = splitUrl[1]
+
+  let accessToken = window.localStorage.getItem('accessToken');
+  if (!accessToken) {
+    alert('請先登入')
+   window.location.href = `http://${location.host}/index.html`
+  //  return
+  }else {
+  // const webUrl = window.location.search
+  // const splitUrl = webUrl.split('=')
+  // let userId = splitUrl[1]
+  const userId = window.localStorage.getItem('userId');
   async function getUserPreference(userId) {
     const collection = $('#my_collection')
-    const record = await axios.get(`http://${location.host}/api/1.0/user/preference?id=${userId}`)
+    const record = await axios.get(`http://${location.host}/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
     // console.log('record', record);
     const preferenceRecord = record.data.preference.filter(e => e.collection === 1)
     // console.log('preferenceRecord', preferenceRecord)
@@ -146,7 +154,7 @@
     //   newDom.show()
     //   $('.display-data').append(newDom)
     // }
-    
+
     /* 用for of 遍歷array */
     for (let foodObject of preferenceRecord) {
       let newDom = $('.collection-card').first().clone()
@@ -161,7 +169,7 @@
 
   }
   getUserPreference(userId)
-
+  }
 </script>
 </body>
 </html>

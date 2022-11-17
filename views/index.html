@@ -11,7 +11,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/stylesheets/style.css">
 
 </head>
@@ -142,15 +141,23 @@
     }
     try {
     const data = await axios.post(`http://${location.host}/api/1.0/user/nativesignin`, { provider: 'native', email, password })
-    console.log('data: ', data);
+    // console.log('data: ', data);
     if (data.data.data.access_token) {
       const accessToken = data.data.data.access_token
-      console.log('accessToken: ', accessToken);
+      // console.log('accessToken: ', accessToken);
       Swal.fire({
           icon: 'success',
           title: '登入成功'
         })
-      return 
+      /* 輸入正確資訊時產生jwt token，進入user diary page */
+      window.localStorage.setItem('accessToken', accessToken)
+      window.localStorage.setItem('userName', data.data.data.user.name)
+      window.localStorage.setItem('userId', data.data.data.user.id)
+      window.localStorage.setItem('userEmail', data.data.data.user.email)
+      const bodyInfo = await axios.get(`http://${location.host}/api/1.0/user/profile`, { headers: {Authorization: `Bearer ${accessToken}`} })
+      // console.log('bodyInfo: ', bodyInfo);
+      if (!bodyInfo.data.data.TDEE) return window.location.href = `http://${location.host}/target.html`
+      return window.location.href = `http://${location.host}/profile.html`
     } else if(data.data.error){
         Swal.fire({
           icon: 'error',
