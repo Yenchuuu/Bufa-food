@@ -55,20 +55,18 @@ const signUp = async (req, res) => {
 
 const nativeSignIn = async (req, res) => {
   const { email, password } = req.body
+  // console.log('email, password: ', email, password)
   if (!email || !password) {
-    res
-      .status(400)
-      .json({ error: 'Request Error: email and password are required.' })
-    return
+    return res.json({ error: 'Request Error: email and password are required.' })
   }
 
   try {
-    const result = await User.nativeSignIn(email)
-    // console.log('result', result)
+    const result = await User.nativeSignIn(email, password)
+    console.log('result', result)
     if (result.length === 0) {
-      return res
-        .status(401)
-        .json({ errorMessage: 'Invalid email or password. Please try again.' })
+      return res.json({ error: 'Email or password is wrong.' })
+    } else if (!bcrypt.compareSync(password, result[0].password)) {
+      return res.json({ error: 'Email or password is wrong.' })
     } else {
       bcrypt.compare(password, result[0].password)
       delete result[0].password

@@ -63,7 +63,7 @@ const updateNutritionTarget = async (updateData, userId) => {
 }
 
 const getUserPreference = async (userId) => {
-  const [preference] = await db.execute('SELECT * FROM `user_preference` WHERE user_id = ?', [userId])
+  const [preference] = await db.execute('SELECT user_preference.*, food.name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id = ?', [userId])
   return preference
 }
 
@@ -108,10 +108,9 @@ const signUp = async (name, email, password) => {
   }
 }
 
-const nativeSignIn = async (email) => {
-  const [user] = await db.query('SELECT * FROM user WHERE email = ?', [
-    email
-  ])
+const nativeSignIn = async (email, password) => {
+  const [user] = await db.query('SELECT * FROM user WHERE email = ?', [email])
+  console.log('user: ', user)
   return user
 }
 

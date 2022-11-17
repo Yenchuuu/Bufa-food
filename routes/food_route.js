@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const { wrapAsync, authentication } = require('../utils/util')
-const { addMealRecord, getDiaryRecord, generateSingleMeal, generateMultipleMeals, getFoodFromKeyword, getFoodTrend, getUserRecommendation, getFoodDetail, updateFoodPreference } = require('../controller/food_controller')
+const { addMealRecord, updateMealRecord, getDiaryRecord, generateSingleMeal, generateMultipleMeals, getFoodFromKeyword, getFoodTrend, getUserRecommendation, getFoodDetail, updateFoodPreference } = require('../controller/food_controller')
 
 /* Diet plan page */
 router.route('/food/diary').get(authentication(), wrapAsync(getDiaryRecord))
+router.route('/food/diary').patch(authentication(), wrapAsync(updateMealRecord))
 router.route('/food/single').post(authentication(), wrapAsync(generateSingleMeal))
 router.route('/food/multiple').post(authentication(), wrapAsync(generateMultipleMeals))
 

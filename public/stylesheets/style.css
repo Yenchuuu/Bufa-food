@@ -145,10 +145,26 @@ p {
   display: block;
 }
 
+.sidebar-color {
+  background-color: #E8E8E8;
+}
+
+.container-color{
+  background-color: #F4F4F2;
+}
+
 .sidebar a:hover {
   color: #E2D8B0;
 }
 
 .footer-icon{
   width: 25px;
+}
+
+a {
+  text-decoration:none;
+}
+
+.link-info{
+  color: rgb(117, 176, 117);
 }

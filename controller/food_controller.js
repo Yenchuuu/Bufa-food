@@ -39,6 +39,27 @@ const addMealRecord = async (req, res) => {
   }
 }
 
+const updateMealRecord = async (req, res) => {
+  const { email } = req.user
+  let date = req.query.id
+  if (!date || date === 'undefined') {
+    date = moment().format('YYYY-MM-DD')
+  }
+  let { meal, serving_amount: servingAmount, food_id: foodId } = req.body
+  // console.log('meal, servingAmount, foodId: ', meal, servingAmount, foodId)
+  meal = parseInt(meal)
+  foodId = parseInt(foodId)
+  try {
+    const userDetail = await User.getUserDetail(email)
+    const userId = userDetail[0].id
+    await Food.updateMealRecord(userId, foodId, meal, servingAmount, date)
+    res.json({ message: 'Record updated successfully.' })
+  } catch (err) {
+    console.error(err)
+    res.json({ errorMessage: 'Record cannot be updated.' })
+  }
+}
+
 const getDiaryRecord = async (req, res) => {
   // TODO: 若沒帶token要跳出alert並跳轉回首頁
   const { email } = req.user
@@ -426,6 +447,7 @@ const updateFoodPreference = async (req, res) => {
 
 module.exports = {
   addMealRecord,
+  updateMealRecord,
   getDiaryRecord,
   getFoodDetail,
   generateSingleMeal,

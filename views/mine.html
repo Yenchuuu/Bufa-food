@@ -7,7 +7,10 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
-    
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="/stylesheets/style.css">
     <link rel="stylesheet" href="/stylesheets/diary.css">
     <link rel="stylesheet" href="/stylesheets/mine.css">
@@ -15,11 +18,11 @@
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <nav style="background-color: #4D555E;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
+  <nav style="background-color: #495464;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/index.html">BUFA FOOD | 不發福</a>
+      <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logov2.png" class="brand-logo">  BUFA FOOD | 不發福</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+      <span class="navbar-toggler-icon"></span>
       </button>
 
       <!-- 把div的 class="collapse navbar-collapse justify-content-md-end" 拿掉，就可以達到置右對齊了 -->
@@ -46,9 +49,10 @@
     </div>
   </nav>
   
-  <main class="d-flex flex-nowrap mt-5 mb-5">
-    <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
-      <div class="sidebar">
+  <!-- <main class="d-flex flex-nowrap mt-5 mb-5"> -->
+  <main class="d-flex flex-nowrap container-color">
+    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
+      <div class="sidebar mt-5">
         <a href="/index.html"><i class="fa fa-fw fa-home"></i> Home</a>
         <a href="/profile.html"><i class="fa fa-fw fa-wrench"></i> Profile</a>
         <a href="/diary.html"><i class="fa fa-fw fa-user"></i> Diary</a>
@@ -57,18 +61,23 @@
     </div>
     
     <div class="container col-lg-6 p-3">
-      <div class="row column-style">
+      <div class="row column-style mt-5">
       <div style="justify-content: center;" class="col-12 diary-head">
         <div style="justify-content: center;" class="center-box">
           <h5 class="text-secondary">我的收藏</h5>
         </div> 
         <div id="my_collection" class="center-box">
-          <div class="card text-dark bg-light mb-3" style="max-width: 15rem;">
+          <!-- <div id="food_trend" style="margin: 30px 0px; display: flex; flex-wrap:wrap; justify-content: space-around;">
+          </div> -->
+          <div hidden>
+          <div class="collection-card card text-dark bg-light mb-3" style="max-width: 15rem;">
             <!-- <div class="card-header">Header</div> -->
             <div class="card-body">
-              <p class="card-text">icon</p>
-              <h4 class="card-title">銅鑼燒</h4>
+              <h6 class="card-title text-secondary"></h6>
             </div>
+          </div>
+          </div>
+          <div class="display-data">
           </div>
         </div>
       </div>
@@ -110,7 +119,7 @@
                   <h3>BUFA FOOD</h3>
                   <p>Praesent sed lobortis mi. Suspendisse vel placerat ligula. Vivamus ac sem lacus. Ut vehicula rhoncus elementum. Etiam quis tristique lectus. Aliquam in arcu eget velit pulvinar dictum vel in justo.</p>
               </div>
-              <div class="col item social"><a href="#"><i class="icon ion-social-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a></div>
+              <!-- <div class="col item social"><a href="#"><i class="icon ion-social-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a></div> -->
           </div>
           <p class="copyright">BUFA FOOD © 2022</p>
       </div>
@@ -120,9 +129,36 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js" integrity="sha384-lpyLfhYuitXl2zRZ5Bn2fqnhNAKOAaM/0Kr9laMspuaMiZfGmfwRNFh8HlMy49eQ" crossorigin="anonymous"></script>
 
 <script>
+  const webUrl = window.location.search
+  const splitUrl = webUrl.split('=')
+  let userId = splitUrl[1]
   async function getUserPreference(userId) {
-    const record = await axios.get(`http://${location.host}/api/1.0/user/mine?id=${userId}`)
-    console.log('record', record);
+    const collection = $('#my_collection')
+    const record = await axios.get(`http://${location.host}/api/1.0/user/preference?id=${userId}`)
+    // console.log('record', record);
+    const preferenceRecord = record.data.preference.filter(e => e.collection === 1)
+    // console.log('preferenceRecord', preferenceRecord)
+    const len = preferenceRecord.length
+    // for (let i = 0; i < len; i++) {
+    //   let newDom = $('.collection-card').first().clone()
+    //   newDom.children('.card-body')
+    //   newDom.children('.card-body').children('.card-title').append(`${preferenceRecord[i].name}`)
+    //   newDom.show()
+    //   $('.display-data').append(newDom)
+    // }
+    
+    /* 用for of 遍歷array */
+    for (let foodObject of preferenceRecord) {
+      let newDom = $('.collection-card').first().clone()
+      newDom.children('.card-body')
+      newDom.children('.card-body').children('.card-title').append(`${foodObject.name}`)
+      newDom.show()
+      $('.display-data').append(newDom)
+    }
+    // preferenceRecord.map(food =>
+    // collection.append(`<a href="/detail.html?id=${food.food_id}"><div class="card text-dark bg-light mb-3" style="max-width: 15rem;"><div class="card-body"><h6 class="card-title text-secondary">${food.name}</h6></div></div></a>`)
+    // )
+
   }
   getUserPreference(userId)
 
