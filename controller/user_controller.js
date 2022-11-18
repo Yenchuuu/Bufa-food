@@ -12,14 +12,12 @@ const signUp = async (req, res) => {
   const { email, password } = req.body
 
   if (!name || !email || !password) {
-    res
-      .status(400)
-      .send({ error: 'Request Error: name, email and password are required.' })
+    res.send({ error: 'Request Error: name, email and password are required.' })
     return
   }
 
-  if (!validator.isEmail(email)) {
-    res.status(400).send({ error: 'Request Error: Invalid email format' })
+  if (!validator.isEmail(email) || !email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/gi)) {
+    res.send({ error: 'Request Error: Invalid email format' })
     return
   }
   /* replace <, >, &, ', " and / with HTML entities */
@@ -27,7 +25,7 @@ const signUp = async (req, res) => {
 
   const result = await User.signUp(name, email, password)
   if (result.error) {
-    res.status(400).send({ error: result.error })
+    res.send({ error: result.error })
     return
   }
 

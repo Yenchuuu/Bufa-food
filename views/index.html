@@ -12,6 +12,7 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="/stylesheets/index.css">    
 
 </head>
 <body>
@@ -56,24 +57,22 @@
       <a href="/footprint.html"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
     </div>
   </div> -->
-  <div class="container mt-5 mb-5">
-    <h2>WELCOME TO BUFA FOOD✨</h2>
-    <!-- <button class="btn btn-outline-secondary col-4" type="button">Sign up</button>
-    <button class="btn btn-outline-secondary col-4" type="button">Sign in</button> -->
+  <div class="container mt-5 mb-5 entry-div">
+    <div style="justify-content: center;"><img src="/images/entry_gif.gif" class="entry-gif" /></div>
+    <h5 class="text-secondary mt-3">Your diet-planner, life-saver!</h5>
   </div>
   <div class="container mt-5 mb-5">
-    <div class="d-flex align-items-center h-custom-2 px-5 ms-xl-4 mt-5 pt-5 pt-xl-0 mt-xl-n5">
-
+    <div class="d-flex align-items-center h-custom-2 px-5 ms-xl-4 pt-2 pt-xl-0 mt-xl-n5">
       <form style="width: 23rem;">
-        <!-- <h3 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Log in</h3> -->
-
+        <h4 class="text-secondary mb-4">Welcome Back✨</h4>
+        
         <div class="form-outline mb-4">
-          <label class="form-label" for="email">Email address</label>
+          <label class="form-label text-secondary" for="email">Email address</label>
           <input type="email" id="email" class="form-control form-control-m" />
         </div>
 
         <div class="form-outline mb-4">
-          <label class="form-label" for="password">Password</label>
+          <label class="form-label text-secondary" for="password">Password</label>
           <input type="password" id="password" class="form-control form-control-m" />
         </div>
 
@@ -85,12 +84,41 @@
         <a class="btn btn-primary btn-m btn-block mb-3" style="background-color: #3b5998" href="#!" role="button">
             <i class="fab fa-facebook-f me-2"></i>Continue with Facebook
           </a>
-        <p>Don't have an account? <a href="#!" class="link-info">Register here</a></p>
+        <p class="text-secondary">Don't have an account? <a class="link-info" id="signupHere">Register here</a></p>
 
       </form>
     </div>
   </div>
 </main>
+<div class="pop-background"></div>
+<div class="pop-window">
+  <div class="pop-content">
+    <form style="width: 23rem;">
+
+      <div class="form-outline mb-4">
+        <label class="form-label" for="name">Name</label>
+        <input type="text" id="name" class="form-control form-control-m" required />
+      </div>
+      
+      <div class="form-outline mb-4">
+        <label class="form-label" for="register_email">Email address</label>
+        <input type="email" id="register_email" class="form-control form-control-m" required />
+      </div>
+
+      <div class="form-outline mb-4">
+        <label class="form-label" for="register_password">Password</label>
+        <input type="password" id="register_password" class="form-control form-control-m" required />
+      </div>
+
+      <div class="form-outline mb-4">
+        <label class="form-label" for="confirm_password">Confirm Password</label>
+        <input type="password" id="confirm_password" class="form-control form-control-m" required />
+      </div>
+    
+    </form>
+    <button style="display: blocked; margin: auto;" type="button" class="btn btn-outline-secondary col-4" id="signupBtn">註冊</button>
+  </div>
+</div>
 
 <div class="footer-dark">
   <footer>
@@ -126,7 +154,60 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js" integrity="sha384-lpyLfhYuitXl2zRZ5Bn2fqnhNAKOAaM/0Kr9laMspuaMiZfGmfwRNFh8HlMy49eQ" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
 <script>
-  $(document).ready(function(){
+
+  /* 點選 + 時跳出的彈窗 */
+  $('#signupHere').click(function(){
+    $('.pop-background').fadeIn(100);
+    $('.pop-window').fadeIn(100);
+  })
+  $('.pop-background').click(function(){
+    $('.pop-background').fadeOut(200);
+    $('.pop-window').fadeOut(200);
+  })
+ 
+  $('#signupBtn').click(async function(){
+    const name = $('#name').val()
+    const email = $('#register_email').val()
+    const password = $('#register_password').val()
+    console.log('info: ', name, email, password);
+
+    const confirmPassword = $('#confirm_password').val()
+    if (!name || !email || !password || !confirmPassword) {
+      Swal.fire({
+        icon: 'error',
+        text: '請確認資訊皆填寫完整'
+      })
+    } else if (password !== confirmPassword) {
+      Swal.fire({
+        icon: 'error',
+        text: '請再次確認密碼輸入正確'
+      })
+    } else {
+    const data = await axios.post(`http://${location.host}/api/1.0/user/signup`, { name, email, password })
+    console.log('data: ', data);
+    if (data.data.error){
+      Swal.fire({
+        icon: 'error',
+        text: '帳號格式錯誤或已被註冊'
+      })
+      return
+    } else if (data.data.data) {
+      /* 註冊即登入 */
+      const accessToken = data.data.data.access_token
+      window.localStorage.setItem('accessToken', accessToken)
+      window.localStorage.setItem('userName', data.data.data.user.name)
+      window.localStorage.setItem('userId', data.data.data.user.id)
+      window.localStorage.setItem('userEmail', data.data.data.user.email)
+      Swal.fire({
+      icon: 'success',
+      title: '註冊成功',
+      footer: `<a href="/target.html" class="text-secondary">前往填寫體態與設定目標💪🏼</a>`
+      })
+    }
+  }
+  })
+
+    $(document).ready(function(){
     $('#signinBtn').click(async function(){
     const email = $('#email').val()
     // console.log('email: ', email);
@@ -170,40 +251,7 @@
     }
   })
 })
-
-//   $(document).ready(function(){
-//   $("#login").click(function(){
-//     var email = $("#email").val();
-//     var password = $("#password").val();
-//     // Checking for blank fields. 檢查輸入欄位是否為空…
-//     if( email =='' || password ==''){
-//       $('input[type="text"],input[type="password"]').css("border","2px solid red");
-//       $('input[type="text"],input[type="password"]').css("box-shadow","0 0 3px red");
-//       alert("輸入的欄位不能是空的，請輸入適當的值...!!!!!!");
-//     }else {
-//       //以ajax方式將輸入的值丟給login.php，這個寫法跟我們之前用的方式更簡潔，花些時間理解一下。
-//       $.post("login.php",{ email1: email, password1:password},
-//       function(data) {
-//         if(data=='無效的Email.......') { //從login.php傳回來的值(echo)，如果是…
-//           $('input[type="text"]').css({"border":"2px solid red","box-shadow":"0 0 3px red"});
-//           $('input[type="password"]').css({"border":"2px solid #00F5FF","box-shadow":"0 0 5px #00F5FF"});
-//           alert(data);
-//         }else if(data=='Email 或 密碼 是錯誤的...!!!!'){
-//           $('input[type="text"],input[type="password"]').css({"border":"2px solid red","box-shadow":"0 0 3px red"});
-//           alert(data);
-//         } else if(data=='登入成功...'){
-//           $("form")[0].reset();
-//           $('input[type="text"],input[type="password"]').css({"border":"2px solid #00F5FF","box-shadow":"0 0 5px #00F5FF"});
-//           //若需要的話，可把表單隱藏起來
-//           // $(".main").hide();
-//           alert(data);
-//         } else{
-//           alert(data);
-//         }
-//       });
-//     }
-//   });
-// });
 </script>
+<script type='text/javascript'>document.addEventListener('DOMContentLoaded', function () {window.setTimeout(document.querySelector('svg').classList.add('animated'),1000);})</script>
 </body>
 </html>
