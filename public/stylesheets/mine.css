@@ -1,5 +1,5 @@
 .column-style {
-  border: 2px #4D555E solid; 
+  border: 2px #495464 solid; 
   border-radius: 1em;
   margin: 1.5em;
   padding: 1em 2em;
@@ -12,6 +12,7 @@
 
 .collection-card{
   margin: 1em 2em;
+  border: 1px #7BB08A solid;
 }
 
 .mine-card-body {

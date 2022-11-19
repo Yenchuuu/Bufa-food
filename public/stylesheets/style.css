@@ -8,6 +8,7 @@ p {
 
 .brand-logo {
   width: 100px;
+  margin: 0 15px 0 0;
 }
 
 .click_icon {
@@ -154,7 +155,7 @@ p {
 }
 
 .sidebar a:hover {
-  color: #E2D8B0;
+  color: #7BB08A;
 }
 
 .footer-icon{

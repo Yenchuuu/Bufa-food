@@ -1,0 +1,31 @@
+.profile-container{
+  margin: 0 2em;
+}
+
+.text-color{
+  color: #7BB08A;
+}
+
+.self-photo{
+  width: 180px;
+  height: 200px;
+  border: solid #7BB08A 1px;
+}
+
+table, td, th {  
+  text-align: left;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+ td{
+  padding: 0 0 1em 0;
+  font-size: 16px;
+ }
+
+ tbody{
+  color: #6c757d;
+ }
