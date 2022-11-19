@@ -11,6 +11,13 @@
   justify-content: center;
 }
 
+a > .link-info{
+  color: #7BB08A(117, 176, 117);
+}
+
+a:hover {
+  color: #959595(117, 176, 117);
+}
 
 .pop-background{
   display: none;

@@ -1,7 +1,22 @@
 .column-style {
   border: 2px #4D555E solid; 
   border-radius: 1em;
-  margin: 0 0 50px 0;
-  padding: 20px 0;
+  margin: 1.5em;
+  padding: 1em 2em;
+}
+
+.display-collection, .display-createdFood, .display-exclusion{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.collection-card{
+  margin: 1em 2em;
+}
+
+.mine-card-body {
+  width: 12rem;
+  flex: 1 1 auto;
+  padding: 1rem 1rem;
 }
 

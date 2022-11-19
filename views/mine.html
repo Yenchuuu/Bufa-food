@@ -20,7 +20,7 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <nav style="background-color: #495464;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logov2.png" class="brand-logo">  BUFA FOOD | 不發福</a>
+      <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logo.png" class="brand-logo">  BUFA FOOD | 不發福</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
       </button>
@@ -64,20 +64,17 @@
       <div class="row column-style mt-5">
       <div style="justify-content: center;" class="col-12 diary-head">
         <div style="justify-content: center;" class="center-box">
-          <h5 class="text-secondary">我的收藏</h5>
+          <h5 class="text-secondary">我的收藏清單</h5>
         </div> 
-        <div id="my_collection" class="center-box">
-          <!-- <div id="food_trend" style="margin: 30px 0px; display: flex; flex-wrap:wrap; justify-content: space-around;">
-          </div> -->
+        <div id="my_collection">
           <div hidden>
-          <div class="collection-card card text-dark bg-light mb-3" style="max-width: 15rem;">
-            <!-- <div class="card-header">Header</div> -->
-            <div class="card-body">
+          <div class="collection-card card text-dark bg-light mb-3">
+            <div class="mine-card-body">
               <h6 class="card-title text-secondary"></h6>
             </div>
           </div>
           </div>
-          <div class="display-data">
+          <div class="display-collection">
           </div>
         </div>
       </div>
@@ -89,9 +86,38 @@
             <h5 class="text-secondary">我的建立清單</h5>
           </div> 
           <div id="created_by_me" class="center-box">
+            <div hidden>
+              <div class="collection-card card text-dark bg-light mb-3">
+                <div class="mine-card-body">
+                  <h6 class="card-title text-secondary"></h6>
+                </div>
+              </div>
+              </div>
+              <div class="display-createdFood">
+              </div>
           </div>
         </div>
       </div>
+
+      <div class="row column-style">
+        <div style="justify-content: center;" class="col-12 diary-head">
+          <div style="justify-content: center;" class="center-box">
+            <h5 class="text-secondary">我的排除清單</h5>
+          </div> 
+          <div id="my_exclusion" class="center-box">
+            <div hidden>
+              <div class="collection-card card text-dark bg-light mb-3">
+                <div class="mine-card-body">
+                  <h6 class="card-title text-secondary"></h6>
+                </div>
+              </div>
+              </div>
+              <div class="display-exclusion">
+              </div>
+          </div>
+        </div>
+      </div>
+
     </div>  
   </main>
 
@@ -136,36 +162,44 @@
    window.location.href = `/index.html`
   //  return
   }else {
-  // const webUrl = window.location.search
-  // const splitUrl = webUrl.split('=')
-  // let userId = splitUrl[1]
   const userId = window.localStorage.getItem('userId');
   async function getUserPreference(userId) {
     const collection = $('#my_collection')
+    const createdFood = $('#created_by_me')
+    const exclusion = $('#my_exclusion')
     const record = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
     // console.log('record', record);
-    const preferenceRecord = record.data.preference.filter(e => e.collection === 1)
-    // console.log('preferenceRecord', preferenceRecord)
-    const len = preferenceRecord.length
-    // for (let i = 0; i < len; i++) {
-    //   let newDom = $('.collection-card').first().clone()
-    //   newDom.children('.card-body')
-    //   newDom.children('.card-body').children('.card-title').append(`${preferenceRecord[i].name}`)
-    //   newDom.show()
-    //   $('.display-data').append(newDom)
-    // }
+    const collectionRecord = record.data.preference.filter(e => e.collection === 1)
+    const createdFoodRecord = record.data.preference.filter(e => e.createdIt === 1)
+    const exclusionRecord = record.data.preference.filter(e => e.exclusion === 1)
+    // console.log('collectionRecord', collectionRecord)
 
     /* 用for of 遍歷array */
-    for (let foodObject of preferenceRecord) {
+    for (let foodObject of collectionRecord) {
       let newDom = $('.collection-card').first().clone()
-      newDom.children('.card-body')
-      newDom.children('.card-body').children('.card-title').append(`${foodObject.name}`)
+      newDom.children('.mine-card-body')
+      // newDom.children('.card-body').append(`<a href="/detail.html?id=${foodObject.food_id}>`)
+      newDom.children('.mine-card-body').children('.card-title').append(`${foodObject.name}`)
+      // newDom.children('.card-body').append(`</a>`)
       newDom.show()
-      $('.display-data').append(newDom)
+      $('.display-collection').append(newDom)
     }
-    // preferenceRecord.map(food =>
-    // collection.append(`<a href="/detail.html?id=${food.food_id}"><div class="card text-dark bg-light mb-3" style="max-width: 15rem;"><div class="card-body"><h6 class="card-title text-secondary">${food.name}</h6></div></div></a>`)
-    // )
+
+    for (let foodObject of createdFoodRecord) {
+      let newDom = $('.collection-card').first().clone()
+      newDom.children('.mine-card-body')
+      newDom.children('.mine-card-body').children('.card-title').append(`${foodObject.name}`)
+      newDom.show()
+      $('.display-createdFood').append(newDom)
+    }
+
+    for (let foodObject of exclusionRecord) {
+      let newDom = $('.collection-card').first().clone()
+      newDom.children('.mine-card-body')
+      newDom.children('.mine-card-body').children('.card-title').append(`${foodObject.name}`)
+      newDom.show()
+      $('.display-exclusion').append(newDom)
+    }
 
   }
   getUserPreference(userId)
