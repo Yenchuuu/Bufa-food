@@ -133,7 +133,7 @@
   let accessToken = window.localStorage.getItem('accessToken');
   if (!accessToken) {
     alert('請先登入')
-   window.location.href = `http://${location.host}/index.html`
+   window.location.href = `/index.html`
   //  return
   }else {
   // const webUrl = window.location.search
@@ -142,7 +142,7 @@
   const userId = window.localStorage.getItem('userId');
   async function getUserPreference(userId) {
     const collection = $('#my_collection')
-    const record = await axios.get(`http://${location.host}/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+    const record = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
     // console.log('record', record);
     const preferenceRecord = record.data.preference.filter(e => e.collection === 1)
     // console.log('preferenceRecord', preferenceRecord)

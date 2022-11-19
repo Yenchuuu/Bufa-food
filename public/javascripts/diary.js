@@ -8,7 +8,7 @@ if (!accessToken) {
     icon: 'warning',
     text: '請先登入'
   })
-  window.location.href = `http://${location.host}/index.html`
+  window.location.href = '/index.html'
 }
 
 $('#generateOneMeal').click(async function () {
@@ -45,7 +45,7 @@ $('#generateOneMeal').click(async function () {
   values.push(parseInt(meal), target, parseInt(targetValue))
   console.log(values)
   /* 判斷選擇哪一餐&目標打api */
-  const targetMeal = await axios.post(`http://${location.host}/api/1.0/food/single`, { meal: values[0], target: values[1], value: values[2], date }, { headers: { Authorization: `Bearer ${accessToken}` } })
+  const targetMeal = await axios.post('/api/1.0/food/single', { meal: values[0], target: values[1], value: values[2], date }, { headers: { Authorization: `Bearer ${accessToken}` } })
   console.log('targetMeal', targetMeal)
   if (target === 'calories' && targetMeal.data.errorMessage) {
     Swal.fire({
@@ -77,7 +77,7 @@ $('#generateOneMeal').click(async function () {
     }
     console.log('switchMeal', switchMeal)
     recommendMeal.map(food => $(`#${switchMeal}Record`).append += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.per_serving}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`)
-    window.location.href = `http://${location.host}/diary.html?date=${date}`
+    window.location.href = `/diary.html?date=${date}`
   }
 })
 
@@ -89,7 +89,7 @@ $('#generateDayMeals').click(async function () {
   if (!date) {
     date = d.toISOString().split('T')[0]
   }
-  const getDailyRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+  const getDailyRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
   // console.log('getDailyRecord', getDailyRecord)
   if (getDailyRecord.data.mealRecords !== 0) {
     Swal.fire({
@@ -97,9 +97,9 @@ $('#generateDayMeals').click(async function () {
       text: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！'
     })
   } else {
-    const getMeal = await axios.post(`http://${location.host}/api/1.0/food/multiple`, { date }, { headers: { Authorization: `Bearer ${accessToken}` } })
+    const getMeal = await axios.post('/api/1.0/food/multiple', { date }, { headers: { Authorization: `Bearer ${accessToken}` } })
     // console.log('getMeal', getMeal, 'date', date)
-    window.location.href = `http://${location.host}/diary.html?date=${date}`
+    window.location.href = `/diary.html?date=${date}`
   }
 })
 
@@ -120,7 +120,7 @@ $('#previousDay').click(function (changeDate) {
   const previousDate = dateB.toISOString().split('T')[0]
   // console.log('dateB', dateB, 'previousDate', previousDate)
   const date = previousDate
-  window.location.href = `http://${location.host}/diary.html?date=${date}`
+  window.location.href = `/diary.html?date=${date}`
 })
 // document.querySelector('#previousDay').addEventListener('click', function (changeDate) {
 //   let currenDate = document.querySelector('#currentDate').textContent
@@ -129,7 +129,7 @@ $('#previousDay').click(function (changeDate) {
 //   let previousDate = dateB.toISOString().split('T')[0]
 //   // console.log('dateB', dateB, 'previousDate', previousDate)
 //   let date = previousDate
-//   window.location.href = `http://${location.host}/diary.html?date=${date}`
+//   window.location.href = `/diary.html?date=${date}`
 // })
 
 /* 往後按一天 */
@@ -140,7 +140,7 @@ $('#followingDay').click(function (changeDate) {
   const followingDate = dateB.toISOString().split('T')[0]
   console.log('dateB', dateB, 'followingDate', followingDate)
   const date = followingDate
-  window.location.href = `http://${location.host}/diary.html?date=${date}`
+  window.location.href = `/diary.html?date=${date}`
 })
 
 // document.querySelector('#followingDay').addEventListener('click', function (changeDate) {
@@ -150,7 +150,7 @@ $('#followingDay').click(function (changeDate) {
 //   let followingDate = dateB.toISOString().split('T')[0]
 //   console.log('dateB', dateB, 'followingDate', followingDate)
 //   let date = followingDate
-//   window.location.href = `http://${location.host}/diary.html?date=${date}`
+//   window.location.href = `/diary.html?date=${date}`
 // })
 
 $('#generateOneMeal').click(function () {
@@ -205,7 +205,7 @@ const getDinner = document.getElementById('dinnerRecord')
 const getSnack = document.getElementById('snackRecord')
 
 async function getDiaryRecord(date) {
-  const diaryRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+  const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
   console.log('diaryRecord', diaryRecord)
   getDate.innerHTML = `<span class="text-secondary" id="currentDate">${date}</span>`
 
@@ -250,7 +250,7 @@ async function getDiaryRecord(date) {
 }
 
 // async function getDiaryRecord(date) {
-//   const diaryRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+//   const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
 //   // console.log('diaryRecord', diaryRecord);
 //   console.log('date', date)
 

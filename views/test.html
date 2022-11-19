@@ -441,7 +441,7 @@
     values.push(parseInt(meal), target, parseInt(targetValue))
     console.log(values)
     /* 判斷選擇哪一餐&目標打api */
-    const targetMeal = await axios.post(`http://${location.host}/api/1.0/food/single`, { meal: values[0], target: values[1], value: values[2], date })
+    const targetMeal = await axios.post(`/api/1.0/food/single`, { meal: values[0], target: values[1], value: values[2], date })
     console.log('targetMeal', targetMeal)
     if (target === 'calories' && targetMeal.data.errorMessage){
       Swal.fire({
@@ -475,7 +475,7 @@
       }
       console.log('switchMeal', switchMeal)
       recommendMeal.map(food => $(`#${switchMeal}Record`).append += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.per_serving}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`)
-      window.location.href = `http://${location.host}/diary.html?date=${date}`
+      window.location.href = `/diary.html?date=${date}`
     }
   })
     
@@ -488,7 +488,7 @@
     if (!date) {
       date = d.toISOString().split('T')[0]
     }
-    const getDailyRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`)
+    const getDailyRecord = await axios.get(`/api/1.0/food/diary?date=${date}`)
     // console.log('getDailyRecord', getDailyRecord)
     if (getDailyRecord.data.mealRecords !== 0) {
       Swal.fire({
@@ -497,9 +497,9 @@
       })
       return
     } else {
-    const getMeal = await axios.post(`http://${location.host}/api/1.0/food/multiple`, {date: date})
+    const getMeal = await axios.post(`/api/1.0/food/multiple`, {date: date})
     // console.log('getMeal', getMeal, 'date', date)
-    window.location.href = `http://${location.host}/diary.html?date=${date}`
+    window.location.href = `/diary.html?date=${date}`
     }
   })
 
@@ -520,7 +520,7 @@
     let previousDate = dateB.toISOString().split('T')[0]
     // console.log('dateB', dateB, 'previousDate', previousDate)
     let date = previousDate
-    window.location.href = `http://${location.host}/diary.html?date=${date}`
+    window.location.href = `/diary.html?date=${date}`
   })
   
   /* 往後按一天 */
@@ -531,7 +531,7 @@
     let followingDate = dateB.toISOString().split('T')[0]
     console.log('dateB', dateB, 'followingDate', followingDate)
     let date = followingDate
-    window.location.href = `http://${location.host}/diary.html?date=${date}`
+    window.location.href = `/diary.html?date=${date}`
   })
 
   $('#generateOneMeal').click(function() {
@@ -551,7 +551,7 @@
   const getDinner = document.getElementById('dinnerRecord')
   const getSnack = document.getElementById('snackRecord')
   async function getDiaryRecord(date) {
-    const diaryRecord = await axios.get(`http://${location.host}/api/1.0/food/diary?date=${date}`)
+    const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`)
     console.log('date', date);
     
     // let breakfastCaloriesTotal, lunchCaloriesTotal, dinnerCaloriesTotal, snackCaloriesTotal, breakfastCarbsTotal, lunchCarbsTotal, dinnerCarbsTotal, snackCarbsTotal, breakfastProteinTotal, lunchProteinTotal, dinnerProteinTotal, snackProteinTotal, breakfastFatTotal, lunchFatTotal, dinnerFatTotal, snackFatTotal

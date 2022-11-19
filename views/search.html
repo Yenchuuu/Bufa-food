@@ -41,9 +41,9 @@
     </div>
   </nav>
   
-  <main class="d-flex flex-nowrap mt-4 mb-4">
-  <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
-    <div class="sidebar">
+  <main class="d-flex flex-nowrap container-color">
+  <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
+    <div class="sidebar mt-3">
       <a href="/index.html"><i class="fa fa-fw fa-home"></i> Home</a>
       <a href="/profile.html"><i class="fa fa-fw fa-wrench"></i> Profile</a>
       <a href="/diary.html"><i class="fa fa-fw fa-user"></i> Diary</a>
@@ -53,7 +53,7 @@
   
   <div class="container col-6">
     <div>
-      <h3 class="text-center text-secondary mt-3 mb-3">搜尋食物🔍</h3>
+      <h3 class="text-center text-secondary mt-5 mb-5">搜尋食物🔍</h3>
       <input type="text" id="autocomplete_search" class="form-control form-control-lg" placeholder="Type food Name Here" style="margin: 30px 0px;" />
       <span id="search_result"></span>
     </div>
@@ -149,7 +149,7 @@
                   <h3>BUFA FOOD</h3>
                   <p>Praesent sed lobortis mi. Suspendisse vel placerat ligula. Vivamus ac sem lacus. Ut vehicula rhoncus elementum. Etiam quis tristique lectus. Aliquam in arcu eget velit pulvinar dictum vel in justo.</p>
               </div>
-              <div class="col item social"><a href="#"><i class="icon ion-social-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a></div>
+              <!-- <div class="col item social"><a href="#"><i class="icon ion-social-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a></div> -->
           </div>
           <p class="copyright">BUFA FOOD © 2022</p>
       </div>
@@ -161,7 +161,7 @@
   /* 熱門食物排行榜top 5 */
   const foodTrendElement = document.getElementById('food_trend')
   async function getFoodTrendInfo() {
-    const foodTrendInfo = await axios.get(`http://${location.host}/api/1.0/food/trend`)
+    const foodTrendInfo = await axios.get(`/api/1.0/food/trend`)
     console.log('foodTrendInfo', foodTrendInfo);
     const foodTrend = foodTrendInfo.data.trendFood
     foodTrend.map(food =>
@@ -178,7 +178,7 @@
     } else {
     const guessUserElement = document.getElementById('guess_user_preference')
     async function getUserRecommendation(currentUserId) {
-      const foodRecommendInfo = await axios.get(`http://${location.host}/api/1.0/food/recommend?currentUserId=${currentUserId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+      const foodRecommendInfo = await axios.get(`/api/1.0/food/recommend?currentUserId=${currentUserId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
       console.log('foodRecommendInfo', foodRecommendInfo);
       const foodRecommendation = foodRecommendInfo.data.foodNutritionInfo
       foodRecommendation.map(recommendation =>
