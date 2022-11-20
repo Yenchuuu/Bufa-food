@@ -7,7 +7,7 @@ if (!accessToken) {
 
 (async function () {
   const userInfo = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
-  if (userInfo.data.data.length !== 0) {
+  if (userInfo.data.data.TDEE) {
     alert('您已填寫過目標資訊囉😀')
     window.location.href = '/profile.html'
   }
