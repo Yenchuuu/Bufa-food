@@ -18,45 +18,22 @@ $('.datepicker').datepicker({
   forceParse: false
 })
 
-// const height = $('#height').val()
-// const weight = $('#weight').val()
-const height = 165
-const weight = 46
-
-// FIXME: 抓不到 value
-console.log('height: ', height)
-console.log('weight: ', weight)
-
 let gender
 function genderVal(genderBtn) {
   gender = ($(genderBtn).attr('value'))
   gender = parseInt(gender)
 }
 
-// FIXME: 抓不到birthday value
-// const birthday = $('#datepicker').attr('value')
-const birthday = '1996-08-08'
-// console.log('birthday: ', birthday)
-
-// FIXME: 抓不到activityLevel value
-// const activityLevel = $('#dropdownMenuButton2').val()
-const activity_level = 1
-
-// function activity(dropdownBtn) {
-//   activityLevel = ($(dropdownBtn).attr('value'))
-//   activityLevel = parseInt(activityLevel)
-//   alert(activityLevel)
-// }
-
 let BMR, goal_carbs, goal_protein, goal_fat, goal_calories, TDEE
 $('#btn_calculateTDEE').click(() => {
+  let activity_level = $('#dropdownMenuButton2').val()
+  activity_level = parseInt(activity_level)
+  const height = $('#height').val()
+  const weight = $('#weight').val()
+  const birthday = $('#datepicker').val()
   const date = new Date()
   const today = date.toISOString().split('T')[0]
   const age = parseInt(today) - parseInt(birthday)
-  console.log('today: ', today)
-  console.log('birthday: ', birthday)
-  console.log('age: ', age)
-  console.log('gender: ', gender)
 
   if (!birthday || !height || !weight || !gender || !activity_level) {
     Swal.fire({
@@ -73,7 +50,6 @@ $('#btn_calculateTDEE').click(() => {
         BMR = Math.round(10 * weight + 6.25 * height - 5 * age + 5)
       }
     }
-    console.log('activity_level: ', activity_level)
     switch (activity_level) {
       case 1: {
         TDEE = Math.round(1.2 * BMR)
