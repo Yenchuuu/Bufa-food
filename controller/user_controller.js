@@ -93,29 +93,34 @@ const nativeSignIn = async (req, res) => {
 }
 
 const setUserTarget = async (req, res) => {
-  // const { birthday, height, weight, gender, diet_type: dietType, diet_goal: dietGoal, activity_level: activityLevel, goalCalories: goalCalories, goalCarbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE } = req.body
+  try {
+    const { email } = req.user
+    const userDetail = await User.getUserDetail(email)
+    const userId = userDetail[0].id
+    let userInfo = {
+      birthday: req.body.birthday,
+      height: req.body.height,
+      weight: req.body.weight,
+      gender: req.body.gender,
+      // diet_type: req.body.diet_type,
+      diet_goal: req.body.diet_goal,
+      activity_level: req.body.activity_level,
+      goal_calories: req.body.goal_calories,
+      goal_carbs: req.body.goal_carbs,
+      goal_protein: req.body.goal_protein,
+      goal_fat: req.body.goal_fat,
+      TDEE: req.body.TDEE
+    }
+    /* 確認所有項目皆有輸入 */
+    if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.diet_goal || !userInfo.activity_level || !userInfo.goal_calories || !userInfo.goal_carbs || !userInfo.goal_protein || !userInfo.goal_fat || !userInfo.TDEE) return res.json({ error: 'imcomplete info' })
 
-  const { id: userId } = req.user
-  // const { email } = req.user
-  // const userDetail = await User.getUserDetail(email)
-  // // console.log('userDetail', userDetail)
-  // const userId = userDetail[0].id
-  const userInfo = {
-    birthday: req.body.birthday,
-    height: req.body.height,
-    weight: req.body.weight,
-    gender: req.body.gender,
-    diet_type: req.body.diet_type,
-    diet_goal: req.body.diet_goal,
-    activity_level: req.body.activity_level,
-    goal_calories: req.body.goalCalories,
-    goal_carbs: req.body.goalCarbs,
-    goal_protein: req.body.goal_protein,
-    goal_fat: req.body.goal_fat,
-    TDEE: req.body.TDEE
+    /* 確認所有數字項之格式皆正確 */
+    if (isNaN(userInfo.height) || isNaN(userInfo.weight) || isNaN(userInfo.gender) || isNaN(userInfo.diet_goal) || isNaN(userInfo.activity_level) || isNaN(userInfo.goal_calories) || isNaN(userInfo.goal_carbs) || isNaN(userInfo.goal_protein) || isNaN(userInfo.goal_fat) || isNaN(userInfo.TDEE)) return res.json({ error: 'incorrect format' })
+    await User.setUserTarget(userId, userInfo)
+    res.status(200).json({ message: 'data added successfully' })
+  } catch (err) {
+    console.log(err)
   }
-  await User.setUserTarget(userId, userInfo)
-  res.status(200).json({ message: 'data added successfully' })
 }
 
 const getUserProfile = async (req, res) => {
