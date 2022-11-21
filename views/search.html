@@ -54,13 +54,17 @@
   <div class="container col-6">
     <div>
       <h3 class="text-center text-secondary mt-5 mb-5">搜尋食物🔍</h3>
-      <input type="text" id="autocomplete_search" class="form-control form-control-lg" placeholder="Type food Name Here" style="margin: 30px 0px;" />
+      <input type="text" id="autocomplete_search" class="form-control form-control-lg" placeholder="Type food Name Here" style="margin: 40px 0px;" />
       <span id="search_result"></span>
     </div>
-    <h4 class="text-secondary mt-3 mb-3">近期熱搜🔥</h4>
-    <div id="food_trend" style="margin: 30px 0px; display: flex; flex-wrap:wrap; justify-content: space-around;">
+    <div class="mt-5" style="border: #5d6c82 solid 2px; border-radius: 1em; padding: 2em;">
+      <h4 class="text-secondary mb-5">近期熱搜🔥</h4>
+      <div id="food_trend" class="mt-3 mb-3" style="display: flex; flex-wrap:wrap; justify-content: space-between;">
+      </div>
     </div>
-    <h4 class="text-secondary mt-3 mb-3" id="guess_title">猜你喜歡</h4>
+    <div class="mb-6" id="hidden-div" style="display: none; height: 50px;"></div>
+    <div class="mt-5 mb-5" style="border: #5d6c82 solid 2px; border-radius: 1em; padding: 2em;" id="guess_title">
+    <h4 class="text-secondary mb-5">猜你喜歡</h4>
     <div class="g-3" id="guess_user_preference">
       <!-- <div class="card text-center">
         <div style="padding:5px" class="card-header">
@@ -122,6 +126,7 @@
       </div> -->
     </div>
     </div>
+    </div>
   </div>
 </main>
 
@@ -174,6 +179,7 @@
   let accessToken = window.localStorage.getItem('accessToken');
   if (!accessToken) {
     $('#guess_title').hide()
+    $('#hidden-div').show()
   } else {
     const currentUserId = window.localStorage.getItem('userId');
     const guessUserElement = document.getElementById('guess_user_preference')
@@ -182,7 +188,7 @@
       console.log('foodRecommendInfo', foodRecommendInfo);
       const foodRecommendation = foodRecommendInfo.data.foodNutritionInfo
       foodRecommendation.map(recommendation =>
-      guessUserElement.innerHTML += `<a href="/detail.html?id=${recommendation.id}"><div class="card text-center"><div style="padding:5px" class="card-header"></div><div class="card-body"><div class="row card-body-title"><div class="col-4"></div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">熱量<br>kcal</br></p></li><li class="nav-card-title"><p class="text-secondary">碳水化合物</p></li><li class="nav-card-title"><p class="text-secondary">蛋白質</p></li><li class="nav-card-title"><p class="text-secondary">脂肪</p></li></ul></div></div><div class="row card-body-title"><div class="col-4 text-secondary card-body-text">${recommendation.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${recommendation.calories}</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.carbs}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.protein}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.fat}g</p></li></ul></div></div></div></a>`
+      guessUserElement.innerHTML += `<a href="/detail.html?id=${recommendation.id}"><div class="card text-center"><div style="padding:5px" class="card-header"></div><div class="card-body"><div class="row card-body-title"><div class="col-5"></div><div class="col-7"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">熱量<br>kcal</br></p></li><li class="nav-card-title"><p class="text-secondary">碳水化合物</p></li><li class="nav-card-title"><p class="text-secondary">蛋白質</p></li><li class="nav-card-title"><p class="text-secondary">脂肪</p></li></ul></div></div><div class="row card-body-title"><div class="col-5 text-secondary card-body-text">${recommendation.name}</div><div class="col-7"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${recommendation.calories}</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.carbs}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.protein}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.fat}g</p></li></ul></div></div></div></a>`
       )
     } 
     getUserRecommendation(currentUserId)

@@ -84,6 +84,7 @@ const getUserPreference = async (currentUserId) => {
       otherUsers[allUsersEuc.indexOf(Math.min(...allUsersEuc))].user_id
     // console.log('mostRelatedUserId', mostRelatedUserId)
 
+    // TODO: 回想一下推薦機制在寫啥？
     let usersRecord = allRecords.filter((e) => e.user_id === mostRelatedUserId)
     let recommendFood = usersRecord.map((e) => e.food_id)
 
@@ -95,6 +96,8 @@ const getUserPreference = async (currentUserId) => {
       })
       // console.log('usersRecord', usersRecord)
       recommendFood = recommendFood.splice(0, 3)
+      console.log('recommendFood: ', recommendFood);
+      return recommendFood
     } else if (usersRecordLen < 3) {
       for (let i = 0; i < 3 - usersRecordLen; i++) {
         const ran = Math.floor(Math.random() * allRecordsLen)
@@ -104,7 +107,6 @@ const getUserPreference = async (currentUserId) => {
     }
 
     // console.log('recommendFood', recommendFood)
-    return recommendFood
   }
 }
 
