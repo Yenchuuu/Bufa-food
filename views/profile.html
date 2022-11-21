@@ -7,8 +7,9 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="/stylesheets/style.css">
@@ -61,21 +62,25 @@
     <section class="profile-container col-lg-9 p-3 mt-3">
       <div class="col-md-8">
         <div class="card-body p-4">
-          <h5 class="text-color">個人檔案</h5>
+          <div class="section-title">
+            <h5 class="text-color">個人檔案</h5>
+            <a id="edit-user-info"><p class="text-secondary">Edit</p></a>
+          </div>
+
           <!-- <i class="far fa-edit"></i> -->
           <hr class="mt-0 mb-4">
           <div class="row pt-1">
             <div class="col-5 mb-3">
              <div class="self-photo" id="self-photo">
              </div>
-             <button class="btn btn-outline-secondary col-3 mt-2" type="button" id="edit-user-info">編輯</button>
+             <!-- <button class="btn btn-outline-secondary col-3 mt-2" type="button" id="edit-user-info">編輯</button> -->
             </div>
             <div class="col-7 mb-3">
               <table>
                   <td class="col-3">
                     名稱
                   </td>
-                  <td class="col-4" id="userName">
+                  <td contenteditable='true' class="col-4" id="userName">
                   </td>
                 </tr>
                 <!-- <tr class="edit-data" style="display:none">
@@ -126,7 +131,12 @@
               </table>
             </div>
           </div>
-          <h5 class="text-color mt-4">設定目標</h5>
+
+          <div class="section-title mt-4">
+            <h5 class="text-color">設定目標</h5>
+            <a id="edit-nutrition-goal"><p class="text-secondary">Edit</p></a>
+          </div>
+
           <hr class="mt-0 mb-4">
           <div class="row pt-1">
             <div class="col-7 mb-3">
@@ -168,12 +178,110 @@
                 </tr>
               </table>
             </div>
+            <div class="col-5 mb-3" id="nutririon-input" style="display:none">
+              <div class="row pt-1">
+                <div class="form-group row">
+                  <div class="col-6 text-secondary mb-4">熱量</div>
+                  <div class="col-6">
+                    <input id="calories" type="number" min="800" id="height" class="form-control form-control-sm" placeholder="kcal" />
+                  </div>
+                  <div class="col-6 text-secondary mb-4">碳水化合物</div>
+                  <div class="col-6">
+                    <input id="carbs" type="number" min="0" max="100" id="height" class="form-control form-control-sm" placeholder="%" />
+                  </div>
+                  <div class="col-6 text-secondary mb-4">蛋白質</div>
+                  <div class="col-6">
+                    <input id="protein" type="number" min="0" max="100" id="height" class="form-control form-control-sm" placeholder="%" />
+                  </div>
+                  <div class="col-6 text-secondary mb-4">脂肪</div>
+                  <div class="col-6">
+                    <input id="fat" type="number" min="0" max="100" id="height" class="form-control form-control-sm" placeholder="%" />
+                  </div>
+                  <div class="col-6 text-secondary mb-4"></div>
+                  <div class="col-6"><button type="button" class="btn-sm form-control btn-outline-secondary" id="submit_nutritionInfo">完成修改</button></div>
+                  </div>
+            </div>
           </div>
           <!-- <hr class="mt-0 mb-4"> -->
         </div>
       </div>
     </section>
- 
+    
+    <div class="pop-background"></div>
+    <div class="pop-window">
+      <div class="pop-content">
+        <form style="width: 23rem;">
+          
+          <h5 class="text-secondary mb-4">修改個人檔案</h5>
+          
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">名稱</div>
+              <div class="col-8">
+                <input type="text" id="name" class="form-control form-control-sm" />
+              </div>
+            </div>
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">生日</div>
+              <div class="col-8">
+                <input type="text" id="datepicker" class="form-control col-4 datepicker" placeholder="YYYY-MM-DD" />
+            </div>
+          </div>
+
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">性別</div>
+              <div class="col-8">
+                <select class="btn-sm btn-secondary" id="gender">
+                  <option value="1">生理女</option>
+                  <option value="2">生理男</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">身高</div>
+              <div class="col-8">
+                <input type="number" min="120" max="220" id="height" class="form-control form-control-sm" />
+              </div>
+            </div>
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">體重</div>
+              <div class="col-8">
+                <input min="30" max="200" type="number" id="weight" class="form-control form-control-sm" />
+              </div>
+            </div>
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">日常活動量</div>
+              <div class="col-8">
+                <select class="btn-sm btn-secondary" id="activity_level">
+                  <option value="1">久坐(一週運動頻率需近於0)</option>
+                  <option value="2">輕度活動量(一週運動1-3次)</option>
+                  <option value="3">中度活動量(一週運動3-5次)</option>
+                  <option value="4">高度活動量(一週運動6-7次)</option>
+                  <option value="5">非常高度活動量(無時無刻都在動)</option>
+                </select>
+            </div>
+          </div>
+
+          <div class="form-group row mt-3">
+            <div class="col-4 text-secondary">體態目標</div>
+            <div class="col-8">
+              <select class="btn-sm btn-secondary" id="diet_goal">
+                <option value="1">減脂</option>
+                <option value="2">維持</option>
+                <option value="3">增肌</option>
+              </select>
+          </div>
+        </div>
+        
+        </form>
+        <div class="mt-4">
+        <button type="button" class="btn-sm btn-outline-secondary col-4" id="submit_userInfo">完成修改</button></div>
+      </div>
+    </div>
   </main>
 
 <div class="footer-dark">

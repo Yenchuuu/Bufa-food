@@ -174,7 +174,7 @@ const updateUserBodyInfo = async (req, res) => {
   const id = parseInt(req.params.id)
   const { email } = req.user
   // const updateData = req.body
-  let { birthday, height, weight, gender, diet_type, diet_goal, activity_level, TDEE } = req.body
+  let { birthday, height, weight, gender, diet_goal, activity_level, TDEE } = req.body
   const data = await User.getUserDetail(email)
   const [{
     id: userId,
@@ -182,7 +182,7 @@ const updateUserBodyInfo = async (req, res) => {
     height: originHeight,
     weight: originWeight,
     gender: originGender,
-    diet_type: originDietType,
+    // diet_type: originDietType,
     diet_goal: originDietGoal,
     activity_level: originActivityLevel
   }] = data
@@ -195,7 +195,7 @@ const updateUserBodyInfo = async (req, res) => {
     if (!weight) weight = originWeight
     if (!birthday) birthday = originBirthday
     if (!gender) gender = originGender
-    if (!diet_type) diet_type = originDietType
+    // if (!diet_type) diet_type = originDietType
     if (!activity_level) activity_level = originActivityLevel
     if (!diet_goal) diet_goal = originDietGoal
 
@@ -261,7 +261,7 @@ const updateUserBodyInfo = async (req, res) => {
       }
     }
 
-    const updateData = { birthday, height, weight, gender, diet_type, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE }
+    const updateData = { birthday, height, weight, gender, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE }
     const updateInfo = await User.updateUserBodyInfo(updateData, userId)
     // console.log('updateData', updateData)
     return res.status(200).json({ message: 'User body information updated successfully.', updateData })
@@ -281,13 +281,13 @@ const updateNutritionTarget = async (req, res) => {
   const userId = data[0].id
   let goal_carbs, goal_protein, goal_fat
   try {
-    if (id !== userId) return res.status(401).json({ errorMessage: 'Authentication failed to do any updates.' })
+    if (id !== userId) return res.status(401).json({ error: 'Authentication failed to do any updates.' })
 
     /* 在profile頁面更新目標營養素時採用各營養素百分(ex. goal_carbs: 40 '%', goal_protein: 50 '%')，再加以計算出各營養素的克數 */
     /* validate: 目標熱量不可不輸入、為負數或字串 */
-    if (!goal_calories || goal_calories < 0 || typeof goal_calories === 'string') return res.status(400).json({ errorMessage: 'Calories must be a positive integer.' })
+    if (!goal_calories || goal_calories < 0 || typeof goal_calories === 'string') return res.json({ error: 'Calories must be a positive integer.' })
     /* validate: 目標營養素比例相加必須等於一百 */
-    if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) return res.status(400).json({ errorMessage: 'Nutrition proportions must equal 100!' })
+    if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) return res.json({ error: 'Nutrition proportions must equal 100!' })
     goal_calories = Math.round((goal_calories))
     goal_carbs = Math.round((goal_calories * (goal_carbs_percantage / 100)) / 4)
     goal_protein = Math.round((goal_calories * (goal_protein_percantage / 100)) / 4)
