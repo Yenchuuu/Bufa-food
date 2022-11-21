@@ -372,8 +372,10 @@
   })
 
   $('#addMealRecord').click(async function(){
-    const meal = $('#inputGroupSelectMeal').val()
-    const servingAmount = $('#serving_amount').val()
+    let meal = $('#inputGroupSelectMeal').val()
+    meal = parseInt(meal)
+    let servingAmount = $('#serving_amount').val()
+    servingAmount = parseInt(servingAmount)
     const date = $('#datepicker').val()
     // console.log(foodId, meal,servingAmount, date);
     if (meal === '選餐') {

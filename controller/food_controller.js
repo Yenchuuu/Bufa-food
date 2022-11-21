@@ -145,7 +145,9 @@ const generateSingleMeal = async (req, res) => {
   const userDetail = await User.getUserDetail(email)
   const [{ id: userId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
   // const userId = userDetail[0].id
-  if (target === 'calories' && value < goalCalories * 0.1) return res.json({ errorMessage: '為求飲食均衡，一餐熱量不建議低於TDEE 10%喔！請重新輸入' })
+  // FIXME: 判斷式沒有控管好
+  if (target === 'calories' && value < (goalCalories * 0.1)) return res.json({ errorMessage: '為求飲食均衡，一餐熱量不建議低於TDEE 10%喔！請重新輸入' })
+  if (target === 'calories' && value > (goalCalories * 2)) return res.json({ errorMessage: '輸入之熱量已遠高於TDEE囉！請再想想吧～' })
   /* 計算使用者C P F的目標營養素分別對總熱量佔比為多少 */
   const userCarbsPercentage = Math.round((goalCarbs * 4) / goalCalories * 100) / 100
   const userProteinPercentage = Math.round((goalProtein * 4) / goalCalories * 100) / 100
