@@ -11,6 +11,10 @@ p {
   margin: 0 15px 0 0;
 }
 
+.nav-item{
+  font-size: 18px;
+}
+
 .click_icon {
   width: 25px;
   margin: 0 8px;
