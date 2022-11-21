@@ -10,6 +10,11 @@ const updateMealRecord = async (userId, foodId, meal, servingAmount, date) => {
   return result
 }
 
+const deleteMealRecord = async (recordId) => {
+  const [result] = await db.execute('DELETE FROM `user_meal` WHERE id = ?', [recordId])
+  return result
+}
+
 const getUserRecord = async (userId, date) => {
   const [mealRecords] = await db.execute(
     'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, (food.calories * serving_amount) AS calories, (food.carbs * serving_amount) AS carbs, (food.protein * serving_amount) AS protein, (food.fat * serving_amount) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
@@ -269,6 +274,7 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
 module.exports = {
   createMealRecord,
   updateMealRecord,
+  deleteMealRecord,
   getUserRecord,
   getFoodDetail,
   getRecommendSingleMeal,

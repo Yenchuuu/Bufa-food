@@ -14,7 +14,7 @@ const addMealRecord = async (req, res) => {
   /* req.body接近來的serving amount單位是g，故應以food table之per_serving計算到底有幾份 */
   const data = await Food.getFoodDetail(foodId)
   const perServing = data[0].per_serving
-  servingAmount = parseFloat((servingAmount / perServing).toFixed(2))
+  servingAmount = parseFloat((servingAmount / perServing).toFixed(1))
   // console.log('servingAmount', servingAmount, 'perServing', perServing)
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
@@ -26,8 +26,8 @@ const addMealRecord = async (req, res) => {
     // console.log('findItem', findItem)
     if (findItem.length !== 0) {
       servingAmount += parseFloat((findItem[0].serving_amount))
-      servingAmount.toFixed(2)
-      // console.log('servingAmount', servingAmount, servingAmount.toFixed(2))
+      servingAmount.toFixed(1)
+      // console.log('servingAmount', servingAmount, servingAmount.toFixed(1))
       await Food.updateMealRecord(userId, foodId, meal, servingAmount, date)
     } else {
       await Food.createMealRecord(userId, foodId, meal, servingAmount, date)
@@ -45,15 +45,52 @@ const updateMealRecord = async (req, res) => {
   if (!date || date === 'undefined') {
     date = moment().format('YYYY-MM-DD')
   }
-  let { meal, serving_amount: servingAmount, food_id: foodId } = req.body
-  // console.log('meal, servingAmount, foodId: ', meal, servingAmount, foodId)
-  meal = parseInt(meal)
-  foodId = parseInt(foodId)
+  // let { meal, serving_amount: servingAmount, food_id: foodId, calories, carbs, protein, fat } = req.body
+
+  /* 用修改份數呈上食物之原始營養素渲染至前端 */
+  // FIXME: 修改食物資訊時應該要可以輸入小數點
+  const data = req.body
+  data.meal = parseInt(data.meal)
+  data.food_id = parseInt(data.food_id)
+  data.serving_amount = parseFloat(data.serving_amount).toFixed(1)
+  const foodId = data.food_id
+  const foodDetail = await Food.getFoodDetail(foodId)
+  data.calories = Math.round(foodDetail[0].calories * data.serving_amount)
+  data.carbs = parseInt(foodDetail[0].carbs * data.serving_amount)
+  data.protein = parseInt(foodDetail[0].protein * data.serving_amount)
+  data.fat = parseInt(foodDetail[0].fat * data.serving_amount)
+
   try {
+    const foodId = data.food_id
+    const meal = data.meal
+    const servingAmount = data.serving_amount
     const userDetail = await User.getUserDetail(email)
     const userId = userDetail[0].id
     await Food.updateMealRecord(userId, foodId, meal, servingAmount, date)
-    res.json({ message: 'Record updated successfully.' })
+
+    res.json(data)
+    // res.json({ message: 'Record updated successfully.' })
+  } catch (err) {
+    console.error(err)
+    res.json({ errorMessage: 'Record cannot be updated.' })
+  }
+}
+
+const deleteMealRecord = async (req, res) => {
+  const { email } = req.user
+  let date = req.query.id
+  if (!date || date === 'undefined') {
+    date = moment().format('YYYY-MM-DD')
+  }
+  const data = req.body
+  const recordId = data.record_id
+  try {
+    const userDetail = await User.getUserDetail(email)
+    const userId = userDetail[0].id
+    await Food.deleteMealRecord(recordId)
+
+    res.json(data)
+    // res.json({ message: 'Record updated successfully.' })
   } catch (err) {
     console.error(err)
     res.json({ errorMessage: 'Record cannot be updated.' })
@@ -61,7 +98,6 @@ const updateMealRecord = async (req, res) => {
 }
 
 const getDiaryRecord = async (req, res) => {
-  // TODO: 若沒帶token要跳出alert並跳轉回首頁
   const { email } = req.user
   const getDate = req.query.date
   let date
@@ -75,6 +111,12 @@ const getDiaryRecord = async (req, res) => {
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
   const mealRecords = await Food.getUserRecord(userId, date)
+  mealRecords.map(e => e.serving_amount = parseFloat(e.serving_amount).toFixed(1))
+  mealRecords.map(e => e.calories = parseInt(e.calories))
+  mealRecords.map(e => e.carbs = parseInt(e.carbs))
+  mealRecords.map(e => e.protein = parseInt(e.protein))
+  mealRecords.map(e => e.fat = parseInt(e.fat))
+
   const caloriesTotal = mealRecords.reduce((acc, item) => {
     return acc + parseInt(item.calories)
   }, 0)
@@ -168,7 +210,6 @@ const generateSingleMeal = async (req, res) => {
       const remainProteinV1 = value * userProteinPercentage - proteinSubtotal
       const remainFatV1 = value * userFatPercentage - fatSubtotal
       console.log('remaining:', remainCaloriesV1, remainCarbsV1, remainProteinV1, remainFatV1)
-
 
       const fatList = recommendMealList.filter(
         (e) => e.recommend_categories_id === 3
@@ -448,6 +489,7 @@ const updateFoodPreference = async (req, res) => {
 module.exports = {
   addMealRecord,
   updateMealRecord,
+  deleteMealRecord,
   getDiaryRecord,
   getFoodDetail,
   generateSingleMeal,

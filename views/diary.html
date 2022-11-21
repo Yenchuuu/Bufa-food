@@ -1,4 +1,3 @@
-<!-- FIXME: 可以用import的方式把time改成moment -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -19,11 +18,13 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
   <script type="text/javascript" src="/javascripts/jsgrid.min.js"></script>
-  <nav style="background-color: #4D555E;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
+  <script src="https://rawgit.com/moment/moment/2.2.1/min/moment.min.js"></script>
+
+  <nav style="background-color: #495464;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
       <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logo.png" class="brand-logo">  BUFA FOOD | 不發福</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+      <span class="navbar-toggler-icon"></span>
       </button>
 
       <!-- 把div的 class="collapse navbar-collapse justify-content-md-end" 拿掉，就可以達到置右對齊了 -->
@@ -50,17 +51,17 @@
     </div>
   </nav>
   
-  <main class="d-flex flex-nowrap mt-5 mb-5">
-  <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM;">
-    <div class="sidebar">
-      <a href="/index.html"><i class="fa fa-fw fa-home"></i> Home</a>
-      <a href="/profile.html"><i class="fa fa-fw fa-wrench"></i> Profile</a>
-      <a href="/diary.html"><i class="fa fa-fw fa-user"></i> Diary</a>
-      <a href="/footprint.html"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
+  <main class="d-flex flex-nowrap container-color">
+    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
+      <div class="sidebar mt-3">
+        <a href="/index.html"><i class="fa fa-fw fa-home"></i> Home</a>
+        <a href="/profile.html"><i class="fa fa-fw fa-wrench"></i> Profile</a>
+        <a href="/diary.html"><i class="fa fa-fw fa-user"></i> Diary</a>
+        <a href="/footprint.html"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
+      </div>
     </div>
-  </div>
   
-  <div style="border: 2px #495464 solid; border-radius: 1em;" class="container col-lg-6 p-3">
+  <div style="border: 2px #495464 solid; border-radius: 1em;" class="container col-lg-6 p-3 mt-5 mb-5">
     <div style="justify-content: center;" class="col-12 diary-head">
       <div style="justify-content: center;" class="center-box">
         <h4 class="text-secondary">飲食紀錄</h4>
@@ -81,14 +82,14 @@
       <!-- <div class="col-12"></div> -->
       <!-- <div class="row gap-3"> -->
         <div style="justify-content: center;" class="input-group mb-4">
-          <select class="custom-select col-3 text-secondary" id="inputGroupSelectMeal">
+          <select style="background-color: transparent;" class="custom-select col-3 text-secondary" id="inputGroupSelectMeal">
             <option selected>選餐</option>
             <option value="1">早餐</option>
             <option value="2">午餐</option>
             <option value="3">晚餐</option>
             <option value="4">點心</option>
           </select>
-          <select class="custom-select col-lg-4 text-secondary" id="inputGroupSelectTarget">
+          <select style="background-color: transparent;" class="custom-select col-lg-4 text-secondary" id="inputGroupSelectTarget">
             <option selected>選目標</option>
             <option value="calories">熱量(kcal)</option>
             <option value="carbs">碳水化合物(g)</option>
@@ -96,7 +97,7 @@
             <option value="fat">脂肪(g)</option>
           </select>
           <div class="input-group-append">
-            <input type="text" class="form-control" aria-label="Text input with dropdown button" id="inputTargetValue" placeholder="請輸入數字">
+            <input style="background-color: transparent;" type="text" class="form-control" aria-label="Text input with dropdown button" id="inputTargetValue" placeholder="請輸入數字">
             <button class="btn btn-outline-secondary col-4" type="button" id="generateOneMeal">建立</button>
           </div>
         </div>

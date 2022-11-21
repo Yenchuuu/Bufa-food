@@ -1,3 +1,4 @@
+// FIXME: jsGrid更新時總計不會跟著更新
 // const userName = window.localStorage.getItem('userName');
 const userId = window.localStorage.getItem('userId')
 const userEmail = window.localStorage.getItem('userEmail')
@@ -85,13 +86,14 @@ $('#generateDayMeals').click(async function () {
   const webUrl = window.location.search
   const splitUrl = webUrl.split('=')
   let date = splitUrl[1]
-  const d = new Date()
+  // const d = new Date()
   if (!date) {
-    date = d.toISOString().split('T')[0]
+    date = moment().format('YYYY-MM-DD')
+    // date = d.toISOString().split('T')[0]
   }
   const getDailyRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
   // console.log('getDailyRecord', getDailyRecord)
-  if (getDailyRecord.data.mealRecords !== 0) {
+  if (getDailyRecord.data.mealRecords.length !== 0) {
     Swal.fire({
       icon: 'warning',
       text: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！'
@@ -122,15 +124,6 @@ $('#previousDay').click(function (changeDate) {
   const date = previousDate
   window.location.href = `/diary.html?date=${date}`
 })
-// document.querySelector('#previousDay').addEventListener('click', function (changeDate) {
-//   let currenDate = document.querySelector('#currentDate').textContent
-//   let dateA = new Date(currenDate)
-//   let dateB = new Date(dateA - (1000 * 60 * 60 * 24))
-//   let previousDate = dateB.toISOString().split('T')[0]
-//   // console.log('dateB', dateB, 'previousDate', previousDate)
-//   let date = previousDate
-//   window.location.href = `/diary.html?date=${date}`
-// })
 
 /* 往後按一天 */
 $('#followingDay').click(function (changeDate) {
@@ -143,16 +136,6 @@ $('#followingDay').click(function (changeDate) {
   window.location.href = `/diary.html?date=${date}`
 })
 
-// document.querySelector('#followingDay').addEventListener('click', function (changeDate) {
-//   let currenDate = document.querySelector('#currentDate').textContent
-//   let dateA = new Date(currenDate)
-//   let dateB = new Date(dateA.getTime() + (1000 * 60 * 60 * 24))
-//   let followingDate = dateB.toISOString().split('T')[0]
-//   console.log('dateB', dateB, 'followingDate', followingDate)
-//   let date = followingDate
-//   window.location.href = `/diary.html?date=${date}`
-// })
-
 $('#generateOneMeal').click(function () {
   const currenDate = $('#currentDate').val()
   const dateA = new Date(currenDate)
@@ -162,91 +145,319 @@ $('#generateOneMeal').click(function () {
 // getDiaryRecord(date)
 // onclick="changeDate(this)"
 
-/* example code */
-// const clients = [
-//   { 品名: 'Otto Clay', Age: 25, Country: 1, Address: 'Ap #897-1459 Quam Avenue', Married: false },
-//   { Name: 'Connor Johnston', Age: 45, Country: 2, Address: 'Ap #370-4647 Dis Av.', Married: true },
-//   { Name: 'Lacey Hess', Age: 29, Country: 3, Address: 'Ap #365-8835 Integer St.', Married: false },
-//   { Name: 'Timothy Henson', Age: 56, Country: 1, Address: '911-5143 Luctus Ave', Married: true },
-//   { Name: 'Ramona Benton', Age: 32, Country: 3, Address: 'Ap #614-689 Vehicula Street', Married: false }
-// ]
-
-// $('#jsGrid').jsGrid({
-//   width: '100%',
-//   height: '400px',
-
-//   inserting: true,
-//   editing: true,
-//   sorting: false,
-//   paging: false,
-
-//   data: clients,
-
-//   fields: [
-//     { name: '品名', type: 'text', width: 150, validate: 'required' },
-//     { name: '份數', type: 'number', width: 50 },
-//     { name: '熱量', type: 'text', width: 50 },
-//     { name: '碳水化合物', type: 'text', width: 50 },
-//     { name: '蛋白質', type: 'text', width: 50 },
-//     { name: '脂肪', type: 'text', width: 50 },
-//     // { name: 'Country', type: 'select', items: countries, valueField: 'Id', textField: 'Name' },
-//     // { name: "Married", type: "checkbox", title: "Is Married", sorting: false },
-//     { type: 'control' }
-//   ]
-// })
-
+// FIXME: 用.hide() .show()優化
 /* 取得飲食紀錄資訊 */
-// FIXME: 如果把getDate 改成 $('#showDate') 則網頁無法讀取
-// const getDate = $('#showDate')
-const getDate = document.querySelector('#showDate')
-const getBreakfast = document.getElementById('breakfastRecord')
-const getLunch = document.getElementById('lunchRecord')
-const getDinner = document.getElementById('dinnerRecord')
-const getSnack = document.getElementById('snackRecord')
+const getDate = $('#showDate')
+const getBreakfast = $('#breakfastRecord')
+const getLunch = $('#lunchRecord')
+const getDinner = $('#dinnerRecord')
+const getSnack = $('#snackRecord')
 
 async function getDiaryRecord(date) {
   const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
   console.log('diaryRecord', diaryRecord)
-  getDate.innerHTML = `<span class="text-secondary" id="currentDate">${date}</span>`
+  getDate.append(`<span class="text-secondary" id="currentDate">${date}</span>`)
 
-  $('#breakfastRecord').jsGrid({
-    width: '100%',
-    height: '400px',
+  const breakfast = diaryRecord.data.mealRecords.filter(e => e.meal === 1)
 
-    inserting: true,
-    editing: true,
-    sorting: false,
-    paging: false,
+  /* 早餐 */
+  if (breakfast.length === 0) {
+    getBreakfast.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有早餐紀錄喔～</p></div>')
+  } else {
+    $('#breakfastRecord').jsGrid({
+      width: '100%',
+      // height: '400px',
 
-    data: diaryRecord.data.mealRecords.filter(e => e.meal === 1),
+      inserting: true,
+      editing: true,
+      sorting: false,
+      paging: false,
 
-    fields: [
-      { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
-      { name: 'serving_amount', type: 'number', width: 50, editing: true },
-      { name: 'calories', type: 'number', width: 50, editing: false },
-      { name: 'carbs', type: 'number', width: 50, editing: false },
-      { name: 'protein', type: 'number', width: 50, editing: false },
-      { name: 'fat', type: 'number', width: 50, editing: false },
-      { type: 'control' }
-    ],
+      data: breakfast,
 
-    controller: {
-      updateItem: function (item) {
-        // console.log('item: ', item)
-        return $.ajax({
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-            accept: 'application/json'
-          },
-          type: 'PATCH',
-          url: `/api/1.0/food/diary?date=${date}`,
-          // FIXME: 以可以成功修改，但前端要把改好的東西渲染出來
-          data: JSON.stringify(item)
-        })
+      fields: [
+        { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
+        { name: 'serving_amount', type: 'number', width: 50, editing: true },
+        { name: 'calories', type: 'number', width: 50, editing: false },
+        { name: 'carbs', type: 'number', width: 50, editing: false },
+        { name: 'protein', type: 'number', width: 50, editing: false },
+        { name: 'fat', type: 'number', width: 50, editing: false },
+        { type: 'control' }
+      ],
+
+      controller: {
+        updateItem: function (item) {
+          // console.log('item: ', item)
+          return $.ajax({
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+              accept: 'application/json'
+            },
+            type: 'PATCH',
+            url: `/api/1.0/food/diary?date=${date}`,
+            data: JSON.stringify(item)
+          })
+        },
+        deleteItem: function (item) {
+          console.log('item: ', item)
+          return $.ajax({
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+              accept: 'application/json'
+            },
+            type: 'DELETE',
+            url: `/api/1.0/food/diary?date=${date}`,
+            data: JSON.stringify(item)
+          })
+        }
       }
+    })
+    const breakfastCaloriesTotal = breakfast.reduce((acc, item) => {
+      return acc + parseInt(item.calories)
+    }, 0)
+    const breakfastCarbsTotal = breakfast.reduce((acc, item) => {
+      return acc + parseInt(item.carbs)
+    }, 0)
+    const breakfastProteinTotal = breakfast.reduce((acc, item) => {
+      return acc + parseInt(item.protein)
+    }, 0)
+    const breakfastFatTotal = breakfast.reduce((acc, item) => {
+      return acc + parseInt(item.fat)
+    }, 0)
+    document.querySelector('#breakfastTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${breakfastCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastFatTotal}g</p></li></ul></div></div></div>`
+  }
+
+  /* 午餐 */
+  const lunch = diaryRecord.data.mealRecords.filter(e => e.meal === 2)
+  if (lunch.length === 0) {
+    getLunch.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有午餐紀錄喔～</p></div>')
+  } else {
+    $('#lunchRecord').jsGrid({
+      width: '100%',
+
+      inserting: true,
+      editing: true,
+      sorting: false,
+      paging: false,
+
+      data: lunch,
+
+      fields: [
+        { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
+        { name: 'serving_amount', type: 'number', width: 50, editing: true },
+        { name: 'calories', type: 'number', width: 50, editing: false },
+        { name: 'carbs', type: 'number', width: 50, editing: false },
+        { name: 'protein', type: 'number', width: 50, editing: false },
+        { name: 'fat', type: 'number', width: 50, editing: false },
+        { type: 'control' }
+      ],
+
+      controller: {
+        updateItem: function (item) {
+          return $.ajax({
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+              accept: 'application/json'
+            },
+            type: 'PATCH',
+            url: `/api/1.0/food/diary?date=${date}`,
+            data: JSON.stringify(item)
+          })
+        },
+        deleteItem: function (item) {
+          // console.log('item: ', item)
+          // $('.jsgrid-header-cell').parent().hide()
+          return $.ajax({
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+              accept: 'application/json'
+            },
+            type: 'DELETE',
+            url: `/api/1.0/food/diary?date=${date}`,
+            data: JSON.stringify(item)
+          })
+        }
+      }
+    })
+    const lunchCaloriesTotal = lunch.reduce((acc, item) => {
+      return acc + parseInt(item.calories)
+    }, 0)
+    const lunchCarbsTotal = lunch.reduce((acc, item) => {
+      return acc + parseInt(item.carbs)
+    }, 0)
+    const lunchProteinTotal = lunch.reduce((acc, item) => {
+      return acc + parseInt(item.protein)
+    }, 0)
+    const lunchFatTotal = lunch.reduce((acc, item) => {
+      return acc + parseInt(item.fat)
+    }, 0)
+    document.querySelector('#lunchTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${lunchCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${lunchCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${lunchProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${lunchFatTotal}g</p></li></ul></div></div></div>`
+  }
+
+  /* 晚餐 */
+  const dinner = diaryRecord.data.mealRecords.filter(e => e.meal === 3)
+  if (dinner.length === 0) {
+    getDinner.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有晚餐紀錄喔～</p></div>')
+  } else {
+    $('#dinnerRecord').jsGrid({
+      width: '100%',
+
+      inserting: true,
+      editing: true,
+      sorting: false,
+      paging: false,
+
+      data: dinner,
+
+      fields: [
+        { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
+        { name: 'serving_amount', type: 'number', width: 50, editing: true },
+        { name: 'calories', type: 'number', width: 50, editing: false },
+        { name: 'carbs', type: 'number', width: 50, editing: false },
+        { name: 'protein', type: 'number', width: 50, editing: false },
+        { name: 'fat', type: 'number', width: 50, editing: false },
+        { type: 'control' }
+      ],
+
+      controller: {
+        updateItem: function (item) {
+          return $.ajax({
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+              accept: 'application/json'
+            },
+            type: 'PATCH',
+            url: `/api/1.0/food/diary?date=${date}`,
+            data: JSON.stringify(item)
+          })
+        },
+        deleteItem: function (item) {
+          console.log('item: ', item)
+          return $.ajax({
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+              accept: 'application/json'
+            },
+            type: 'DELETE',
+            url: `/api/1.0/food/diary?date=${date}`,
+            data: JSON.stringify(item)
+          })
+        }
+      }
+    })
+    const dinnerCaloriesTotal = dinner.reduce((acc, item) => {
+      return acc + parseInt(item.calories)
+    }, 0)
+    const dinnerCarbsTotal = dinner.reduce((acc, item) => {
+      return acc + parseInt(item.carbs)
+    }, 0)
+    const dinnerProteinTotal = dinner.reduce((acc, item) => {
+      return acc + parseInt(item.protein)
+    }, 0)
+    const dinnerFatTotal = dinner.reduce((acc, item) => {
+      return acc + parseInt(item.fat)
+    }, 0)
+    document.querySelector('#dinnerTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${dinnerCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerFatTotal}g</p></li></ul></div></div></div>`
+  }
+
+  /* 點心 */
+  const snack = diaryRecord.data.mealRecords.filter(e => e.meal === 4)
+  if (snack.length === 0) {
+    getSnack.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有點心紀錄喔～</p></div>')
+  } else {
+    $('#snackRecord').jsGrid({
+      width: '100%',
+
+      inserting: true,
+      editing: true,
+      sorting: false,
+      paging: false,
+
+      data: dinner,
+
+      fields: [
+        { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
+        { name: 'serving_amount', type: 'number', width: 50, editing: true },
+        { name: 'calories', type: 'number', width: 50, editing: false },
+        { name: 'carbs', type: 'number', width: 50, editing: false },
+        { name: 'protein', type: 'number', width: 50, editing: false },
+        { name: 'fat', type: 'number', width: 50, editing: false },
+        { type: 'control' }
+      ],
+
+      controller: {
+        updateItem: function (item) {
+          return $.ajax({
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+              accept: 'application/json'
+            },
+            type: 'PATCH',
+            url: `/api/1.0/food/diary?date=${date}`,
+            data: JSON.stringify(item)
+          })
+        },
+        deleteItem: function (item) {
+          console.log('item: ', item)
+          return $.ajax({
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+              accept: 'application/json'
+            },
+            type: 'DELETE',
+            url: `/api/1.0/food/diary?date=${date}`,
+            data: JSON.stringify(item)
+          })
+        }
+      }
+    })
+    const snackCaloriesTotal = snack.reduce((acc, item) => {
+      return acc + parseInt(item.calories)
+    }, 0)
+    const snackCarbsTotal = snack.reduce((acc, item) => {
+      return acc + parseInt(item.carbs)
+    }, 0)
+    const snackProteinTotal = snack.reduce((acc, item) => {
+      return acc + parseInt(item.protein)
+    }, 0)
+    const snackFatTotal = snack.reduce((acc, item) => {
+      return acc + parseInt(item.fat)
+    }, 0)
+    document.querySelector('#snackTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${snackCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${snackCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${snackProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${snackFatTotal}g</p></li></ul></div></div></div>`
+  }
+
+  /* 總計圓餅圖 */
+  $('#dailyCaloriesTotal').append(`<p class="text-secondary">${diaryRecord.data.caloriesTotal}</p>`)
+  $('#dailyCarbsTotal').append(`<p class="text-secondary">${diaryRecord.data.carbsTotal}g</p>`)
+  $('#dailyProteinTotal').append(`<p class="text-secondary">${diaryRecord.data.proteinTotal}g</p>`)
+  $('#dailyFatTotal').append(`<p class="text-secondary">${diaryRecord.data.fatTotal}g</p>`)
+  const carbsPercentage = diaryRecord.data.carbsTotal * 4 / diaryRecord.data.caloriesTotal
+  const proteinPercentage = diaryRecord.data.proteinTotal * 4 / diaryRecord.data.caloriesTotal
+  const fatPercentage = diaryRecord.data.fatTotal * 9 / diaryRecord.data.caloriesTotal
+  const pieData = {
+    data: [{
+      values: [carbsPercentage, proteinPercentage, fatPercentage],
+      labels: ['碳水化合物', '蛋白質', '脂肪'],
+      type: 'pie',
+      marker: {
+        colors: ['#607D8B', '#9E9E9E', '#EF9A9A']
+      }
+    }],
+    layout: {
+      plot_bgcolor: 'black',
+      paper_bgcolor: '#FFF3'
     }
-  })
+  }
+  pie = document.querySelector('#pieChart')
+  Plotly.newPlot(pie, pieData.data, pieData.layout)
 }
 
 // async function getDiaryRecord(date) {
@@ -300,7 +511,7 @@ async function getDiaryRecord(date) {
 //   }
 //   const dinner = diaryRecord.data.mealRecords.filter(e => e.meal === 3)
 //   if (dinner.length === 0) {
-//     getDinner.innerHTML = '<div class="col-12 text-secondary card-body-text"><p>今日還沒有晚餐紀錄喔～</p></div>'
+//     getDinner.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有晚餐紀錄喔～</p></div>')
 //   } else {
 //     dinner.map(food => getDinner.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
 //     )
@@ -321,7 +532,7 @@ async function getDiaryRecord(date) {
 
 //   const snack = diaryRecord.data.mealRecords.filter(e => e.meal === 4)
 //   if (snack.length === 0) {
-//     getSnack.innerHTML = '<div class="col-12 text-secondary card-body-text"><p>今日還沒有點心紀錄喔～</p></div>'
+//     getSnack.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有點心紀錄喔～</p></div>')
 //   } else {
 //     snack.map(food => getSnack.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
 //     )
@@ -345,10 +556,10 @@ async function getDiaryRecord(date) {
 //   // const dailyProteinTotal = breakfastProteinTotal + lunchProteinTotal + dinnerProteinTotal + snackProteinTotal
 //   // const dailyFatTotal = breakfastFatTotal + lunchFatTotal + dinnerFatTotal + snackFatTotal
 
-//   document.querySelector('#dailyCaloriesTotal').innerHTML = `<p class="text-secondary">${diaryRecord.data.caloriesTotal}</p>`
-//   document.querySelector('#dailyCarbsTotal').innerHTML = `<p class="text-secondary">${diaryRecord.data.carbsTotal}g</p>`
-//   document.querySelector('#dailyProteinTotal').innerHTML = `<p class="text-secondary">${diaryRecord.data.proteinTotal}g</p>`
-//   document.querySelector('#dailyFatTotal').innerHTML = `<p class="text-secondary">${diaryRecord.data.fatTotal}g</p>`
+//   $('#dailyCaloriesTotal').append(`<p class="text-secondary">${diaryRecord.data.caloriesTotal}</p>`)
+//   $('#dailyCarbsTotal').append(`<p class="text-secondary">${diaryRecord.data.carbsTotal}g</p>`)
+//   $('#dailyProteinTotal').append(`<p class="text-secondary">${diaryRecord.data.proteinTotal}g</p>`)
+//   $('#dailyFatTotal').append(`<p class="text-secondary">${diaryRecord.data.fatTotal}g</p>`)
 //   const carbsPercentage = diaryRecord.data.carbsTotal * 4 / diaryRecord.data.caloriesTotal
 //   const proteinPercentage = diaryRecord.data.proteinTotal * 4 / diaryRecord.data.caloriesTotal
 //   const fatPercentage = diaryRecord.data.fatTotal * 9 / diaryRecord.data.caloriesTotal
@@ -360,6 +571,6 @@ async function getDiaryRecord(date) {
 //       colors: ['#607D8B', '#9E9E9E', '#EF9A9A']
 //     }
 //   }]
-//   pie = document.querySelector('#pieChart')
+//   pie = $('#pieChart')
 //   Plotly.newPlot(pie, pieData)
 // }
