@@ -18,7 +18,7 @@
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <nav style="background-color: #495464;" class="navbar navbar-expand-xl navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logov2.png" class="brand-logo">  BUFA FOOD | 不發福</a>
+      <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logo.png" class="brand-logo">  BUFA FOOD | 不發福</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -239,14 +239,13 @@
   const Toast = Swal.mixin({
     toast: true,
     position: 'top-end',
+    icon: 'success',
+    title: 'Your work has been saved',
     showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.addEventListener('mouseenter', Swal.stopTimer)
-      toast.addEventListener('mouseleave', Swal.resumeTimer)
-    }
+    timer: 1500
   })
+
+
   /* 當按下喜歡、不喜歡、不吃以及收藏按鈕時觸發 */
   async function updateInfo(iconBtn){
     const btnVal = $(iconBtn).attr('id')
@@ -263,17 +262,17 @@
     switch (btnVal) {  
       case 'add_collection': {
         const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-        console.log('data', data);
-        const collection = data.data.preference.filter(e => e.food_id == foodId)[0].collection
+        // console.log('data', data);
+        const collection = data.data.preference.filter(e => e.food_id == foodId)
         console.log('collection', collection)
-        if (collection.length === 0 || collection === 0) {
+        if (collection.length === 0 || collection[0].collection === 0) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
           Toast.fire({
           icon: 'success',
           title: `已將${foodName}加入收藏列表`,
           footer: `<a href="/mine.html" class="text-secondary">前往我的食物清單</a>`
         })
-        } else if(collection === 1) {
+        } else if(collection[0].collection === 1) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
           Toast.fire({
           icon: 'success',
@@ -285,15 +284,15 @@
       }
       case 'thumb_up': {
         const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-        const likedItem = data.data.preference.filter(e => e.food_id == foodId)[0].likeIt
+        const likedItem = data.data.preference.filter(e => e.food_id == foodId)
         console.log('likedItem', likedItem)
-        if (likedItem.length === 0 || likedItem === 0) {
+        if (likedItem.length === 0 || likedItem[0].likeIt === 0) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
           Toast.fire({
           icon: 'success',
           title: `我喜歡${foodName}😍`
         })
-        } else if(likedItem === 1) {
+        } else if(likedItem[0].likeIt === 1) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
           Toast.fire({
           icon: 'success',
@@ -304,15 +303,15 @@
       }
       case 'thumb_down': {
         const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-        const dislikedItem = data.data.preference.filter(e => e.food_id == foodId)[0].dislikeIt
+        const dislikedItem = data.data.preference.filter(e => e.food_id == foodId)
         console.log('dislikedItem', dislikedItem)
-        if (dislikedItem.length === 0 || dislikedItem === 0) {
+        if (dislikedItem.length === 0 || dislikedItem[0].dislikeIt === 0) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
           Toast.fire({
           icon: 'success',
           title: `我不喜歡${foodName}🤢`
         })
-        } else if(dislikedItem === 1) {
+        } else if(dislikedItem[0].dislikeIt === 1) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
           Toast.fire({
           icon: 'success',
@@ -323,16 +322,16 @@
       }
       case 'add_exclusiion': {
         const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-        const exclusion = data.data.preference.filter(e => e.food_id == foodId)[0].exclusion
+        const exclusion = data.data.preference.filter(e => e.food_id == foodId)
         console.log('exclusion', exclusion)
-        if (exclusion.length === 0 || exclusion === 0) {
+        if (exclusion.length === 0 || exclusion[0].exclusion === 0) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
           Toast.fire({
           icon: 'success',
           title: `我不吃${foodName}😵`,
           footer: `<a href="/mine.html" class="text-secondary">前往我的食物清單</a>`
         })
-        } else if(exclusion === 1) {
+        } else if(exclusion[0].exclusion === 1) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
           Toast.fire({
           icon: 'success',
