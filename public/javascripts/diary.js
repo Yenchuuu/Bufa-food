@@ -379,7 +379,7 @@ async function getDiaryRecord(date) {
       sorting: false,
       paging: false,
 
-      data: dinner,
+      data: snack,
 
       fields: [
         { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
