@@ -439,10 +439,11 @@ async function getDiaryRecord(date) {
   $('#dailyCarbsTotal').append(`<p class="text-secondary">${diaryRecord.data.carbsTotal}g</p>`)
   $('#dailyProteinTotal').append(`<p class="text-secondary">${diaryRecord.data.proteinTotal}g</p>`)
   $('#dailyFatTotal').append(`<p class="text-secondary">${diaryRecord.data.fatTotal}g</p>`)
-  const carbsPercentage = diaryRecord.data.carbsTotal * 4 / diaryRecord.data.caloriesTotal
-  const proteinPercentage = diaryRecord.data.proteinTotal * 4 / diaryRecord.data.caloriesTotal
-  const fatPercentage = diaryRecord.data.fatTotal * 9 / diaryRecord.data.caloriesTotal
+  const carbsPercentage = parseFloat(diaryRecord.data.carbsTotal * 4 / diaryRecord.data.caloriesTotal).toFixed(3)
+  const proteinPercentage = parseFloat(diaryRecord.data.proteinTotal * 4 / diaryRecord.data.caloriesTotal).toFixed(3)
+  const fatPercentage = parseFloat(diaryRecord.data.fatTotal * 9 / diaryRecord.data.caloriesTotal).toFixed(3)
   const pieData = {
+    // title: '營養素彙總',
     data: [{
       values: [carbsPercentage, proteinPercentage, fatPercentage],
       labels: ['碳水化合物', '蛋白質', '脂肪'],
@@ -452,8 +453,15 @@ async function getDiaryRecord(date) {
       }
     }],
     layout: {
+      title: {
+        text: '今日營養素彙總',
+        font: {
+          family: 'Microsoft JhengHei',
+          color: '#6c757d'
+        }
+      },
       plot_bgcolor: 'black',
-      paper_bgcolor: '#FFF3'
+      paper_bgcolor: '#F4F4F2'
     }
   }
   pie = document.querySelector('#pieChart')
