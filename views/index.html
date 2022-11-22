@@ -17,8 +17,8 @@
     <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <!-- <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v15.0&appId=898182897812684&autoLogAppEvents=1" nonce="1ozSb3qa"></script> -->
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <nav style="background-color: #495464;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
@@ -262,27 +262,6 @@
   })
 })
 
-/* FB Login SDK */
-window.fbAsyncInit = function() {
-    FB.init({
-      appId      : '{your-app-id}',
-      cookie     : true,
-      xfbml      : true,
-      version    : '{api-version}'
-    });
-      
-    FB.AppEvents.logPageView();   
-      
-  };
-
-  (function(d, s, id){
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) {return;}
-     js = d.createElement(s); js.id = id;
-     js.src = "https://connect.facebook.net/en_US/sdk.js";
-     fjs.parentNode.insertBefore(js, fjs);
-   }(document, 'script', 'facebook-jssdk'));
-
 let accessToken;
   function statusChangeCallback(response) {
     // Called with the results from FB.getLoginStatus().
@@ -314,12 +293,12 @@ let accessToken;
     });
   }
 
-  window.fbAsyncInit = function () {
+  window.fbAsyncInit = function() {
     FB.init({
-      appId: '898182897812684',
-      cookie: true, // Enable cookies to allow the server to access the session.
-      xfbml: true, // Parse social plugins on this webpage.
-      version: 'v15.0', // Use this Graph API version for this call.
+      appId      : '1510461219452107',
+      cookie     : true,
+      xfbml      : true,
+      version    : 'v15.0'
     });
 
     FB.getLoginStatus(function (response) {
@@ -342,12 +321,6 @@ let accessToken;
   }
 
 </script>
-<!-- <script
-async
-defer
-crossorigin="anonymous"
-src="https://connect.facebook.net/en_US/sdk.js"
-></script> -->
 <script type='text/javascript'>document.addEventListener('DOMContentLoaded', function () {window.setTimeout(document.querySelector('svg').classList.add('animated'),1000);})</script>
 </body>
 </html>
