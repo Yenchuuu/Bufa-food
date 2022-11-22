@@ -202,7 +202,7 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
       if (getUserPreference[0].likeIt === 1) {
         preferenceScore = getUserPreference[0].preference - 8
         condition.sql = 'SET preference = ?, likeIt = 0 WHERE food_id = ? AND user_id = ?;'
-      } else if (getUserPreference[0].likeIt === 0 && getUserPreference[0].dislikeIt === 1 &&  getUserPreference[0].exclusion === 1) {
+      } else if (getUserPreference[0].likeIt === 0 && getUserPreference[0].dislikeIt === 1 && getUserPreference[0].exclusion === 1) {
         /* 因為喜歡、不喜歡、不吃是獨立事件，第一項與後兩項只能有一個是1 */
         preferenceScore = getUserPreference[0].preference + 5
         condition.sql = 'SET preference = ?, likeIt = 1, dislike = 0, exclusion = 0 WHERE food_id = ? AND user_id = ?;'

@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/stylesheets/style.css">
   <link rel="stylesheet" href="/stylesheets/detail.css">
   <link href="/icons/favicon.ico" rel="shortcut icon" type="image/ico" />
+  <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <script src="https://cdn.plot.ly/plotly-2.14.0.min.js"></script>
@@ -48,14 +49,13 @@
     </div>
   </nav>
   
-  <main style="background-color: #F4F4F2;" class="d-flex flex-nowrap">
-  <!-- <main style="background-color: #F4F4F2;" class="d-flex flex-nowrap mt-4 mb-4"> -->
-    <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 13EM; background-color: #E8E8E8;">
-    <div class="sidebar">
-      <a href="/index.html"><i class="fa fa-fw fa-home"></i> Home</a>
-      <a href="/profile.html"><i class="fa fa-fw fa-wrench"></i> Profile</a>
-      <a href="/diary.html"><i class="fa fa-fw fa-user"></i> Diary</a>
-      <a href="/footprint.html"><i class="fa fa-fw fa-envelope"></i> Footprint</a>
+  <main class="d-flex flex-nowrap container-color">
+    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
+    <div class="sidebar mt-3">
+      <a href="/index.html">Home</a>
+      <a href="/profile.html">Profile</a>
+      <a href="/diary.html">Diary</a>
+      <a href="/footprint.html">Footprint</a>
     </div>
   </div>
   
@@ -86,24 +86,25 @@
   </div>
 
   <div class="container col-6 mt-4 mb-4">
-      <div class="col-12 text-center" id="foodName"></div>
+      <div class="col-12 text-center mt-3" id="foodName"></div>
       <div class="card text-center">
         <div style="padding:5px" class="card-header">
           <ul style="justify-content: end; align-items: center;" class="nav nav-pills">
-              <li class="nav-item">
-                <img src="/icons/empty_heart.webp" class="click_icon" id="add_collection" onclick="updateInfo(this)">
+              <li class="nav-item" id="add_collection" onclick="updateInfo(this)">
+                <!-- <img src="/icons/empty_heart.webp" class="click_icon" id="add_collection" onclick="updateInfo(this)"> -->
+                <!-- <i onclick="updateInfo(this)" class="click_icon fa-regular fa-heart"></i> -->
               </li>
-              <li class="nav-item">
-                <img src="/icons/thumb_up.png" class="click_icon" id="thumb_up" onclick="updateInfo(this)">
+              <li class="nav-item" id="thumb_up" onclick="updateInfo(this)" >
+                <!-- <img src="/icons/thumb_up.png" class="click_icon" onclick="updateInfo(this)"> -->
               </li>
-            <li class="nav-item">
-              <img src="/icons/thumb_down.png" class="click_icon" id="thumb_down" onclick="updateInfo(this)">
+            <li class="nav-item" id="thumb_down" onclick="updateInfo(this)" >
+              <!-- <img src="/icons/thumb_down.png" class="click_icon"  onclick="updateInfo(this)"> -->
             </li>
-            <li class="nav-item">
-              <img src="/icons/nono.png" class="click_icon" id="add_exclusiion" onclick="updateInfo(this)">
+            <li class="nav-item" id="add_exclusiion" onclick="updateInfo(this)" >
+              <!-- <img src="/icons/nono.png" class="click_icon"  onclick="updateInfo(this)"> -->
             </li>
-            <li class="nav-item">
-              <img src="/icons/add.png" class="click_icon" id="add_diary">
+            <li class="nav-item" id="add_diary" onclick="updateInfo(this)" >
+              <!-- <img src="/icons/add.png" class="click_icon" > -->
             </li>
           </ul>
         </div>
@@ -181,7 +182,7 @@
                   <h3>BUFA FOOD</h3>
                   <p>Praesent sed lobortis mi. Suspendisse vel placerat ligula. Vivamus ac sem lacus. Ut vehicula rhoncus elementum. Etiam quis tristique lectus. Aliquam in arcu eget velit pulvinar dictum vel in justo.</p>
               </div>
-              <!-- <div class="col item social"><a href="#"><i class="icon ion-social-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a></div> -->
+              <!-- <div class="col item social"><a href="#"><i class="fa-brands fa-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a></div> -->
           </div>
           <p class="copyright">BUFA FOOD © 2022</p>
       </div>
@@ -232,6 +233,49 @@
     Plotly.newPlot(pie, pieData);
   } 
   
+  $(document).ready(async function(){
+    if (!accessToken) {
+      $('#add_collection').append('<i class="click_icon fa-regular fa-heart"></i>')
+      $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up"></i>')
+      $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down"></i>')
+      $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark"></i>')
+      $('#add_diary').append('<i class="click_icon fa-regular fa-calendar-plus"></i>')
+    } else {
+      $('#add_diary').append('<i class="click_icon fa-regular fa-calendar-plus"></i>')
+      const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+      // console.log('data', data);
+      const preference = data.data.preference.filter(e => e.food_id == foodId)
+      if (preference.length === 0){
+        $('#add_collection').append('<i class="click_icon fa-regular fa-heart"></i>')
+        $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up"></i>')
+        $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down"></i>')
+        $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark"></i>')
+        return
+      }
+      if (preference[0].collection === 0) {
+        $('#add_collection').append('<i class="click_icon fa-regular fa-heart"></i>')
+      } else if(preference[0].collection === 1) {
+        $('#add_collection').append('<i class="click_icon fa-solid fa-heart"></i>')
+      }
+
+      if (preference[0].likeIt === 0) {
+        $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up"></i>')
+      } else if(preference[0].likeIt === 1) {
+        $('#thumb_up').append('<i class="click_icon fa-solid fa-thumbs-up"></i>')
+      }
+      if (preference[0].dislikeIt === 0) {
+        $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down"></i>')
+      } else if(preference[0].dislikeIt === 1) {
+        $('#thumb_down').append('<i class="click_icon fa-solid fa-thumbs-down"></i>')
+      }
+      if (preference[0].exclusion === 0) {
+        $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark"></i>')
+      } else if(preference[0].exclusion === 1) {
+        $('#add_exclusiion').append('<i class="click_icon fa-solid fa-circle-xmark"></i>')
+      }
+    }
+  })
+
   $('.datepicker').datepicker({
   dateFormat: 'yy-mm-dd',
 	forceParse: false,
@@ -247,6 +291,7 @@
   })
 
 
+  // FIXME: 應該是因為用replaceWith的關係，按過的按鈕若沒重整就不能再按一次了
   /* 當按下喜歡、不喜歡、不吃以及收藏按鈕時觸發 */
   async function updateInfo(iconBtn){
     const btnVal = $(iconBtn).attr('id')
@@ -268,6 +313,7 @@
         console.log('collection', collection)
         if (collection.length === 0 || collection[0].collection === 0) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
+          $('#add_collection').replaceWith('<i class="click_icon fa-solid fa-heart"></i>')
           Toast.fire({
           icon: 'success',
           title: `已將${foodName}加入收藏列表`,
@@ -275,6 +321,7 @@
         })
         } else if(collection[0].collection === 1) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
+          $('#add_collection').replaceWith('<i class="click_icon fa-regular fa-heart"></i>')
           Toast.fire({
           icon: 'success',
           title: `已將${foodName}從收藏列表移除`,
@@ -289,12 +336,16 @@
         console.log('likedItem', likedItem)
         if (likedItem.length === 0 || likedItem[0].likeIt === 0) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
+          $('#thumb_up').replaceWith('<i class="click_icon fa-solid fa-thumbs-up"></i>')
+          $('#thumb_down').replaceWith('<i class="click_icon fa-regular fa-thumbs-down"></i>')
+          $('#add_exclusiion').replaceWith('<i class="click_icon fa-regular fa-circle-xmark"></i>')
           Toast.fire({
           icon: 'success',
           title: `我喜歡${foodName}😍`
         })
         } else if(likedItem[0].likeIt === 1) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
+          $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up"></i>')
           Toast.fire({
           icon: 'success',
           title: `收回對${foodName}的喜歡`
@@ -308,12 +359,15 @@
         console.log('dislikedItem', dislikedItem)
         if (dislikedItem.length === 0 || dislikedItem[0].dislikeIt === 0) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
+          $('#thumb_down').replaceWith('<i class="click_icon fa-solid fa-thumbs-down"></i>')
+          $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up"></i>')
           Toast.fire({
           icon: 'success',
           title: `我不喜歡${foodName}🤢`
         })
         } else if(dislikedItem[0].dislikeIt === 1) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
+          $('#thumb_down').replaceWith('<i class="click_icon fa-regular fa-thumbs-down"></i>')
           Toast.fire({
           icon: 'success',
           title: `收回對${foodName}的不喜歡`
@@ -327,6 +381,8 @@
         console.log('exclusion', exclusion)
         if (exclusion.length === 0 || exclusion[0].exclusion === 0) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
+          $('#add_exclusiion').replaceWith('<i class="click_icon fa-solid fa-circle-xmark"></i>')
+          $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up"></i>')
           Toast.fire({
           icon: 'success',
           title: `我不吃${foodName}😵`,
@@ -334,6 +390,7 @@
         })
         } else if(exclusion[0].exclusion === 1) {
           const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
+          $('#add_exclusiion').replaceWith('<i class="click_icon fa-regular fa-circle-xmark"></i>')
           Toast.fire({
           icon: 'success',
           title: `將${foodName}從挑食清單中移除`,
