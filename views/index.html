@@ -17,8 +17,8 @@
     <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v15.0&appId=898182897812684&autoLogAppEvents=1" nonce="1ozSb3qa"></script>
+  <!-- <div id="fb-root"></div>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v15.0&appId=898182897812684&autoLogAppEvents=1" nonce="1ozSb3qa"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <nav style="background-color: #495464;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
@@ -87,9 +87,9 @@
         <!-- <a class="btn btn-primary btn-m btn-block mb-3" style="background-color: #3b5998" href="#!" role="button">
             <i class="fab fa-facebook-f me-2"></i>Continue with Facebook
           </a> -->
-          <!-- <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-          </fb:login-button> -->
-          <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div>
+          <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+          </fb:login-button>
+          <!-- <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div> -->
       
           <div id="status" hidden></div>
         <p class="text-secondary">Don't have an account? <a class="link-info" id="signupHere" style="color: #7BB08A;">Register here</a></p>
@@ -261,6 +261,27 @@
     }
   })
 })
+
+/* FB Login SDK */
+window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '{your-app-id}',
+      cookie     : true,
+      xfbml      : true,
+      version    : '{api-version}'
+    });
+      
+    FB.AppEvents.logPageView();   
+      
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "https://connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
 
 let accessToken;
   function statusChangeCallback(response) {
