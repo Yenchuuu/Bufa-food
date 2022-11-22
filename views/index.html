@@ -273,7 +273,7 @@ let accessToken;
       accessToken = response.authResponse.accessToken;
       axios({
       method: 'post',
-      url: '/api/1.0/user/signin',
+      url: '/api/1.0/user/fbsignin',
       data: {provider:"facebook", access_token: accessToken}
     });
     console.log('accessToken',accessToken);

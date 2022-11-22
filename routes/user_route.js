@@ -5,7 +5,7 @@ const { signUp, nativeSignIn, fbSignIn, setUserTarget, getUserProfile, updateUse
 
 router.route('/user/signup').post(wrapAsync(signUp))
 router.route('/user/nativesignin').post(wrapAsync(nativeSignIn))
-router.route('/user/nativesignin').post(wrapAsync(fbSignIn))
+router.route('/user/fbsignin').post(wrapAsync(fbSignIn))
 router.route('/user/target').post(authentication(), wrapAsync(setUserTarget))
 router.route('/user/preference').get(authentication(), wrapAsync(getUserPreference))
 router.route('/user/profile').get(authentication(), wrapAsync(getUserProfile))
