@@ -114,4 +114,61 @@ const nativeSignIn = async (email, password) => {
   return user
 }
 
-module.exports = { signUp, nativeSignIn, setUserTarget, getUserDetail, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
+const fbSignIn = async (id, name, email) => {
+  const conn = await db.getConnection()
+  try {
+    const loginAt = new Date()
+    const user = {
+      provider: 'facebook',
+      email,
+      name,
+      picture: 'https://graph.facebook.com/' + id + '/picture?type=large',
+      access_expired: TOKEN_EXPIRE,
+      login_at: loginAt
+    }
+    const accessToken = jwt.sign(
+      {
+        provider: user.provider,
+        name: user.name,
+        email: user.email,
+        picture: user.picture
+      },
+      TOKEN_SECRET
+    )
+    user.access_token = accessToken
+
+    const [users] = await conn.query('SELECT id FROM user WHERE email = ? AND provider = \'facebook\'', [email])
+    let userId
+    if (users.length === 0) {
+      // Insert new user
+      const queryStr = 'INSERT INTO user set ?'
+      const [result] = await conn.query(queryStr, user)
+      userId = result.insertId
+    } else {
+      // Update existed user
+      userId = users[0].id
+      const queryStr = 'UPDATE user SET access_token = ?, access_expired = ?, login_at = ?  WHERE id = ?'
+      await conn.query(queryStr, [accessToken, TOKEN_EXPIRE, loginAt, userId])
+    }
+    user.id = userId
+    return { user }
+  } catch (error) {
+    return { error }
+  } finally {
+    await conn.release()
+  }
+}
+
+const getFacebookProfile = async function (accessToken) {
+  try {
+    const res = await got('https://graph.facebook.com/me?fields=id,name,email&access_token=' + accessToken, {
+      responseType: 'json'
+    })
+    return res.body
+  } catch (e) {
+    console.log(e)
+    throw 'Permissions Error: facebook access token is wrong'
+  }
+}
+
+module.exports = { signUp, nativeSignIn, fbSignIn, getFacebookProfile, setUserTarget, getUserDetail, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }

@@ -92,12 +92,42 @@ const nativeSignIn = async (req, res) => {
   }
 }
 
+const fbSignIn = async (req, res) => {
+  // 確認是否有fb token
+  const data = req.body
+  console.log('data: ', data)
+
+  try {
+    const profile = await User.getFacebookProfile(accessToken)
+    const { id, name, email } = profile
+
+    if (!id || !name || !email) {
+      return { error: 'Permissions Error: facebook access token can not get user id, name or email' }
+    }
+
+    const result = await User.facebookSignIn(accessToken)
+    if (result.error) {
+      const status_code = result.status ? result.status : 403
+      res.status(status_code).send({ error: result.error })
+      return
+    }
+  
+    const user = result.user
+    if (!user) {
+      res.status(500).send({ error: 'Database Query Error' })
+      return
+    }
+  } catch (error) {
+    return { error }
+  }
+}
+
 const setUserTarget = async (req, res) => {
   try {
     const { email } = req.user
     const userDetail = await User.getUserDetail(email)
     const userId = userDetail[0].id
-    let userInfo = {
+    const userInfo = {
       birthday: req.body.birthday,
       height: req.body.height,
       weight: req.body.weight,
@@ -311,4 +341,4 @@ const getUserPreference = async (req, res) => {
   res.status(200).json({ preference })
 }
 
-module.exports = { signUp, nativeSignIn, setUserTarget, getUserProfile, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
+module.exports = { signUp, nativeSignIn, fbSignIn, setUserTarget, getUserProfile, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
