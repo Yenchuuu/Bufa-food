@@ -96,7 +96,7 @@ const fbSignIn = async (req, res) => {
   // 確認是否有fb token
   const data = req.body
   console.log('data: ', data)
-
+  const accessToken = data.access_token
   try {
     const profile = await User.getFacebookProfile(accessToken)
     const { id, name, email } = profile
