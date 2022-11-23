@@ -302,11 +302,12 @@
       version    : 'v15.0'
     });
 
-    FB.getLoginStatus(function(response) {
-      // Called after the JS SDK has been initialized.
-      statusChangeCallback(response);
-      // Returns the login status.
-    });
+    /* 導致FB會自動登入，因此註解掉 */
+    // FB.getLoginStatus(function(response) {
+    //   // Called after the JS SDK has been initialized.
+    //   statusChangeCallback(response);
+    //   // Returns the login status.
+    // });
   };
 
   function testAPI() {
