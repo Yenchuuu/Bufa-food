@@ -4,13 +4,16 @@
   <meta charset="utf-8">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
   <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/search.css">
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link href="/icons/favicon.ico" rel="shortcut icon" type="image/ico" />
   <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
   <nav style="background-color: #495464;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
     <div class="container-fluid">
       <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logo.png" class="brand-logo">  BUFA FOOD | 不發福</a>
@@ -51,20 +54,23 @@
       <a href="/footprint.html">Footprint</a>
     </div>
   </div>
-  
+
   <div class="container col-6">
     <div>
       <h3 class="text-center text-secondary mt-5 mb-5">搜尋食物🔍</h3>
-      <input type="text" id="autocomplete_search" class="form-control form-control-lg" placeholder="Type food Name Here" style="margin: 40px 0px;" />
+      <input type="text" id="autocomplete_search" class="form-control form-control-lg" style="margin: 40px 0 0 0;" />
       <span id="search_result"></span>
+      <div class="text-end text-secondary mt-2">
+        <p>找不到想要的食物嗎？<a type="button" id="add_food">按此建立</a></p>
+      </div>
     </div>
     <div class="mt-5" style="border: #5d6c82 solid 2px; border-radius: 1em; padding: 2em;">
-      <h4 class="text-secondary mb-5">近期熱搜🔥</h4>
+      <h4 class="text-center text-secondary mb-5">近期熱搜🔥</h4>
       <div id="food_trend" class="mt-3 mb-3" style="display: flex; flex-wrap:wrap; justify-content: space-between;">
       </div>
     </div>
     <div class="mb-6" id="hidden-div" style="display: none; height: 50px;"></div>
-    <div class="mt-5 mb-5" style="border: #5d6c82 solid 2px; border-radius: 1em; padding: 2em;" id="guess_title">
+    <div class="text-center mt-5 mb-5" style="border: #5d6c82 solid 2px; border-radius: 1em; padding: 2em;" id="guess_title">
     <h4 class="text-secondary mb-5">猜你喜歡</h4>
     <div class="g-3" id="guess_user_preference">
       <!-- <div class="card text-center">
@@ -131,6 +137,73 @@
   </div>
 </main>
 
+      
+<div class="pop-background"></div>
+    <div class="pop-window">
+      <div class="pop-content">
+        <form style="width: 23rem;">
+          
+          <h5 class="text-center text-secondary mb-6">建立食物檔案</h5>
+          
+            <div class="form-group row mt-4">
+              <div class="col-4 text-secondary">食物名</div>
+              <div class="col-7">
+                <input type="text" id="name" class="form-control form-control-sm" />
+              </div>
+            </div>
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">每份量</div>
+              <div class="col-4">
+                <input type="number" min="1" max="1000" id="per_serving" class="form-control form-control-sm" />
+              </div>
+              <div class="col-1 text-secondary">g
+              </div>
+              <div class="col-4"></div>
+              <div class="col-8 text-secondary mt-2"><p style="font-size: 12px">若無特定份量，建議以100g為單位</p></div>
+            </div>
+            
+            <div class="mt-2 mb-4 text-secondary">每份所含營養資訊：<p style="font-size: 12px">請四捨五入至正整數</p></div>
+            <!-- <div class="text-second ary mt-2"></div> -->
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">熱量</div>
+              <div class="col-4">
+                <input type="number" min="1" max="900" id="calories" class="form-control form-control-sm" />
+              </div>
+              <div class="col-1 text-secondary">kcal</div>
+            </div>
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">碳水化合物</div>
+              <div class="col-4">
+                <input min="0" type="number" id="carbs" class="form-control form-control-sm" />
+              </div>
+              <div class="col-1 text-secondary">g</div>
+            </div>
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">蛋白質</div>
+              <div class="col-4">
+                <input min="0" type="number" id="protein" class="form-control form-control-sm" />
+              </div>
+              <div class="col-1 text-secondary">g</div>
+            </div>
+
+            <div class="form-group row mt-3">
+              <div class="col-4 text-secondary">脂肪</div>
+              <div class="col-4">
+                <input min="0" type="number" id="fat" class="form-control form-control-sm" />
+              </div>
+              <div class="col-1 text-secondary">g</div>
+            </div>
+        
+        </form>
+        <div class="mt-4 mx-auto">
+        <button type="button" class="btn-sm btn-outline-secondary mx-auto" id="submit_foodInfo">建立</button></div>
+      </div>
+    </div>
+
 <div class="footer-dark">
   <footer>
       <div class="container">
@@ -177,7 +250,9 @@
   getFoodTrendInfo()
 
   /* 猜你喜歡的三樣食物 */
-  let accessToken = window.localStorage.getItem('accessToken');
+  const accessToken = window.localStorage.getItem('accessToken');
+  const userId = window.localStorage.getItem('userId');
+
   if (!accessToken) {
     $('#guess_title').hide()
     $('#hidden-div').show()
@@ -240,6 +315,93 @@
     document.getElementById('autocomplete_search').value = food_name;
     document.getElementById('search_result').innerHTML = '';
   }
+  
+  /* 點選 按此建立 時跳出的彈窗 */
+  $('#add_food').click(function(){
+    if (!accessToken) {
+      Swal.fire({
+      icon: 'warning',
+      text: '請先登入'
+    })
+    return
+    }
+    $('.pop-background').fadeIn(100);
+    $('.pop-window').fadeIn(100);
+  })
+  $('.pop-background').click(function(){
+    $('.pop-background').fadeOut(200);
+    $('.pop-window').fadeOut(200);
+  })
+
+  $('#submit_foodInfo').click(async function(){
+    const name = $('#name').val()
+    let calories = $('#calories').val()
+    let carbs = $('#carbs').val()
+    let protein = $('#protein').val()
+    let fat = $('#fat').val()
+    calories = parseInt(calories)
+    carbs = parseInt(carbs)
+    protein = parseInt(protein)
+    fat = parseInt(fat)
+    let per_serving = $('#per_serving').val()
+    per_serving = parseInt(per_serving)
+    
+    if(!name || !per_serving || !calories || !carbs || !protein || !fat){
+      Swal.fire({
+      icon: 'warning',
+      text: '填寫資訊不完整'
+    })
+    return
+    }
+
+    if(calories < 1 || per_serving < 1){
+      Swal.fire({
+      icon: 'warning',
+      text: '請確認份量資訊'
+    })
+    return
+    }
+
+    if((carbs + protein + fat) > per_serving){
+      Swal.fire({
+      icon: 'warning',
+      text: '請確認營養素資訊填寫是否正確'
+    })
+    return
+    }
+
+    /* 因熱量來源最高為脂肪(1g = 9 kcal)，故熱量理當不該超過份量中 * 9 */
+    if((carbs * 4 + protein * 4 + fat * 9) > calories || calories > per_serving * 9){
+      Swal.fire({
+      icon: 'warning',
+      text: '請確認熱量資訊填寫是否正確'
+    })
+    return
+    }
+
+    // if (!Number.isInteger(per_serving) || !Number.isInteger(calories) || !Number.isInteger(protein) || !Number.isInteger(carbs) || !Number.isInteger(fat)){
+    //   Swal.fire({
+    //   icon: 'warning',
+    //   text: '請輸入正整數'
+    // })
+    // return
+    // }
+    
+    const data = await axios.post('/api/1.0/food/detail', { name, calories, carbs, protein, fat, per_serving }, { headers: { Authorization: `Bearer ${accessToken}` } })
+    console.log('data: ', data);
+    if (data.data.error) {
+      Swal.fire({
+        icon: 'warning',
+        text: '建立失敗，請再試一次'
+      })
+    } else if (data.data.message) {
+      Swal.fire({
+        icon: 'success',
+        title: '建立成功',
+        footer: '<a href="/mine.html" class="text-secondary">前往我的食物</a>'
+      })
+    }
+  })
   
   </script>
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>

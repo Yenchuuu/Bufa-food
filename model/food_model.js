@@ -29,6 +29,24 @@ const getFoodDetail = async (foodId) => {
   return result
 }
 
+const createFoodDetail = async (name, calories, carbs, protein, fat, per_serving, userId) => {
+  const conn = await db.getConnection()
+  try {
+    await conn.query('START TRANSACTION')
+    const [food] = await conn.execute('INSERT INTO `food` (name, calories, carbs, protein, fat, per_serving, creator_user_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, calories, carbs, protein, fat, per_serving, userId])
+    const foodId = food.insertId
+    const [preference] = await conn.execute('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (4, 0, 0, 1, 0, 0, ?, ?)', [foodId, userId])
+    await conn.query('COMMIT')
+    return preference
+  } catch (err) {
+    await conn.query('ROLLBACK')
+    console.error(err)
+    throw err
+  } finally {
+    await conn.release()
+  }
+}
+
 const getRecommendSingleMeal = async (target, value) => {
   const condition = { sql: '', binding: [] }
   if (target === 'calories') {
@@ -277,6 +295,7 @@ module.exports = {
   deleteMealRecord,
   getUserRecord,
   getFoodDetail,
+  createFoodDetail,
   getRecommendSingleMeal,
   setRecommendSingleMeal,
   getRecommendMultipleMeals,

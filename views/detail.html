@@ -460,7 +460,7 @@
       )
       return
     } else {
-      await axios.post(`/api/1.0/food/create?id=${foodId}`, { userId, foodId, meal,servingAmount, date }, { headers: { Authorization: `Bearer ${accessToken}` } })
+      await axios.post(`/api/1.0/food/mealrecord?id=${foodId}`, { userId, foodId, meal,servingAmount, date }, { headers: { Authorization: `Bearer ${accessToken}` } })
       Swal.fire({
       icon: 'success',
       title: '新增成功',

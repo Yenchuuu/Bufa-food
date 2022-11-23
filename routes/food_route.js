@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { wrapAsync, authentication } = require('../utils/util')
-const { addMealRecord, updateMealRecord, deleteMealRecord, getDiaryRecord, generateSingleMeal, generateMultipleMeals, getFoodFromKeyword, getFoodTrend, getUserRecommendation, getFoodDetail, updateFoodPreference } = require('../controller/food_controller')
+const { addMealRecord, updateMealRecord, deleteMealRecord, getDiaryRecord, generateSingleMeal, generateMultipleMeals, getFoodFromKeyword, getFoodTrend, getUserRecommendation, getFoodDetail, createFoodDetail, updateFoodPreference } = require('../controller/food_controller')
 
 /* Diet plan page */
 router.route('/food/diary').get(authentication(), wrapAsync(getDiaryRecord))
@@ -16,7 +16,8 @@ router.route('/food/trend').get(wrapAsync(getFoodTrend))
 // FIXME: 推薦機制壞掉了，Error: No default engine was specified and no extension was provided.
 router.route('/food/recommend').get(authentication(), wrapAsync(getUserRecommendation))
 
-router.route('/food/create').post(authentication(), wrapAsync(addMealRecord))
+router.route('/food/mealrecord').post(authentication(), wrapAsync(addMealRecord))
+router.route('/food/detail').post(authentication(), wrapAsync(createFoodDetail))
 router.route('/food/detail').get(wrapAsync(getFoodDetail))
 router.route('/food/detail').patch(authentication(), wrapAsync(updateFoodPreference))
 
