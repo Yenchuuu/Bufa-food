@@ -1,4 +1,5 @@
 require('dotenv').config()
+const axios = require('axios')
 const db = require('../utils/mysqlconf')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -67,12 +68,12 @@ const getUserPreference = async (userId) => {
   return preference
 }
 
-const signUp = async (name, email, password) => {
+const signUp = async (provider, name, email, password) => {
   const conn = await db.getConnection()
   try {
     const loginAt = new Date()
     const user = {
-      provider: 'native',
+      provider,
       email,
       password: bcrypt.hashSync(password, salt),
       name,
@@ -117,14 +118,11 @@ const nativeSignIn = async (email, password) => {
 const fbSignIn = async (id, name, email) => {
   const conn = await db.getConnection()
   try {
-    const loginAt = new Date()
     const user = {
       provider: 'facebook',
       email,
       name,
-      picture: 'https://graph.facebook.com/' + id + '/picture?type=large',
-      access_expired: TOKEN_EXPIRE,
-      login_at: loginAt
+      picture: 'https://graph.facebook.com/' + id + '/picture?type=large'
     }
     const accessToken = jwt.sign(
       {
@@ -135,23 +133,18 @@ const fbSignIn = async (id, name, email) => {
       },
       TOKEN_SECRET
     )
-    user.access_token = accessToken
 
     const [users] = await conn.query('SELECT id FROM user WHERE email = ? AND provider = \'facebook\'', [email])
     let userId
     if (users.length === 0) {
-      // Insert new user
       const queryStr = 'INSERT INTO user set ?'
       const [result] = await conn.query(queryStr, user)
       userId = result.insertId
     } else {
-      // Update existed user
       userId = users[0].id
-      const queryStr = 'UPDATE user SET access_token = ?, access_expired = ?, login_at = ?  WHERE id = ?'
-      await conn.query(queryStr, [accessToken, TOKEN_EXPIRE, loginAt, userId])
     }
     user.id = userId
-    return { user }
+    return { user, access_token: accessToken }
   } catch (error) {
     return { error }
   } finally {
@@ -161,10 +154,15 @@ const fbSignIn = async (id, name, email) => {
 
 const getFacebookProfile = async function (accessToken) {
   try {
-    const res = await got('https://graph.facebook.com/me?fields=id,name,email&access_token=' + accessToken, {
-      responseType: 'json'
+    const { data } = await axios({
+      url: 'https://graph.facebook.com/me',
+      method: 'post',
+      params: {
+        fields: ['id', 'email', 'name', 'picture'].join(','),
+        access_token: accessToken
+      }
     })
-    return res.body
+    return data
   } catch (e) {
     console.log(e)
     throw 'Permissions Error: facebook access token is wrong'

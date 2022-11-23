@@ -80,19 +80,14 @@
         </div>
 
         <div class="pt-1 mb-4">
-          <button class="btn btn-outline-secondary col-4" type="button" id="signinBtn">Sign in</button>
-          <!-- <p class="small mb-2 pb-lg-2"><a class="text-muted" href="#!">Forgot password?</a></p> -->
+          <button class="btn btn-outline-secondary col-6" type="button" id="signinBtn">Sign in</button>
+          <p class="text-secondary mt-3">Don't have an account? <a class="link-info" id="signupHere" style="color: #7BB08A;">Register here</a></p>
         </div>
 
-        <!-- <a class="btn btn-primary btn-m btn-block mb-3" style="background-color: #3b5998" href="#!" role="button">
-            <i class="fab fa-facebook-f me-2"></i>Continue with Facebook
-          </a> -->
-          <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-          </fb:login-button>
-          <!-- <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div> -->
+          <div scope="public_profile,email" onlogin="checkLoginState();" class="fb-login-button" data-width="133px" data-size="medium" data-button-type="login_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div>
       
           <div id="status" hidden></div>
-        <p class="text-secondary">Don't have an account? <a class="link-info" id="signupHere" style="color: #7BB08A;">Register here</a></p>
+
 
       </form>
     </div>
@@ -124,7 +119,7 @@
       </div>
     
     </form>
-    <button style="display: blocked; margin: auto;" type="button" class="btn btn-outline-secondary col-4" id="signupBtn">註冊</button>
+    <button style="display: blocked; margin: auto;" type="button" class="btn btn-outline-secondary col-4" id="signupBtn">Register</button>
   </div>
 </div>
 
@@ -242,10 +237,7 @@
     } else if(userInfo.access_token){
       const accessToken = userInfo.access_token
       // console.log('accessToken: ', accessToken);
-      Swal.fire({
-          icon: 'success',
-          title: '登入成功'
-        })
+      alert('登入成功')
       /* 輸入正確資訊時產生jwt token，進入user diary page */
       window.localStorage.setItem('accessToken', accessToken)
       window.localStorage.setItem('userName', userInfo.user.name)
@@ -262,22 +254,32 @@
   })
 })
 
-let accessToken;
-  function statusChangeCallback(response) {
+let fbAccessToken;
+  async function statusChangeCallback(response) {
     // Called with the results from FB.getLoginStatus().
     console.log('statusChangeCallback');
     console.log(response); // The current login status of the person.
     if (response.status === 'connected') {
       // Logged into your webpage and Facebook.
       testAPI();
-      accessToken = response.authResponse.accessToken;
-      axios({
-      method: 'post',
-      url: '/api/1.0/user/fbsignin',
-      data: {provider:"facebook", access_token: accessToken}
-    });
-    console.log('accessToken',accessToken);
-
+      fbAccessToken = response.authResponse.accessToken;
+      const data = await axios({
+        method: 'post',
+        url: '/api/1.0/user/fbsignin',
+        data: {provider:"facebook", access_token: fbAccessToken}
+      });
+      console.log('data: ', data);
+    const userInfo = data.data
+    const accessToken = userInfo.access_token
+    alert('登入成功')
+      /* 輸入正確資訊時產生jwt token，進入user diary page */
+      window.localStorage.setItem('accessToken', accessToken)
+      window.localStorage.setItem('userName', userInfo.user.name)
+      window.localStorage.setItem('userId', userInfo.user.id)
+      window.localStorage.setItem('userEmail', userInfo.user.email)
+      const bodyInfo = await axios.get(`/api/1.0/user/profile`, { headers: {Authorization: `Bearer ${accessToken}`} })
+      if (!bodyInfo.data.data.TDEE) return window.location.href = `/target.html`
+      return window.location.href = `/diary.html`
     } else {
       // Not logged into your webpage or we are unable to tell.
       document.getElementById('status').innerHTML =

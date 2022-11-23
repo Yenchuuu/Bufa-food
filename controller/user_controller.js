@@ -22,8 +22,8 @@ const signUp = async (req, res) => {
   }
   /* replace <, >, &, ', " and / with HTML entities */
   name = validator.escape(name)
-
-  const result = await User.signUp(name, email, password)
+  const provider = 'native'
+  const result = await User.signUp(provider, name, email, password)
   if (result.error) {
     res.send({ error: result.error })
     return
@@ -95,7 +95,6 @@ const nativeSignIn = async (req, res) => {
 const fbSignIn = async (req, res) => {
   // 確認是否有fb token
   const data = req.body
-  console.log('data: ', data)
   const accessToken = data.access_token
   try {
     const profile = await User.getFacebookProfile(accessToken)
@@ -104,19 +103,8 @@ const fbSignIn = async (req, res) => {
     if (!id || !name || !email) {
       return { error: 'Permissions Error: facebook access token can not get user id, name or email' }
     }
-
-    const result = await User.facebookSignIn(accessToken)
-    if (result.error) {
-      const status_code = result.status ? result.status : 403
-      res.status(status_code).send({ error: result.error })
-      return
-    }
-  
-    const user = result.user
-    if (!user) {
-      res.status(500).send({ error: 'Database Query Error' })
-      return
-    }
+    const data = await User.fbSignIn(id, name, email)
+    res.status(200).json(data)
   } catch (error) {
     return { error }
   }
