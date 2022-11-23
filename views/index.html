@@ -254,7 +254,6 @@
   })
 })
 
-let fbAccessToken;
   async function statusChangeCallback(response) {
     // Called with the results from FB.getLoginStatus().
     console.log('statusChangeCallback');
@@ -262,16 +261,16 @@ let fbAccessToken;
     if (response.status === 'connected') {
       // Logged into your webpage and Facebook.
       testAPI();
-      fbAccessToken = response.authResponse.accessToken;
+      const fbAccessToken = response.authResponse.accessToken;
       const data = await axios({
         method: 'post',
         url: '/api/1.0/user/fbsignin',
         data: {provider:"facebook", access_token: fbAccessToken}
       });
       console.log('data: ', data);
-    const userInfo = data.data
-    const accessToken = userInfo.access_token
-    alert('登入成功')
+      const userInfo = data.data
+      const accessToken = userInfo.access_token
+      alert('登入成功')
       /* 輸入正確資訊時產生jwt token，進入user diary page */
       window.localStorage.setItem('accessToken', accessToken)
       window.localStorage.setItem('userName', userInfo.user.name)
@@ -303,12 +302,10 @@ let fbAccessToken;
       version    : 'v15.0'
     });
 
-    FB.getLoginStatus(function (response) {
+    FB.getLoginStatus(function(response) {
       // Called after the JS SDK has been initialized.
-      if (response.status === 'connected') {
-        // getFbUserData();
-      }
-      statusChangeCallback(response); // Returns the login status.
+      statusChangeCallback(response);
+      // Returns the login status.
     });
   };
 
