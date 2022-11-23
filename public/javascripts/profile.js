@@ -11,11 +11,14 @@ if (!accessToken) {
 
 $(document).ready(async function () {
   const data = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
-  // console.log('data: ', data);
   const gender = { 1: '生理女', 2: '生理男' }
   const goal = { 1: '減脂', 2: '維持', 3: '增肌' }
   const activityLevel = { 1: '久坐', 2: '輕度', 3: '中度', 4: '高度', 5: '非常高度' }
   const userInfo = data.data.data
+  if (userInfo.TDEE === null) {
+    alert('請先完成身體資訊之填寫')
+    window.location.href = '/target.html'
+  }
   $('#userName').append(userInfo.name)
   $('#userBirthday').append(userInfo.birthday)
   $('#userGender').append(Object.values(gender[userInfo.gender]))
