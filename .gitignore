@@ -73,11 +73,11 @@ cert
 # artillery
 artillery*
 
-# midterm
-midterm*
-
 # https
 .well-known
 
 # Mac
 .DS_Store
+
+# Ignoring directories
+images/
