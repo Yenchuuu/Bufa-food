@@ -31,7 +31,7 @@ $(document).ready(async function () {
   $('#goalCarbs').append(userInfo.goalCarbs)
   $('#goalProtein').append(userInfo.goalProtein)
   $('#goalFat').append(userInfo.goalFat)
-  $('#self-photo').append(`<img src="${userInfo.picture}" class="self-photo" />`)
+  $('#self-photo').append(`<img src="${userInfo.imagePath}" class="self-photo" />`)
 })
 
 $('#edit-user-info').click(function () {
@@ -47,6 +47,46 @@ $('.datepicker').datepicker({
   dateFormat: 'yy-mm-dd',
   forceParse: false
 })
+
+$('#edit_photo').click(function () {
+  $('#upload_photo').show()
+})
+
+$('#delete_photo').click(function () {
+  Swal.fire({
+    title: '確定刪除相片嗎？',
+    showDenyButton: false,
+    showCancelButton: true,
+    confirmButtonText: '刪除',
+    cancelButtonText: '取消'
+  }).then((result) => {
+    /* Read more about isConfirmed, isDenied below */
+    if (result.isConfirmed) {
+      const data = axios.delete(`/api/1.0/user/profile/image/${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+      window.location.href = 'profile.html'
+    }
+  })
+})
+
+async function upload() {
+  // TODO: 待理解，consloe.log 出來的是 FormData{ }
+  const formData = new FormData(form)
+  // console.log('formData: ', formData)
+  const data = await axios.patch(`/api/1.0/user/profile/image/${userId}`, formData, { headers: { Authorization: `Bearer ${accessToken}` } })
+  // FIXME: 通知都沒跳出來就直接跳轉了
+  if (data.data.message) {
+    Swal.fire({
+      icon: 'seccess',
+      text: '上傳成功'
+    })
+  } else {
+    Swal.fire({
+      icon: 'error',
+      text: '上傳失敗，請再試一次'
+    })
+  }
+  window.location.href = 'profile.html'
+}
 
 $('#submit_userInfo').click(async function () {
   const name = $('#name').val()

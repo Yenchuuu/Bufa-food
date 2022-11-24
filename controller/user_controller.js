@@ -3,8 +3,15 @@ const User = require('../model/user_model')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const path = require('path')
 const salt = parseInt(process.env.BCRYPT_SALT)
 const { TOKEN_EXPIRE, TOKEN_SECRET } = process.env // 30 days by seconds
+/* 圖片上傳--S3相關 */
+const { uploadFile } = require('../utils/s3')
+const util = require('util')
+const fs = require('fs')
+const unlinkFile = util.promisify(fs.unlink)
+require('dotenv').config({ path: '../.env' })
 
 // FIXME: model 跟 controller 沒拆乾淨
 const signUp = async (req, res) => {
@@ -142,16 +149,22 @@ const setUserTarget = async (req, res) => {
 }
 
 const getUserProfile = async (req, res) => {
-  const { name, email, picture } = req.user
+  const { name, email } = req.user
   const userDetail = await User.getUserDetail(email)
-  const [{ birthday, height, weight, gender, diet_type: dietType, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE }] = userDetail
+  const [{ picture, birthday, height, weight, gender, diet_type: dietType, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE }] = userDetail
   // console.log('userDetail', userDetail)
+  let imagePath
+  if (picture == null) {
+    imagePath = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png'
+  } else {
+    imagePath = `${process.env.CLOUDFRONT_URL}/${picture}`
+  }
   res.status(200).json({
     data: {
       // provider,
       name,
       email,
-      picture,
+      imagePath,
       birthday,
       height,
       weight,
@@ -166,6 +179,51 @@ const getUserProfile = async (req, res) => {
       TDEE
     }
   })
+}
+
+const uploadUserImage = async (req, res) => {
+  const id = parseInt(req.params.id)
+  const { email } = req.user
+  const img = req.file.filename
+
+  /* 把使用者照片上傳至S3，並於本機刪除 */
+  // FIXME: 照片都有上傳成功但會噴s3 err: [Error: ENOENT: no such file or directory, unlink
+  try {
+    const uploadPhoto = await uploadFile(req.file)
+    // console.log('userPhoto_result:', uploadPhoto)
+    await unlinkFile(img)
+  } catch (err) {
+    console.log('s3 err:', err)
+  }
+  try {
+    const data = await User.getUserDetail(email)
+    const userId = data[0].id
+    if (id === userId) {
+      await User.uploadUserImage(img, userId)
+      return res.status(200).json({ message: 'User image uploaded successfully.' })
+    } else {
+      return res.status(401).json({ error: 'Authentication failed to do any uploads.' })
+    }
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const deleteUserImage = async (req, res) => {
+  const id = parseInt(req.params.id)
+  const { email } = req.user
+  try {
+    const data = await User.getUserDetail(email)
+    const userId = data[0].id
+    if (id === userId) {
+      await User.deleteUserImage(userId)
+      return res.status(200).json({ message: 'User image removed successfully.' })
+    } else {
+      return res.status(401).json({ error: 'Authentication failed to do any updates.' })
+    }
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 /* PATCH api 更新使用者基本資訊 */
@@ -329,4 +387,4 @@ const getUserPreference = async (req, res) => {
   res.status(200).json({ preference })
 }
 
-module.exports = { signUp, nativeSignIn, fbSignIn, setUserTarget, getUserProfile, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
+module.exports = { signUp, nativeSignIn, fbSignIn, setUserTarget, getUserProfile, uploadUserImage, deleteUserImage, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }

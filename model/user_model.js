@@ -18,6 +18,16 @@ const getUserDetail = async (email) => {
   return userDetail
 }
 
+const uploadUserImage = async (img, userId) => {
+  const [result] = await db.execute('UPDATE user SET picture = ? WHERE id = ?', [img, userId])
+  return result
+}
+
+const deleteUserImage = async (userId) => {
+  const [result] = await db.execute('UPDATE user SET picture = ? WHERE id = ?', [null, userId])
+  return result
+}
+
 /* PATCH account相關資訊 */
 const updateUserProfile = async (updateData, userId) => {
   console.log('updateData', updateData)
@@ -169,4 +179,4 @@ const getFacebookProfile = async function (accessToken) {
   }
 }
 
-module.exports = { signUp, nativeSignIn, fbSignIn, getFacebookProfile, setUserTarget, getUserDetail, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
+module.exports = { signUp, nativeSignIn, fbSignIn, getFacebookProfile, setUserTarget, getUserDetail, updateUserProfile, deleteUserImage, uploadUserImage, updateUserBodyInfo, updateNutritionTarget, getUserPreference }

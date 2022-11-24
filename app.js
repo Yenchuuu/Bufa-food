@@ -14,6 +14,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use('/', express.static(path.join(__dirname, 'public')))
 app.use('/', express.static(path.join(__dirname, 'views')))
+app.use('/', express.static(path.join(__dirname, '/images')))
 
 /* Build API route */
 app.use('/api/' + API_VERSION, [require('./routes/food_route'), require('./routes/user_route')])
