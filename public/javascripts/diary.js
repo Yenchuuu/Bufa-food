@@ -443,18 +443,17 @@ async function getDiaryRecord(date) {
   const proteinPercentage = parseFloat(diaryRecord.data.proteinTotal * 4 / diaryRecord.data.caloriesTotal).toFixed(3)
   const fatPercentage = parseFloat(diaryRecord.data.fatTotal * 9 / diaryRecord.data.caloriesTotal).toFixed(3)
   const pieData = {
-    // title: '營養素彙總',
     data: [{
       values: [carbsPercentage, proteinPercentage, fatPercentage],
-      labels: ['碳水化合物', '蛋白質', '脂肪'],
       type: 'pie',
       marker: {
         colors: ['#607D8B', '#9E9E9E', '#EF9A9A']
-      }
+      },
+      labels: ['碳水化合物', '蛋白質', '脂肪']
     }],
     layout: {
       title: {
-        text: '今日營養素彙總',
+        text: '營養素彙總',
         font: {
           family: 'Microsoft JhengHei',
           color: '#6c757d'
@@ -468,117 +467,27 @@ async function getDiaryRecord(date) {
   Plotly.newPlot(pie, pieData.data, pieData.layout)
 }
 
-// async function getDiaryRecord(date) {
-//   const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-//   // console.log('diaryRecord', diaryRecord);
-//   console.log('date', date)
+getOverallRecord(date)
+async function getOverallRecord (date) {
+  const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+  console.log('diaryRecord: ', diaryRecord);
 
-//   // let breakfastCaloriesTotal, lunchCaloriesTotal, dinnerCaloriesTotal, snackCaloriesTotal, breakfastCarbsTotal, lunchCarbsTotal, dinnerCarbsTotal, snackCarbsTotal, breakfastProteinTotal, lunchProteinTotal, dinnerProteinTotal, snackProteinTotal, breakfastFatTotal, lunchFatTotal, dinnerFatTotal, snackFatTotal
-//   // getDate.attr($('#currentDate'), `${date}`)
-//   getDate.innerHTML = `<span class="text-secondary" id="currentDate">${date}</span>`
-//   const breakfast = diaryRecord.data.mealRecords.filter(e => e.meal === 1)
-//   if (breakfast.length === 0) {
-//     getBreakfast.innerHTML = '<div class="col-12 text-secondary card-body-text"><p>今日還沒有早餐紀錄喔～</p></div>'
-//   } else {
-//     breakfast.map(food => getBreakfast.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
-//     )
-//     const breakfastCaloriesTotal = breakfast.reduce((acc, item) => {
-//       return acc + parseInt(item.calories)
-//     }, 0)
-//     const breakfastCarbsTotal = breakfast.reduce((acc, item) => {
-//       return acc + parseInt(item.carbs)
-//     }, 0)
-//     const breakfastProteinTotal = breakfast.reduce((acc, item) => {
-//       return acc + parseInt(item.protein)
-//     }, 0)
-//     const breakfastFatTotal = breakfast.reduce((acc, item) => {
-//       return acc + parseInt(item.fat)
-//     }, 0)
-//     document.querySelector('#breakfastTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${breakfastCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastFatTotal}g</p></li></ul></div></div></div>`
-//   }
+  const userGoal = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
 
-//   const lunch = diaryRecord.data.mealRecords.filter(e => e.meal === 2)
-//   if (lunch.length === 0) {
-//     getLunch.innerHTML = '<div class="col-12 text-secondary card-body-text"><p>今日還沒有午餐紀錄喔～</p></div>'
-//   } else {
-//     lunch.map(food => getLunch.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
-//     )
-//     const lunchCaloriesTotal = lunch.reduce((acc, item) => {
-//       return acc + parseInt(item.calories)
-//     }, 0)
-//     const lunchCarbsTotal = lunch.reduce((acc, item) => {
-//       return acc + parseInt(item.carbs)
-//     }, 0)
-//     const lunchProteinTotal = lunch.reduce((acc, item) => {
-//       return acc + parseInt(item.protein)
-//     }, 0)
-//     const lunchFatTotal = lunch.reduce((acc, item) => {
-//       return acc + parseInt(item.fat)
-//     }, 0)
-//     document.querySelector('#lunchTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${lunchCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${lunchCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${lunchProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${lunchFatTotal}g</p></li></ul></div></div></div>`
-//   }
-//   const dinner = diaryRecord.data.mealRecords.filter(e => e.meal === 3)
-//   if (dinner.length === 0) {
-//     getDinner.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有晚餐紀錄喔～</p></div>')
-//   } else {
-//     dinner.map(food => getDinner.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
-//     )
-//     const dinnerCaloriesTotal = dinner.reduce((acc, item) => {
-//       return acc + parseInt(item.calories)
-//     }, 0)
-//     const dinnerCarbsTotal = dinner.reduce((acc, item) => {
-//       return acc + parseInt(item.carbs)
-//     }, 0)
-//     const dinnerProteinTotal = dinner.reduce((acc, item) => {
-//       return acc + parseInt(item.protein)
-//     }, 0)
-//     const dinnerFatTotal = dinner.reduce((acc, item) => {
-//       return acc + parseInt(item.fat)
-//     }, 0)
-//     document.querySelector('#dinnerTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${dinnerCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerFatTotal}g</p></li></ul></div></div></div>`
-//   }
+  /* 目標差距表格 */
+  $('#goalCalories').append(userGoal.data.data.goalCalories)
+  $('#goalCarbs').append(userGoal.data.data.goalCarbs)
+  $('#goalProtein').append(userGoal.data.data.goalProtein)
+  $('#goalFat').append(userGoal.data.data.goalFat)
 
-//   const snack = diaryRecord.data.mealRecords.filter(e => e.meal === 4)
-//   if (snack.length === 0) {
-//     getSnack.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有點心紀錄喔～</p></div>')
-//   } else {
-//     snack.map(food => getSnack.innerHTML += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.serving_amount}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`
-//     )
-//     const snackCaloriesTotal = snack.reduce((acc, item) => {
-//       return acc + parseInt(item.calories)
-//     }, 0)
-//     const snackCarbsTotal = snack.reduce((acc, item) => {
-//       return acc + parseInt(item.carbs)
-//     }, 0)
-//     const snackProteinTotal = snack.reduce((acc, item) => {
-//       return acc + parseInt(item.protein)
-//     }, 0)
-//     const snackFatTotal = snack.reduce((acc, item) => {
-//       return acc + parseInt(item.fat)
-//     }, 0)
-//     document.querySelector('#snackTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${snackCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${snackCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${snackProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${snackFatTotal}g</p></li></ul></div></div></div>`
-//   }
+  const diffCalories = userGoal.data.data.goalCalories - diaryRecord.data.caloriesTotal
 
-//   // const dailyCaloriesTotal = breakfastCaloriesTotal + lunchCaloriesTotal + dinnerCaloriesTotal + snackCaloriesTotal
-//   // const dailyCarbsTotal = breakfastCarbsTotal + lunchCarbsTotal + dinnerCarbsTotal + snackCarbsTotal
-//   // const dailyProteinTotal = breakfastProteinTotal + lunchProteinTotal + dinnerProteinTotal + snackProteinTotal
-//   // const dailyFatTotal = breakfastFatTotal + lunchFatTotal + dinnerFatTotal + snackFatTotal
+  const diffCarbs = userGoal.data.data.goalCarbs - diaryRecord.data.carbsTotal
+  const diffProtein = userGoal.data.data.goalProtein - diaryRecord.data.proteinTotal
+  const diffFat = userGoal.data.data.goalFat - diaryRecord.data.fatTotal
 
-//   $('#dailyCaloriesTotal').append(`<p class="text-secondary">${diaryRecord.data.caloriesTotal}</p>`)
-//   $('#dailyCarbsTotal').append(`<p class="text-secondary">${diaryRecord.data.carbsTotal}g</p>`)
-//   $('#dailyProteinTotal').append(`<p class="text-secondary">${diaryRecord.data.proteinTotal}g</p>`)
-//   $('#dailyFatTotal').append(`<p class="text-secondary">${diaryRecord.data.fatTotal}g</p>`)
-//   const carbsPercentage = diaryRecord.data.carbsTotal * 4 / diaryRecord.data.caloriesTotal
-//   const proteinPercentage = diaryRecord.data.proteinTotal * 4 / diaryRecord.data.caloriesTotal
-//   const fatPercentage = diaryRecord.data.fatTotal * 9 / diaryRecord.data.caloriesTotal
-//   const pieData = [{
-//     values: [carbsPercentage, proteinPercentage, fatPercentage],
-//     labels: ['碳水化合物', '蛋白質', '脂肪'],
-//     type: 'pie',
-//     marker: {
-//       colors: ['#607D8B', '#9E9E9E', '#EF9A9A']
-//     }
-//   }]
-//   pie = $('#pieChart')
-//   Plotly.newPlot(pie, pieData)
-// }
+  $('#diffCalories').append(diffCalories)
+  $('#diffCarbs').append(diffCarbs)
+  $('#diffProtein').append(diffProtein)
+  $('#diffFat').append(diffFat)
+}

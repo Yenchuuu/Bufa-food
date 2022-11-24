@@ -46,3 +46,31 @@ th, td {
   width:3em;
   border: none none solid none;
 }
+
+.reference_table{
+  width: 80%;
+  height: 190px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  /* align-items: center; */
+  align-content: center;
+  text-align: center;
+  margin: 0 2rem;
+  border: 1.5px dotted grey;
+  border-radius: 1em;
+}
+
+.reference_column{
+  padding: 1em 0;
+
+}
+
+.reference_div{
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.table-title{
+  padding: 5px 0;
+}

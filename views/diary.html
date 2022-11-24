@@ -306,12 +306,38 @@
 
       </div>
     </div>
-  <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 24EM;">
-    <div class="sidebar">
-      <!-- <div class="card-body"> -->
-        <!-- <p>Pie Chart of nutrition</p> -->
-        <div id="pieChart"  style="width:100%; height:500px;"></div>
+    <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 26EM;">
+      <div class="sidebar mt-2">
+        <div id="pieChart"  style="width:100%; height:350px;"></div>
       </div>
+      <div class="reference_table">
+        <div class="reference_column col-4">
+          <div style="text-align: start;" class="col">
+            <div class="reference_div text-secondary">項目</div>
+            <div class="reference_div text-secondary">熱量</div>
+            <div class="reference_div text-secondary">碳水化合物</div>
+            <div class="reference_div text-secondary">蛋白質</div>
+            <div class="reference_div text-secondary">脂肪</div>
+          </div>
+        </div>
+        <div class="reference_column col-4">
+          <div class="col">
+            <div class="table-title text-secondary font-weight-bold">設定目標</div>
+            <div id="goalCalories" class="reference_div text-secondary"></div>
+            <div id="goalCarbs" class="reference_div text-secondary"></div>
+            <div id="goalProtein" class="reference_div text-secondary"></div>
+            <div id="goalFat" class="reference_div text-secondary"></div>
+          </div>
+        </div>
+        <div class="reference_column col-4">
+          <div class="col">
+            <div class="table-title text-secondary font-weight-bold">差異</div>
+            <div id="diffCalories" class="reference_div text-secondary"></div>
+            <div id="diffCarbs" class="reference_div text-secondary"></div>
+            <div id="diffProtein" class="reference_div text-secondary"></div>
+            <div id="diffFat" class="reference_div text-secondary"></div>
+          </div>
+        </div>
     </div>
   </div>
 </main>
