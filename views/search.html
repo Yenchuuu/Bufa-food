@@ -9,7 +9,7 @@
   <link href="/icons/favicon.ico" rel="shortcut icon" type="image/ico" />
   <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
 </head>
-<body>
+<body onscroll="myFunction()">
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
   <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
@@ -58,7 +58,7 @@
   <div class="container col-6">
     <div>
       <h3 class="text-center text-secondary mt-5 mb-5">搜尋食物🔍</h3>
-      <input type="text" id="autocomplete_search" class="form-control form-control-lg" style="margin: 40px 0 0 0;" />
+      <input type="text" id="autocomplete_search" class="form-control form-control-lg text-secondary" style="margin: 40px 0 0 0;" />
       <span id="search_result"></span>
       <div class="text-end text-secondary mt-2">
         <p>找不到想要的食物嗎？<a type="button" id="add_food">按此建立</a></p>
@@ -298,22 +298,29 @@
   
   // 追蹤使用者輸入的字元，並執行query
   search_element.onkeyup = function(){
-    let query = search_element.value;
-    load_data(query);
-  };
+    let query = search_element.value
+    load_data(query)
+  }
   
-  // // 使用者初次點選input便產生推薦項
-  // search_element.onfocus = function(){
-  //   let query = search_element.value;
-  //   load_data(query);
-  // };
+  /* 滾動網頁時將搜尋結果隱藏 */
+  function myFunction(){
+    $('#search_result').hide()
+    $('#autocomplete_search').blur()
+  }
+
+  // 使用者點選input顯示搜尋結果
+  search_element.onfocus = function(){
+    $('#search_result').show()
+    // let query = search_element.value;
+    // load_data(query)
+  }
   
   function get_text(event) {
     // console.log('event', event);
     let food_name = event.textContent;
     console.log(food_name);
     document.getElementById('autocomplete_search').value = food_name;
-    document.getElementById('search_result').innerHTML = '';
+    // document.getElementById('search_result').innerHTML = '';
   }
   
   /* 點選 按此建立 時跳出的彈窗 */

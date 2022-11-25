@@ -32,3 +32,13 @@
   justify-content: center;
   align-content: center;
 }
+
+#search_result{
+  position: absolute;
+  width: 30rem;
+  z-index: 10;
+}
+
+.list-group-item{
+
+}

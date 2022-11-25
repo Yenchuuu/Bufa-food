@@ -470,7 +470,6 @@ async function getDiaryRecord(date) {
 getOverallRecord(date)
 async function getOverallRecord (date) {
   const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-  console.log('diaryRecord: ', diaryRecord);
 
   const userGoal = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
 
@@ -481,7 +480,6 @@ async function getOverallRecord (date) {
   $('#goalFat').append(userGoal.data.data.goalFat)
 
   const diffCalories = userGoal.data.data.goalCalories - diaryRecord.data.caloriesTotal
-
   const diffCarbs = userGoal.data.data.goalCarbs - diaryRecord.data.carbsTotal
   const diffProtein = userGoal.data.data.goalProtein - diaryRecord.data.proteinTotal
   const diffFat = userGoal.data.data.goalFat - diaryRecord.data.fatTotal
