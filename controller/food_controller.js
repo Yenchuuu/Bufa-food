@@ -108,6 +108,7 @@ const getDiaryRecord = async (req, res) => {
     date = getDate
   }
   // console.log('date', date)
+  // FIXME: 可以改用SQL計算
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
   const mealRecords = await Food.getUserRecord(userId, date)

@@ -36,8 +36,8 @@
           <li class="nav-item">
             <a class="nav-link disabled">|</a>
           </li>
-          <li class="nav-item">
-            <a class="active" href="/profile.html"><img src="/icons/member-mobile.png"></a>
+          <li class="nav-item" id="nav-profile-change">
+            <a id="profile-icon" class="active" href="/profile.html"><img src="/icons/member-mobile.png"></a>
           </li>
 
         </ul>
@@ -257,6 +257,9 @@
     $('#guess_title').hide()
     $('#hidden-div').show()
   } else {
+    $('#nav-profile-change').children().hide()
+    $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
+
     const currentUserId = window.localStorage.getItem('userId');
     const guessUserElement = document.getElementById('guess_user_preference')
     async function getUserRecommendation(currentUserId) {
@@ -408,6 +411,12 @@
         footer: '<a href="/mine.html" class="text-secondary">前往我的食物</a>'
       })
     }
+  })
+
+  $('#nav-profile-change').click(() => {
+    localStorage.clear()
+    alert('已成功登出～')
+    window.location.href = '/index.html'
   })
   
   </script>

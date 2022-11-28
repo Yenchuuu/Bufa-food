@@ -9,6 +9,15 @@ if (!accessToken) {
   window.location.href = '/index.html'
 }
 
+$('#nav-profile-change').children().hide()
+$('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
+
+$('#nav-profile-change').click(() => {
+  localStorage.clear()
+  alert('已成功登出～')
+  window.location.href = '/index.html'
+})
+
 $(document).ready(async function () {
   const data = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
   const gender = { 1: '生理女', 2: '生理男' }

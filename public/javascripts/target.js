@@ -5,6 +5,15 @@ if (!accessToken) {
   window.location.href = '/index.html'
 }
 
+$('#nav-profile-change').children().hide()
+$('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
+
+$('#nav-profile-change').click(() => {
+  localStorage.clear()
+  alert('已成功登出～')
+  window.location.href = '/index.html'
+})
+
 (async function () {
   const userInfo = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
   if (userInfo.data.data.TDEE) {
@@ -24,13 +33,13 @@ function genderVal(genderBtn) {
   gender = parseInt(gender)
 }
 
-let BMR, goal_carbs, goal_protein, goal_fat, goal_calories, TDEE
+let height, weight, birthday, activity_level, BMR, goal_carbs, goal_protein, goal_fat, goal_calories, TDEE
 $('#btn_calculateTDEE').click(() => {
-  let activity_level = $('#dropdownMenuButton2').val()
+  activity_level = $('#dropdownMenuButton2').val()
   activity_level = parseInt(activity_level)
-  const height = $('#height').val()
-  const weight = $('#weight').val()
-  const birthday = $('#datepicker').val()
+  height = $('#height').val()
+  weight = $('#weight').val()
+  birthday = $('#datepicker').val()
   const date = new Date()
   const today = date.toISOString().split('T')[0]
   const age = parseInt(today) - parseInt(birthday)

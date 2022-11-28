@@ -4,6 +4,8 @@ if (!accessToken) {
   window.location.href = '/index.html'
   //  return
 } else {
+  $('#nav-profile-change').children().hide()
+  $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
   const userId = window.localStorage.getItem('userId')
   async function getUserPreference(userId) {
     const collection = $('#my_collection')
@@ -45,3 +47,9 @@ if (!accessToken) {
   }
   getUserPreference(userId)
 }
+
+$('#nav-profile-change').click(() => {
+  localStorage.clear()
+  alert('已成功登出～')
+  window.location.href = '/index.html'
+})

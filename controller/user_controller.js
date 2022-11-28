@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
 const User = require('../model/user_model')
+const Food = require('../model/food_model')
+const moment = require('moment')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -387,4 +389,228 @@ const getUserPreference = async (req, res) => {
   res.status(200).json({ preference })
 }
 
-module.exports = { signUp, nativeSignIn, fbSignIn, setUserTarget, getUserProfile, uploadUserImage, deleteUserImage, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
+const setDailyGoal = async (req, res) => {
+  const date = moment().format('YYYY-MM-DD')
+  const userData = User.setDailyGoal(date)
+  res.json(userData)
+}
+
+const getDailyGoal = async (req, res) => {
+  const { email } = req.user
+  const startDate = req.query.date
+  const endDate = moment(startDate, 'YYYY-MM-DD').add(6, 'day').format('YYYY-MM-DD')
+
+  const userDetail = await User.getUserDetail(email)
+  const userId = userDetail[0].id
+  const goalRecords = await User.getDailyGoal(userId, startDate, endDate)
+
+  const dailyRecords = await User.getDailySummary(userId, startDate, endDate)
+
+  const day2 = moment(startDate, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+  const day3 = moment(day2, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+  const day4 = moment(day3, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+  const day5 = moment(day4, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+  const day6 = moment(day5, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+  const day7 = moment(day6, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
+
+  const dailyCaloriesArray = []
+  const dailyCarbsArray = []
+  const dailyProteinArray = []
+  const dailyFatArray = []
+
+  const [startDateObj] = dailyRecords.filter(e => e.date_record === startDate)
+  if (startDateObj === undefined) {
+    dailyCaloriesArray.push(0)
+    dailyCarbsArray.push(0)
+    dailyProteinArray.push(0)
+    dailyFatArray.push(0)
+  } else {
+    dailyCaloriesArray.push(parseInt(startDateObj.calories))
+    dailyCarbsArray.push(parseInt(startDateObj.carbs))
+    dailyProteinArray.push(parseInt(startDateObj.protein))
+    dailyFatArray.push(parseInt(startDateObj.fat))
+  }
+
+  const [day2Obj] = dailyRecords.filter(e => e.date_record === day2)
+  if (day2Obj === undefined) {
+    dailyCaloriesArray.push(0)
+    dailyCarbsArray.push(0)
+    dailyProteinArray.push(0)
+    dailyFatArray.push(0)
+  } else {
+    dailyCaloriesArray.push(parseInt(day2Obj.calories))
+    dailyCarbsArray.push(parseInt(day2Obj.carbs))
+    dailyProteinArray.push(parseInt(day2Obj.protein))
+    dailyFatArray.push(parseInt(day2Obj.fat))
+  }
+
+  const [day3Obj] = dailyRecords.filter(e => e.date_record === day3)
+  if (day3Obj === undefined) {
+    dailyCaloriesArray.push(0)
+    dailyCarbsArray.push(0)
+    dailyProteinArray.push(0)
+    dailyFatArray.push(0)
+  } else {
+    dailyCaloriesArray.push(parseInt(day3Obj.calories))
+    dailyCarbsArray.push(parseInt(day3Obj.carbs))
+    dailyProteinArray.push(parseInt(day3Obj.protein))
+    dailyFatArray.push(parseInt(day3Obj.fat))
+  }
+
+  const [day4Obj] = dailyRecords.filter(e => e.date_record === day4)
+  if (day4Obj === undefined) {
+    dailyCaloriesArray.push(0)
+    dailyCarbsArray.push(0)
+    dailyProteinArray.push(0)
+    dailyFatArray.push(0)
+  } else {
+    dailyCaloriesArray.push(parseInt(day4Obj.calories))
+    dailyCarbsArray.push(parseInt(day4Obj.carbs))
+    dailyProteinArray.push(parseInt(day4Obj.protein))
+    dailyFatArray.push(parseInt(day4Obj.fat))
+  }
+
+  const [day5Obj] = dailyRecords.filter(e => e.date_record === day5)
+  if (day5Obj === undefined) {
+    dailyCaloriesArray.push(0)
+    dailyCarbsArray.push(0)
+    dailyProteinArray.push(0)
+    dailyFatArray.push(0)
+  } else {
+    dailyCaloriesArray.push(parseInt(day5Obj.calories))
+    dailyCarbsArray.push(parseInt(day5Obj.carbs))
+    dailyProteinArray.push(parseInt(day5Obj.protein))
+    dailyFatArray.push(parseInt(day5Obj.fat))
+  }
+
+  const [day6Obj] = dailyRecords.filter(e => e.date_record === day6)
+  if (day6Obj === undefined) {
+    dailyCaloriesArray.push(0)
+    dailyCarbsArray.push(0)
+    dailyProteinArray.push(0)
+    dailyFatArray.push(0)
+  } else {
+    dailyCaloriesArray.push(parseInt(day6Obj.calories))
+    dailyCarbsArray.push(parseInt(day6Obj.carbs))
+    dailyProteinArray.push(parseInt(day6Obj.protein))
+    dailyFatArray.push(parseInt(day6Obj.fat))
+  }
+
+  const [day7Obj] = dailyRecords.filter(e => e.date_record === day7)
+  if (day7Obj === undefined) {
+    dailyCaloriesArray.push(0)
+    dailyCarbsArray.push(0)
+    dailyProteinArray.push(0)
+    dailyFatArray.push(0)
+  } else {
+    dailyCaloriesArray.push(parseInt(day7Obj.calories))
+    dailyCarbsArray.push(parseInt(day7Obj.carbs))
+    dailyProteinArray.push(parseInt(day7Obj.protein))
+    dailyFatArray.push(parseInt(day7Obj.fat))
+  }
+  // FIXME: 真的要寫得這麼笨嗎？
+  // console.log('dailyCaloriesArray: ', dailyCaloriesArray)
+  // console.log('dailyCarbsArray: ', dailyCarbsArray)
+  // console.log('dailyProteinArray: ', dailyProteinArray)
+  // console.log('dailyFatArray: ', dailyFatArray)
+
+  const goalCaloriesArray = []
+  const goalCarbsArray = []
+  const goalProteinArray = []
+  const goalFatArray = []
+
+  const [startDateGoal] = goalRecords.filter(e => e.date === startDate)
+  if (startDateGoal === undefined) {
+    goalCaloriesArray.push(0)
+    goalCarbsArray.push(0)
+    goalProteinArray.push(0)
+    goalFatArray.push(0)
+  } else {
+    goalCaloriesArray.push(parseInt(startDateGoal.goal_calories))
+    goalCarbsArray.push(parseInt(startDateGoal.goal_carbs))
+    goalProteinArray.push(parseInt(startDateGoal.goal_protein))
+    goalFatArray.push(parseInt(startDateGoal.goal_fat))
+  }
+
+  const [day2Goal] = goalRecords.filter(e => e.date === day2)
+  if (day2Goal === undefined) {
+    goalCaloriesArray.push(0)
+    goalCarbsArray.push(0)
+    goalProteinArray.push(0)
+    goalFatArray.push(0)
+  } else {
+    goalCaloriesArray.push(parseInt(day2Goal.goal_calories))
+    goalCarbsArray.push(parseInt(day2Goal.goal_carbs))
+    goalProteinArray.push(parseInt(day2Goal.goal_protein))
+    goalFatArray.push(parseInt(day2Goal.goal_fat))
+  }
+
+  const [day3Goal] = goalRecords.filter(e => e.date === day3)
+  if (day3Goal === undefined) {
+    goalCaloriesArray.push(0)
+    goalCarbsArray.push(0)
+    goalProteinArray.push(0)
+    goalFatArray.push(0)
+  } else {
+    goalCaloriesArray.push(parseInt(day3Goal.goal_calories))
+    goalCarbsArray.push(parseInt(day3Goal.goal_carbs))
+    goalProteinArray.push(parseInt(day3Goal.goal_protein))
+    goalFatArray.push(parseInt(day3Goal.goal_fat))
+  }
+
+  const [day4Goal] = goalRecords.filter(e => e.date === day4)
+  if (day4Goal === undefined) {
+    goalCaloriesArray.push(0)
+    goalCarbsArray.push(0)
+    goalProteinArray.push(0)
+    goalFatArray.push(0)
+  } else {
+    goalCaloriesArray.push(parseInt(day4Goal.goal_calories))
+    goalCarbsArray.push(parseInt(day4Goal.goal_carbs))
+    goalProteinArray.push(parseInt(day4Goal.goal_protein))
+    goalFatArray.push(parseInt(day4Goal.goal_fat))
+  }
+
+  const [day5Goal] = goalRecords.filter(e => e.date === day5)
+  if (day5Goal === undefined) {
+    goalCaloriesArray.push(0)
+    goalCarbsArray.push(0)
+    goalProteinArray.push(0)
+    goalFatArray.push(0)
+  } else {
+    goalCaloriesArray.push(parseInt(day5Goal.goal_calories))
+    goalCarbsArray.push(parseInt(day5Goal.goal_carbs))
+    goalProteinArray.push(parseInt(day5Goal.goal_protein))
+    goalFatArray.push(parseInt(day5Goal.goal_fat))
+  }
+
+  const [day6Goal] = goalRecords.filter(e => e.date === day6)
+  if (day6Goal === undefined) {
+    goalCaloriesArray.push(0)
+    goalCarbsArray.push(0)
+    goalProteinArray.push(0)
+    goalFatArray.push(0)
+  } else {
+    goalCaloriesArray.push(parseInt(day6Goal.goal_calories))
+    goalCarbsArray.push(parseInt(day6Goal.goal_carbs))
+    goalProteinArray.push(parseInt(day6Goal.goal_protein))
+    goalFatArray.push(parseInt(day6Goal.goal_fat))
+  }
+
+  const [day7Goal] = goalRecords.filter(e => e.date === day7)
+  if (day7Goal === undefined) {
+    goalCaloriesArray.push(0)
+    goalCarbsArray.push(0)
+    goalProteinArray.push(0)
+    goalFatArray.push(0)
+  } else {
+    goalCaloriesArray.push(parseInt(day7Goal.goal_calories))
+    goalCarbsArray.push(parseInt(day7Goal.goal_carbs))
+    goalProteinArray.push(parseInt(day7Goal.goal_protein))
+    goalFatArray.push(parseInt(day7Goal.goal_fat))
+  }
+
+  res.json({ dailyCaloriesArray, dailyCarbsArray, dailyProteinArray, dailyFatArray, goalCaloriesArray, goalCarbsArray, goalProteinArray, goalFatArray })
+}
+
+module.exports = { signUp, nativeSignIn, fbSignIn, setUserTarget, getUserProfile, uploadUserImage, deleteUserImage, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference, setDailyGoal, getDailyGoal }

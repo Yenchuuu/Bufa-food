@@ -5,12 +5,18 @@ const userEmail = window.localStorage.getItem('userEmail')
 
 const accessToken = window.localStorage.getItem('accessToken')
 if (!accessToken) {
-  Swal.fire({
-    icon: 'warning',
-    text: '請先登入'
-  })
+  alert('請先登入')
   window.location.href = '/index.html'
 }
+
+$('#nav-profile-change').children().hide()
+$('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
+
+$('#nav-profile-change').click(() => {
+  localStorage.clear()
+  alert('已成功登出～')
+  window.location.href = '/index.html'
+})
 
 $('#generateOneMeal').click(async function () {
   const values = []
@@ -442,33 +448,38 @@ async function getDiaryRecord(date) {
   const carbsPercentage = parseFloat(diaryRecord.data.carbsTotal * 4 / diaryRecord.data.caloriesTotal).toFixed(3)
   const proteinPercentage = parseFloat(diaryRecord.data.proteinTotal * 4 / diaryRecord.data.caloriesTotal).toFixed(3)
   const fatPercentage = parseFloat(diaryRecord.data.fatTotal * 9 / diaryRecord.data.caloriesTotal).toFixed(3)
-  const pieData = {
-    data: [{
-      values: [carbsPercentage, proteinPercentage, fatPercentage],
-      type: 'pie',
-      marker: {
-        colors: ['#607D8B', '#9E9E9E', '#EF9A9A']
-      },
-      labels: ['碳水化合物', '蛋白質', '脂肪']
-    }],
-    layout: {
-      title: {
-        text: '營養素彙總',
-        font: {
-          family: 'Microsoft JhengHei',
-          color: '#6c757d'
-        }
-      },
-      plot_bgcolor: 'black',
-      paper_bgcolor: '#F4F4F2'
+
+  if (diaryRecord.data.caloriesTotal === 0) {
+    $('#pieChartContainer').children().hide()
+  } else {
+    const pieData = {
+      data: [{
+        values: [carbsPercentage, proteinPercentage, fatPercentage],
+        type: 'pie',
+        marker: {
+          colors: ['#607D8B', '#9E9E9E', '#EF9A9A']
+        },
+        labels: ['碳水化合物', '蛋白質', '脂肪']
+      }],
+      layout: {
+        title: {
+          text: '營養素彙總',
+          font: {
+            family: 'Microsoft JhengHei',
+            color: '#6c757d'
+          }
+        },
+        plot_bgcolor: 'black',
+        paper_bgcolor: '#F4F4F2'
+      }
     }
+    pie = document.querySelector('#pieChart')
+    Plotly.newPlot(pie, pieData.data, pieData.layout)
   }
-  pie = document.querySelector('#pieChart')
-  Plotly.newPlot(pie, pieData.data, pieData.layout)
 }
 
 getOverallRecord(date)
-async function getOverallRecord (date) {
+async function getOverallRecord(date) {
   const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
 
   const userGoal = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })

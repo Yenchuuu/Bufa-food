@@ -42,8 +42,8 @@
           <li class="nav-item">
             <a class="nav-link disabled">|</a>
           </li>
-          <li class="nav-item">
-            <a class="active" href="/profile.html"><img src="/icons/member-mobile.png"></a>
+          <li class="nav-item" id="nav-profile-change">
+            <a id="profile-icon" class="active" href="/profile.html"><img src="/icons/member-mobile.png"></a>
           </li>
 
         </ul>
@@ -319,6 +319,18 @@
         'Thanks for logging in, ' + response.name + '!';
     });
   }
+
+let accessToken = window.localStorage.getItem('accessToken');
+if (accessToken) {
+    $('#nav-profile-change').children().hide()
+    $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
+  }
+
+$('#nav-profile-change').click(() => {
+  localStorage.clear()
+  alert('已成功登出～')
+  window.location.href = '/index.html'
+})
 
 </script>
 <script type='text/javascript'>document.addEventListener('DOMContentLoaded', function () {window.setTimeout(document.querySelector('svg').classList.add('animated'),1000);})</script>

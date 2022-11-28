@@ -128,6 +128,7 @@ const nativeSignIn = async (email, password) => {
 const fbSignIn = async (id, name, email) => {
   const conn = await db.getConnection()
   try {
+    await conn.query('START TRANSACTION')
     const user = {
       provider: 'facebook',
       email,
@@ -154,8 +155,10 @@ const fbSignIn = async (id, name, email) => {
       userId = users[0].id
     }
     user.id = userId
+    await conn.query('COMMIT')
     return { user, access_token: accessToken }
   } catch (error) {
+    await conn.query('ROLLBACK')
     return { error }
   } finally {
     await conn.release()
@@ -179,4 +182,35 @@ const getFacebookProfile = async function (accessToken) {
   }
 }
 
-module.exports = { signUp, nativeSignIn, fbSignIn, getFacebookProfile, setUserTarget, getUserDetail, updateUserProfile, deleteUserImage, uploadUserImage, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
+const setDailyGoal = async function () {
+  const conn = await db.getConnection()
+  const date = '2022-11-26'
+  try {
+    await conn.query('START TRANSACTION')
+    const [userInfo] = await conn.execute('SELECT user_id, goal_calories, goal_carbs, goal_protein, goal_fat FROM `user_bodyInfo`')
+    const len = userInfo.length
+    for (let i = 0; i < len; i++) {
+      await conn.execute('INSERT INTO `user_goal` (user_id, goal_calories, goal_carbs, goal_protein, goal_fat, date) VALUES (?, ?, ?, ?, ?, ?)', [userInfo[i].user_id, userInfo[i].goal_calories, userInfo[i].goal_carbs, userInfo[i].goal_protein, userInfo[i].goal_fat, date])
+    }
+    await conn.query('COMMIT')
+    return
+  } catch (error) {
+    console.error(error)
+    await conn.query('ROLLBACK')
+    return { error }
+  } finally {
+    await conn.release()
+  }
+}
+
+const getDailyGoal = async function (userId, startDate, endDate) {
+  const [goalData] = await db.execute('SELECT * FROM `user_goal` WHERE user_id = ? AND date BETWEEN ? AND ?', [userId, startDate, endDate])
+  return goalData
+}
+
+const getDailySummary = async function (userId, startDate, endDate) {
+  const [summaryData] = await db.execute('SELECT user_meal.date_record, SUM(food.calories * serving_amount) AS calories, SUM(food.carbs * serving_amount) AS carbs, SUM(food.protein * serving_amount) AS protein, SUM(food.fat * serving_amount) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record BETWEEN (?) AND (?) GROUP BY date_record;', [userId, startDate, endDate])
+  return summaryData
+}
+
+module.exports = { signUp, nativeSignIn, fbSignIn, getFacebookProfile, setUserTarget, setDailyGoal, getDailySummary, getDailyGoal, getUserDetail, updateUserProfile, deleteUserImage, uploadUserImage, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
