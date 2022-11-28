@@ -141,7 +141,7 @@ const getFoodFromSearchbox = async (keyword) => {
 
 const getFoodTrend = async (periodStart, periodEnd) => {
   const [trendFood] = await db.execute(
-    'SELECT food_id, COUNT(food_id), food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` LIMIT 5;',
+    'SELECT food_id, COUNT(food_id) AS counts, food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` ORDER BY counts DESC LIMIT 5;',
     [periodStart, periodEnd]
   )
   return trendFood
