@@ -47,6 +47,7 @@ const createFoodDetail = async (name, calories, carbs, protein, fat, per_serving
   }
 }
 
+// FIXME: 這種撈取方式，一旦輸入數值太大就會噴error
 const getRecommendSingleMeal = async (target, value) => {
   const condition = { sql: '', binding: [] }
   if (target === 'calories') {
@@ -71,7 +72,7 @@ const getRecommendSingleMeal = async (target, value) => {
     recommendMealQuery,
     condition.binding
   )
-  // console.log('recommendMealList', recommendMealList
+  console.log('recommendMealList', recommendMealList)
   return recommendMealList
 }
 
