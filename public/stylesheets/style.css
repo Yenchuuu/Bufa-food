@@ -169,3 +169,38 @@ p {
 a {
   text-decoration:none;
 }
+
+div#navbarsExample04 ul li.nav-item {
+  position: relative;
+}
+
+div.container-fluid a.navbar-brand:after,
+div#navbarsExample04 ul li.nav-item:after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 0%;
+  content: '.';
+  color: transparent;
+  background: #aaa;
+  height: 1px;
+}
+
+div.container-fluid a.navbar-brand:after,
+div#navbarsExample04 ul li.nav-item:hover:after {
+  width: 100%;
+}
+
+div.container-fluid a.navbar-brand:after,
+div.container-fluid a.navbar-brand:before,
+div#navbarsExample04 ul li.nav-item:after,
+div#navbarsExample04 ul li.nav-item:before {
+  transition: all .5s;
+}
+
+div.container-fluid a.navbar-brand:hover, 
+div#navbarsExample04 ul li.nav-item a:hover {
+  color: #7BB08A;
+}
