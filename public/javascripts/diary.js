@@ -26,23 +26,22 @@ if (!accessToken) {
     const webUrl = window.location.search
     const splitUrl = webUrl.split('=')
     let date = splitUrl[1]
-    const d = new Date()
     if (!date) {
-      date = d.toISOString().split('T')[0]
+      date = moment().format('YYYY-MM-DD')
     }
-    if (!meal || meal === '選餐') {
+    if (!validator.isInt(meal, { min: 1 })) {
       Swal.fire({
         icon: 'warning',
         text: '請選擇要建立於哪一餐‼️'
       })
       return
-    } else if (!target) {
+    } else if (!target || target === '選目標') {
       Swal.fire({
         icon: 'warning',
         text: '請選擇要建立之目標‼️'
       })
       return
-    } else if (isNaN(targetValue) || !targetValue) {
+    } else if (!validator.isInt(targetValue, { min: 1 })) {
       Swal.fire({
         icon: 'warning',
         text: '請輸入有效之數字‼️'
@@ -50,14 +49,24 @@ if (!accessToken) {
       return
     }
     values.push(parseInt(meal), target, parseInt(targetValue))
-    console.log(values)
+    // console.log('values: ', values)
     /* 判斷選擇哪一餐&目標打api */
     const targetMeal = await axios.post('/api/1.0/food/single', { meal: values[0], target: values[1], value: values[2], date }, { headers: { Authorization: `Bearer ${accessToken}` } })
-    console.log('targetMeal', targetMeal)
-    if (target === 'calories' && targetMeal.data.errorMessage) {
+    // console.log('targetMeal', targetMeal)
+    if (target === 'calories' && targetMeal.data.errorMessage === 'lowCalories') {
       Swal.fire({
         icon: 'warning',
         text: '為求飲食均衡，一餐熱量不建議低於TDEE 10%喔！\b請重新輸入'
+      })
+    } else if (target === 'calories' && targetMeal.data.errorMessage === 'highCalories') {
+      Swal.fire({
+        icon: 'warning',
+        text: '為求飲食均衡，不建議將一日熱量集中於一餐！\b請重新輸入'
+      })
+    } else if (targetMeal.data.errorMessage === 'outOfRange') {
+      Swal.fire({
+        icon: 'warning',
+        text: '為求飲食均衡，不建議將營養素過度集中攝取於某一餐，請重新輸入'
       })
     } else {
       const recommendMeal = targetMeal.data.recommendMeal
@@ -92,10 +101,8 @@ if (!accessToken) {
     const webUrl = window.location.search
     const splitUrl = webUrl.split('=')
     let date = splitUrl[1]
-    // const d = new Date()
     if (!date) {
       date = moment().format('YYYY-MM-DD')
-      // date = d.toISOString().split('T')[0]
     }
     const getDailyRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
     // console.log('getDailyRecord', getDailyRecord)
@@ -114,9 +121,8 @@ if (!accessToken) {
   const webUrl = window.location.search
   const splitUrl = webUrl.split('=')
   let date = splitUrl[1]
-  const d = new Date()
   if (!date) {
-    date = d.toISOString().split('T')[0]
+    date = moment().format('YYYY-MM-DD')
   }
   getDiaryRecord(date)
 
@@ -146,7 +152,7 @@ if (!accessToken) {
     const currenDate = $('#currentDate').val()
     const dateA = new Date(currenDate)
     const dateB = dateA - (1000 * 60 * 60 * 24)
-    console.log('dateB', dateB)
+    // console.log('dateB', dateB)
   })
   // getDiaryRecord(date)
   // onclick="changeDate(this)"
@@ -161,7 +167,7 @@ if (!accessToken) {
 
   async function getDiaryRecord(date) {
     const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-    console.log('diaryRecord', diaryRecord)
+    // console.log('diaryRecord', diaryRecord)
     getDate.append(`<span class="text-secondary" id="currentDate">${date}</span>`)
 
     const breakfast = diaryRecord.data.mealRecords.filter(e => e.meal === 1)
@@ -473,8 +479,11 @@ if (!accessToken) {
           paper_bgcolor: '#F4F4F2'
         }
       }
+      const config = {
+        displayModeBar: false // this is the line that hides the bar.
+      }
       pie = document.querySelector('#pieChart')
-      Plotly.newPlot(pie, pieData.data, pieData.layout)
+      Plotly.newPlot(pie, pieData.data, pieData.layout, config)
     }
   }
 

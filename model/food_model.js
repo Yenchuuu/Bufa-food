@@ -47,32 +47,12 @@ const createFoodDetail = async (name, calories, carbs, protein, fat, perServing,
   }
 }
 
-// FIXME: 這種撈取方式，一旦輸入數值太大就會噴error
-const getRecommendSingleMeal = async (target, value) => {
-  const condition = { sql: '', binding: [] }
-  if (target === 'calories') {
-    condition.sql =
-      'WHERE (recommend_categories_id = 5 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 1 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 2 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 3) OR (recommend_categories_id = 4);'
-    condition.binding = [value - 30, value + 30, (value * 0.35) - 30, (value * 0.35) + 30, (value * 0.40) - 30, (value * 0.40) + 30]
-  } else if (target === 'carbs') {
-    condition.sql =
-      'WHERE recommend_categories_id = 1 AND carbs BETWEEN ? AND ?'
-    condition.binding = [value - 5, value + 5]
-  } else if (target === 'protein') {
-    condition.sql =
-      'WHERE recommend_categories_id = 2 AND protein BETWEEN ? AND ?'
-    condition.binding = [value - 5, value + 5]
-  } else if (target === 'fat') {
-    condition.sql = 'WHERE recommend_categories_id = 3 AND fat BETWEEN ? AND ?'
-    condition.binding = [value - 5, value + 5]
-  }
-  const recommendMealQuery =
-    'SELECT id, name, per_serving, calories, carbs, protein, fat, recommend_categories_id FROM `food`' + condition.sql
+const getRecommendSingleMeal = async (userId) => {
+  const singleMealQuery = 'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
   const [recommendMealList] = await db.execute(
-    recommendMealQuery,
-    condition.binding
+    singleMealQuery, [userId]
   )
-  console.log('recommendMealList', recommendMealList)
+  // console.log('recommendMealList', recommendMealList)
   return recommendMealList
 }
 
@@ -125,7 +105,7 @@ const setRecommendMultipleMeals = async (userId, recommendBreakfast, recommendLu
 /* 選出所有recommend食物，排除該使用者不喜歡的食物 */
 const getRecommendMultipleMeals = async (userId) => {
   const multipleMealsQuery =
-    'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id, (carbs * 4 /calories) AS carbsPercentage, (fat * 9 /calories) AS fatPercentage, (protein * 4 /calories) AS proteinPercentage FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
+    'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
   const [recommendMealsList] = await db.execute(multipleMealsQuery, [userId])
   // console.log('recommendMealsList', recommendMealsList)
   return recommendMealsList
