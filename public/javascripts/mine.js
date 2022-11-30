@@ -1,7 +1,9 @@
 const accessToken = window.localStorage.getItem('accessToken')
 if (!accessToken) {
-  alert('請先登入')
-  window.location.href = '/index.html'
+  Swal.fire({
+    icon: 'warning',
+    text: '請先登入'
+  }).then((result) => { window.location.href = '/index.html' })
   //  return
 } else {
   $('#nav-profile-change').children().hide()
@@ -50,6 +52,5 @@ if (!accessToken) {
 
 $('#nav-profile-change').click(() => {
   localStorage.clear()
-  alert('已成功登出～')
   window.location.href = '/index.html'
 })

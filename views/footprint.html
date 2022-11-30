@@ -122,16 +122,17 @@
 
   let accessToken = window.localStorage.getItem('accessToken');
   if (!accessToken) {
-    alert('請先登入')
-    window.location.href = '/index.html'
-  }
+    Swal.fire({
+      icon: 'warning',
+      text: '請先登入'
+    }).then((result) => { window.location.href = '/index.html' })
+  } else {
 
   $('#nav-profile-change').children().hide()
   $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
 
   $('#nav-profile-change').click(() => {
-    localStorage.clear()
-    alert('已成功登出～')
+    localStorage.clear()    
     window.location.href = '/index.html'
   })
 
@@ -319,7 +320,7 @@ const caloriesChart = new Chart(calories, {
 })
 
 })
-
+}
 </script>
 </body>
 </html>

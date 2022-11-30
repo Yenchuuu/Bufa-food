@@ -227,7 +227,7 @@
     }
     try {
     const data = await axios.post(`/api/1.0/user/nativesignin`, { provider: 'native', email, password })
-    console.log('data: ', data);
+    // console.log('data: ', data);
     const userInfo = data.data.data
     if(data.data.error){
         Swal.fire({
@@ -238,7 +238,6 @@
     } else if(userInfo.access_token){
       const accessToken = userInfo.access_token
       // console.log('accessToken: ', accessToken);
-      alert('登入成功')
       /* 輸入正確資訊時產生jwt token，進入user diary page */
       window.localStorage.setItem('accessToken', accessToken)
       window.localStorage.setItem('userName', userInfo.user.name)
@@ -246,8 +245,13 @@
       window.localStorage.setItem('userEmail', userInfo.user.email)
       const bodyInfo = await axios.get(`/api/1.0/user/profile`, { headers: {Authorization: `Bearer ${accessToken}`} })
       // console.log('bodyInfo: ', bodyInfo);
+      Swal.fire({
+        icon: 'success',
+        text: '登入成功'
+      }).then((result) => { 
       if (!bodyInfo.data.data.TDEE) return window.location.href = `/target.html`
       return window.location.href = `/diary.html`
+      })
     }
     } catch (err) {
       console.error(err)
@@ -268,18 +272,22 @@
         url: '/api/1.0/user/fbsignin',
         data: {provider:"facebook", access_token: fbAccessToken}
       });
-      console.log('data: ', data);
+      // console.log('data: ', data);
       const userInfo = data.data
       const accessToken = userInfo.access_token
-      alert('登入成功')
       /* 輸入正確資訊時產生jwt token，進入user diary page */
       window.localStorage.setItem('accessToken', accessToken)
       window.localStorage.setItem('userName', userInfo.user.name)
       window.localStorage.setItem('userId', userInfo.user.id)
       window.localStorage.setItem('userEmail', userInfo.user.email)
       const bodyInfo = await axios.get(`/api/1.0/user/profile`, { headers: {Authorization: `Bearer ${accessToken}`} })
+      Swal.fire({
+        icon: 'success',
+        text: '登入成功'
+      }).then((result) => { 
       if (!bodyInfo.data.data.TDEE) return window.location.href = `/target.html`
       return window.location.href = `/diary.html`
+      })
     } else {
       // Not logged into your webpage or we are unable to tell.
       document.getElementById('status').innerHTML =
@@ -328,8 +336,7 @@ if (accessToken) {
   }
 
 $('#nav-profile-change').click(() => {
-  localStorage.clear()
-  alert('已成功登出～')
+  localStorage.clear()  
   window.location.href = '/index.html'
 })
 

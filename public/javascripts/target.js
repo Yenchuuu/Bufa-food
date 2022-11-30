@@ -1,8 +1,10 @@
 const userId = window.localStorage.getItem('userId')
 const accessToken = window.localStorage.getItem('accessToken')
 if (!accessToken) {
-  alert('請先登入')
-  window.location.href = '/index.html'
+  Swal.fire({
+    icon: 'warning',
+    text: '請先登入'
+  }).then((result) => { window.location.href = '/index.html' })
 }
 
 $('#nav-profile-change').children().hide()
@@ -10,17 +12,19 @@ $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-
 
 $('#nav-profile-change').click(() => {
   localStorage.clear()
-  alert('已成功登出～')
   window.location.href = '/index.html'
 })
 
-(async function () {
+async function checkUserInfo() {
   const userInfo = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
   if (userInfo.data.data.TDEE) {
-    alert('您已填寫過目標資訊囉😀')
-    window.location.href = '/profile.html'
+    Swal.fire({
+      icon: 'warning',
+      text: '您已填寫過目標資訊囉😀'
+    }).then((result) => { window.location.href = '/profile.html' })
   }
-})()
+}
+checkUserInfo()
 
 $('.datepicker').datepicker({
   dateFormat: 'yy-mm-dd',
