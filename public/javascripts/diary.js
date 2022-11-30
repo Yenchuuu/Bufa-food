@@ -148,6 +148,22 @@ if (!accessToken) {
     window.location.href = `/diary.html?date=${date}`
   })
 
+  /* 注入隱形input box for 使用者快速選取日期 */
+  $('#showDate').click((e) => {
+    const clickedDate = $(e.target).parent()
+    clickedDate.children().show()
+    clickedDate.children().next().hide()
+  })
+  // TODO: 目前用onblur，還是應該改成用按鈕跳轉？
+  function chooseDate() {
+    const clickedDate = $('#showDate')
+    clickedDate.children().prev().hide()
+    const date = $('#datepicker').val()
+    clickedDate.children().next().text(date)
+    clickedDate.children().next().show()
+    window.location.href = `/diary.html?date=${date}`
+  }
+
   $('#generateOneMeal').click(function () {
     const currenDate = $('#currentDate').val()
     const dateA = new Date(currenDate)
