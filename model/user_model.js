@@ -121,7 +121,7 @@ const signUp = async (provider, name, email, password) => {
 
 const nativeSignIn = async (email, password) => {
   const [user] = await db.query('SELECT * FROM user WHERE email = ?', [email])
-  console.log('user: ', user)
+  // console.log('user: ', user)
   return user
 }
 

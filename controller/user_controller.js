@@ -69,7 +69,7 @@ const nativeSignIn = async (req, res) => {
 
   try {
     const result = await User.nativeSignIn(email, password)
-    console.log('result', result)
+    // console.log('result', result)
     if (result.length === 0) {
       return res.json({ error: 'Email or password is wrong.' })
     } else if (!bcrypt.compareSync(password, result[0].password)) {
