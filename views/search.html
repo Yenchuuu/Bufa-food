@@ -9,6 +9,7 @@
   <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link href="/icons/favicon.ico" rel="shortcut icon" type="image/ico" />
   <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/validator@13.7.0/validator.min.js"></script>
 </head>
 <body onscroll="myFunction()">
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -170,7 +171,7 @@
             <div class="form-group row mt-3">
               <div class="col-4 text-secondary">熱量</div>
               <div class="col-4">
-                <input type="number" min="1" max="900" id="calories" class="form-control form-control-sm" />
+                <input type="number" min="1" max="9000" id="calories" class="form-control form-control-sm" />
               </div>
               <div class="col-1 text-secondary">kcal</div>
             </div>
@@ -236,190 +237,7 @@
   </footer>
 </div>
 
-  <script>
-  
-  /* 熱門食物排行榜top 5 */
-  const foodTrendElement = document.getElementById('food_trend')
-  async function getFoodTrendInfo() {
-    const foodTrendInfo = await axios.get(`/api/1.0/food/trend`)
-    // console.log('foodTrendInfo', foodTrendInfo);
-    const foodTrend = foodTrendInfo.data.trendFood
-    foodTrend.map(food =>
-      foodTrendElement.innerHTML += `<a href="/detail.html?id=${food.food_id}" class="btn btn-outline-secondary">${food.name}</a>`
-    )
-  } 
-  getFoodTrendInfo()
-
-  /* 猜你喜歡的三樣食物 */
-  const accessToken = window.localStorage.getItem('accessToken');
-  const userId = window.localStorage.getItem('userId');
-
-  if (!accessToken) {
-    $('#guess_title').hide()
-    $('#hidden-div').show()
-  } else {
-    $('#nav-profile-change').children().hide()
-    $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
-
-    const currentUserId = window.localStorage.getItem('userId');
-    const guessUserElement = document.getElementById('guess_user_preference')
-    async function getUserRecommendation(currentUserId) {
-      const foodRecommendInfo = await axios.get(`/api/1.0/food/recommend?currentUserId=${currentUserId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-      console.log('foodRecommendInfo', foodRecommendInfo);
-      const foodRecommendation = foodRecommendInfo.data.foodNutritionInfo
-      foodRecommendation.map(recommendation =>
-      guessUserElement.innerHTML += `<a href="/detail.html?id=${recommendation.id}"><div class="card text-center"><div style="padding:5px" class="card-header"></div><div class="card-body"><div class="row card-body-title"><div class="col-5"></div><div class="col-7"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">熱量<br>kcal</br></p></li><li class="nav-card-title"><p class="text-secondary">碳水化合物</p></li><li class="nav-card-title"><p class="text-secondary">蛋白質</p></li><li class="nav-card-title"><p class="text-secondary">脂肪</p></li></ul></div></div><div class="row card-body-title"><div class="col-5 text-secondary card-body-text">${recommendation.name}</div><div class="col-7"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${recommendation.calories}</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.carbs}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.protein}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.fat}g</p></li></ul></div></div></div></a>`
-      )
-    } 
-    getUserRecommendation(currentUserId)
-  }
-
-  function load_data(query) {
-    fetch(`/api/1.0/food/search?key=${query}`)
-    .then(function(response){
-      return response.json();
-    })
-    .then(function(responseData){
-      let html = '<ul class="list-group">';
-      const len = responseData.length;
-      if(len > 0) {
-        for(let i = 0; i < len; i++) {
-          // RegExp 物件被用來比對符合自訂規則的文字
-          let regular_expression = new RegExp(`(${query})`);
-          // span 中的$1表示搜尋的關鍵字
-          html += `<a href="/detail.html?id=${responseData[i].id}" class="list-group-item list-group-item-action" onclick="get_text(this)">${responseData[i].name.replace(regular_expression, '<span class="text-secondary fw-bold">$1</span>')}</a>`;
-
-          }
-      } else {
-        html += '<a href="#" class="list-group-item list-group-item-action disabled">No Data Found</a>';
-      }
-      html += '</ul>';
-      document.getElementById('search_result').innerHTML = html;
-    });
-  }
-  
-  let search_element = document.getElementById("autocomplete_search");
-  
-  // 追蹤使用者輸入的字元，並執行query
-  search_element.onkeyup = function(){
-    let query = search_element.value
-    load_data(query)
-  }
-  
-  /* 滾動網頁時將搜尋結果隱藏 */
-  function myFunction(){
-    $('#search_result').hide()
-    $('#autocomplete_search').blur()
-  }
-
-  // 使用者點選input顯示搜尋結果
-  search_element.onfocus = function(){
-    $('#search_result').show()
-    // let query = search_element.value;
-    // load_data(query)
-  }
-  
-  function get_text(event) {
-    // console.log('event', event);
-    let food_name = event.textContent;
-    console.log(food_name);
-    document.getElementById('autocomplete_search').value = food_name;
-    // document.getElementById('search_result').innerHTML = '';
-  }
-  
-  /* 點選 按此建立 時跳出的彈窗 */
-  $('#add_food').click(function(){
-    if (!accessToken) {
-      Swal.fire({
-      icon: 'warning',
-      text: '請先登入'
-    })
-    return
-    }
-    $('.pop-background').fadeIn(100);
-    $('.pop-window').fadeIn(100);
-  })
-  $('.pop-background').click(function(){
-    $('.pop-background').fadeOut(200);
-    $('.pop-window').fadeOut(200);
-  })
-
-  $('#submit_foodInfo').click(async function(){
-    const name = $('#name').val()
-    let calories = $('#calories').val()
-    let carbs = $('#carbs').val()
-    let protein = $('#protein').val()
-    let fat = $('#fat').val()
-    calories = parseInt(calories)
-    carbs = parseInt(carbs)
-    protein = parseInt(protein)
-    fat = parseInt(fat)
-    let per_serving = $('#per_serving').val()
-    per_serving = parseInt(per_serving)
-    
-    if(!name || !per_serving || !calories || !carbs || !protein || !fat){
-      Swal.fire({
-      icon: 'warning',
-      text: '填寫資訊不完整'
-    })
-    return
-    }
-
-    if(calories < 1 || per_serving < 1){
-      Swal.fire({
-      icon: 'warning',
-      text: '請確認份量資訊'
-    })
-    return
-    }
-
-    if((carbs + protein + fat) > per_serving){
-      Swal.fire({
-      icon: 'warning',
-      text: '請確認營養素資訊填寫是否正確'
-    })
-    return
-    }
-
-    /* 因熱量來源最高為脂肪(1g = 9 kcal)，故熱量理當不該超過份量中 * 9 */
-    if((carbs * 4 + protein * 4 + fat * 9) > calories || calories > per_serving * 9){
-      Swal.fire({
-      icon: 'warning',
-      text: '請確認熱量資訊填寫是否正確'
-    })
-    return
-    }
-
-    // if (!Number.isInteger(per_serving) || !Number.isInteger(calories) || !Number.isInteger(protein) || !Number.isInteger(carbs) || !Number.isInteger(fat)){
-    //   Swal.fire({
-    //   icon: 'warning',
-    //   text: '請輸入正整數'
-    // })
-    // return
-    // }
-    
-    const data = await axios.post('/api/1.0/food/detail', { name, calories, carbs, protein, fat, per_serving }, { headers: { Authorization: `Bearer ${accessToken}` } })
-    console.log('data: ', data);
-    if (data.data.error) {
-      Swal.fire({
-        icon: 'warning',
-        text: '建立失敗，請再試一次'
-      })
-    } else if (data.data.message) {
-      Swal.fire({
-        icon: 'success',
-        title: '建立成功',
-        footer: '<a href="/mine.html" class="text-secondary">前往我的食物</a>'
-      })
-    }
-  })
-
-  $('#nav-profile-change').click(() => {
-    localStorage.clear()    
-    window.location.href = '/index.html'
-  })
-  
-  </script>
+  <script src="/javascripts/search.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
 </body>
 </html>

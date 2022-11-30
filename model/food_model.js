@@ -29,11 +29,11 @@ const getFoodDetail = async (foodId) => {
   return result
 }
 
-const createFoodDetail = async (name, calories, carbs, protein, fat, per_serving, userId) => {
+const createFoodDetail = async (name, calories, carbs, protein, fat, perServing, userId) => {
   const conn = await db.getConnection()
   try {
     await conn.query('START TRANSACTION')
-    const [food] = await conn.execute('INSERT INTO `food` (name, calories, carbs, protein, fat, per_serving, creator_user_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, calories, carbs, protein, fat, per_serving, userId])
+    const [food] = await conn.execute('INSERT INTO `food` (name, calories, carbs, protein, fat, per_serving, creator_user_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, calories, carbs, protein, fat, perServing, userId])
     const foodId = food.insertId
     const [preference] = await conn.execute('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (4, 0, 0, 1, 0, 0, ?, ?)', [foodId, userId])
     await conn.query('COMMIT')

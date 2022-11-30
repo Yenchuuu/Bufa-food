@@ -143,11 +143,17 @@ const createFoodDetail = async (req, res) => {
   const { email } = req.user
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
-  const { name, calories, carbs, protein, fat, per_serving } = req.body
-  /* 接進來的req.body datatype 為 number */
+  let { name, calories, carbs, protein, fat, perServing } = req.body
+  console.log('req.body: ', req.body)
+
+  calories = parseInt(calories)
+  carbs = parseInt(carbs)
+  protein = parseInt(protein)
+  fat = parseInt(fat)
+  perServing = parseInt(perServing)
 
   try {
-    const data = await Food.createFoodDetail(name, calories, carbs, protein, fat, per_serving, userId)
+    const data = await Food.createFoodDetail(name, calories, carbs, protein, fat, perServing, userId)
     res.json({ message: 'Food created successfully.' })
   } catch (err) {
     console.error(err)
