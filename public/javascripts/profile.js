@@ -3,7 +3,6 @@ const userId = window.localStorage.getItem('userId')
 const userEmail = window.localStorage.getItem('userEmail')
 
 const accessToken = window.localStorage.getItem('accessToken')
-// console.log('accessToken: ', accessToken);
 if (!accessToken) {
   Swal.fire({
     icon: 'warning',
@@ -24,9 +23,14 @@ if (!accessToken) {
     const goal = { 1: '減脂', 2: '維持', 3: '增肌' }
     const activityLevel = { 1: '久坐', 2: '輕度', 3: '中度', 4: '高度', 5: '非常高度' }
     const userInfo = data.data.data
+    // console.log('userInfo: ', userInfo)
     if (userInfo.TDEE === null) {
-      alert('請先完成身體資訊之填寫')
-      window.location.href = '/target.html'
+      Swal.fire({
+        icon: 'warning',
+        text: '請先完成身體資訊之填寫'
+      }).then(() => {
+        window.location.href = '/target.html'
+      })
     }
     $('#userName').append(userInfo.name)
     $('#userBirthday').append(userInfo.birthday)
@@ -40,7 +44,19 @@ if (!accessToken) {
     $('#goalCarbs').append(userInfo.goalCarbs)
     $('#goalProtein').append(userInfo.goalProtein)
     $('#goalFat').append(userInfo.goalFat)
-    $('#self-photo').append(`<img src="${userInfo.imagePath}" class="self-photo" />`)
+    if (userInfo.imagePath === '') {
+      $('#self-photo').append('<img src=\'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png\' class="self-photo" />')
+      $('#delete_photo').hide()
+    } else {
+      $('#self-photo').append(`<img src="${userInfo.imagePath}" class="self-photo" />`)
+    }
+    $('#name').attr('value', userInfo.name)
+    $('#birthday').attr('value', userInfo.birthday)
+    // $('#gender').attr('value', Object.values(gender[userInfo.gender]))
+    $('#height').attr('value', userInfo.height)
+    $('#weight').attr('value', userInfo.weight)
+    // $('#diet_goal').attr('value', Object.values(activityLevel[userInfo.activityLevel]))
+    // $('#activity_level').attr('value', Object.values(goal[userInfo.dietGoal]))
   })
 
   $('#edit-user-info').click(function () {
@@ -52,10 +68,10 @@ if (!accessToken) {
     $('.pop-window').fadeOut(200)
   })
 
-  $('.datepicker').datepicker({
-    dateFormat: 'yy-mm-dd',
-    forceParse: false
-  })
+  // $('.datepicker').datepicker({
+  //   dateFormat: 'yy-mm-dd',
+  //   forceParse: false
+  // })
 
   $('#edit_photo').click(function () {
     $('#upload_photo').show()
@@ -77,29 +93,31 @@ if (!accessToken) {
     })
   })
 
-  async function upload() {
-    // TODO: 待理解，consloe.log 出來的是 FormData{ }
-    const formData = new FormData(form)
-    // console.log('formData: ', formData)
-    const data = await axios.patch(`/api/1.0/user/profile/image/${userId}`, formData, { headers: { Authorization: `Bearer ${accessToken}` } })
-    // FIXME: 通知都沒跳出來就直接跳轉了
-    if (data.data.message) {
-      Swal.fire({
-        icon: 'seccess',
-        text: '上傳成功'
-      })
-    } else {
-      Swal.fire({
-        icon: 'error',
-        text: '上傳失敗，請再試一次'
-      })
-    }
-    window.location.href = 'profile.html'
-  }
+  // async function upload() {
+  //   // TODO: 待理解，consloe.log 出來的是 FormData{ }
+  //   const formData = new FormData(form)
+  //   // console.log('formData: ', formData)
+  //   const data = await axios.patch(`/api/1.0/user/profile/image/${userId}`, formData, { headers: { Authorization: `Bearer ${accessToken}` } })
+  //   if (data.data.message) {
+  //     Swal.fire({
+  //       icon: 'seccess',
+  //       text: '上傳成功'
+  //     }).then(() => {
+  //       window.location.href = 'profile.html'
+  //     })
+  //   } else {
+  //     Swal.fire({
+  //       icon: 'error',
+  //       text: '上傳失敗，請再試一次'
+  //     }).then(() => {
+  //       window.location.href = 'profile.html'
+  //     })
+  //   }
+  // }
 
   $('#submit_userInfo').click(async function () {
     const name = $('#name').val()
-    const birthday = $('#datepicker').val()
+    const birthday = $('#birthday').val()
     let gender = $('#gender').val()
     gender = parseInt(gender)
     let height = $('#height').val()
@@ -110,6 +128,9 @@ if (!accessToken) {
     activity_level = parseInt(activity_level)
     let diet_goal = $('#diet_goal').val()
     diet_goal = parseInt(diet_goal)
+    const date = new Date()
+    const today = date.toISOString().split('T')[0]
+    const age = parseInt(today) - parseInt(birthday)
 
     // console.log('data', name, birthday, height, weight, gender, activity_level, diet_goal)
 
@@ -119,6 +140,18 @@ if (!accessToken) {
         text: '資訊輸入不完全'
       })
       return
+    } else if (age <= 0 || age > 100) {
+      Swal.fire({
+        icon: 'warning',
+        text: '請確認年紀輸入是否正確'
+      })
+      return
+    } else if (height > 220 || height < 120 || weight < 30 || weight > 200) {
+      Swal.fire({
+        icon: 'warning',
+        text: '請確認身高體重輸入是否正確'
+      })
+      return
     }
 
     await axios.patch(`/api/1.0/user/profile/account/${userId}`, { name }, { headers: { Authorization: `Bearer ${accessToken}` } })
@@ -126,10 +159,17 @@ if (!accessToken) {
     const data = await axios.patch(`/api/1.0/user/profile/bodyinfo/${userId}`, { birthday, height, weight, gender, activity_level, diet_goal }, { headers: { Authorization: `Bearer ${accessToken}` } })
     // console.log('data: ', data)
     if (data.data.message) {
-      alert('設定成功')
-      window.location.href = '/profile.html'
+      Swal.fire({
+        icon: 'success',
+        text: '設定成功'
+      }).then(() => {
+        window.location.href = '/profile.html'
+      })
     } else {
-      alert('請再試一次')
+      Swal.fire({
+        icon: 'warning',
+        text: '請再試一次'
+      })
     }
   })
 
@@ -152,7 +192,13 @@ if (!accessToken) {
     if (!goal_carbs_percantage || !goal_protein_percantage || !goal_fat_percantage) {
       Swal.fire({
         icon: 'warning',
-        text: '碳水化合物、蛋白質與脂肪之比例應均衡分配'
+        text: '碳水化合物、蛋白質與脂肪之資訊不完整或不正確'
+      })
+      return
+    } else if (goal_carbs_percantage < 0 || goal_protein_percantage < 0 || goal_fat_percantage < 0 || goal_carbs_percantage > 100 || goal_protein_percantage > 100 || goal_fat_percantage > 100) {
+      Swal.fire({
+        icon: 'warning',
+        text: '碳水化合物、蛋白質與脂肪之比例應為正整數'
       })
       return
     } else if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) {
@@ -167,14 +213,27 @@ if (!accessToken) {
         text: '一日熱量攝取量過低，請調整！'
       })
       return
+    } else if (goal_calories > 2 * TDEE) {
+      Swal.fire({
+        icon: 'warning',
+        text: '一日熱量攝取量過高，請調整！'
+      })
+      return
     }
 
     const data = await axios.patch(`/api/1.0/user/profile/nutritiontarget/${userId}`, { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage }, { headers: { Authorization: `Bearer ${accessToken}` } })
     if (data.data.message) {
-      alert('設定成功')
-      window.location.href = '/profile.html'
+      Swal.fire({
+        icon: 'success',
+        text: '設定成功'
+      }).then(() => {
+        window.location.href = '/profile.html'
+      })
     } else {
-      alert('請再試一次')
+      Swal.fire({
+        icon: 'warning',
+        text: '請再試一次'
+      })
     }
   })
 }

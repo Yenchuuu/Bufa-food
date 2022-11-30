@@ -52,7 +52,7 @@ if (!accessToken) {
         icon: 'warning',
         text: '資訊輸入不完全'
       })
-    } else if (age <= 0) {
+    } else if (age <= 0 || age > 100) {
       Swal.fire({
         icon: 'warning',
         text: '請確認年紀輸入是否正確'
