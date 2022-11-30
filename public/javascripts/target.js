@@ -25,10 +25,10 @@ if (!accessToken) {
   }
   checkUserInfo()
 
-  $('.datepicker').datepicker({
-    dateFormat: 'yy-mm-dd',
-    forceParse: false
-  })
+  // $('.datepicker').datepicker({
+  //   dateFormat: 'yy-mm-dd',
+  //   forceParse: false
+  // })
 
   let gender
   function genderVal(genderBtn) {
@@ -51,6 +51,16 @@ if (!accessToken) {
       Swal.fire({
         icon: 'warning',
         text: '資訊輸入不完全'
+      })
+    } else if (age <= 0) {
+      Swal.fire({
+        icon: 'warning',
+        text: '請確認年紀輸入是否正確'
+      })
+    } else if (height > 220 || height < 120 || weight < 30 || weight > 200) {
+      Swal.fire({
+        icon: 'warning',
+        text: '請確認身高體重輸入是否正確'
       })
     } else {
       switch (gender) {
@@ -90,59 +100,66 @@ if (!accessToken) {
 
   let diet_goal
   function gietGoal(goalBtn) {
-    /* 由系統依照diet goal計算default營養素 */
-    diet_goal = ($(goalBtn).attr('value'))
-    diet_goal = parseInt(diet_goal)
-    switch (diet_goal) {
-      case 1: {
-        goal_calories = Math.round(0.85 * TDEE)
-        goal_carbs = Math.round((goal_calories * 0.35) / 4)
-        goal_protein = Math.round((goal_calories * 0.4) / 4)
-        goal_fat = Math.round((goal_calories * 0.25) / 9)
-        break
-      }
-      case 2: {
-        goal_calories = TDEE
-        goal_carbs = Math.round((goal_calories * 0.35) / 4)
-        goal_protein = Math.round((goal_calories * 0.4) / 4)
-        goal_fat = Math.round((goal_calories * 0.25) / 9)
-        break
-      }
-      case 3: {
-        goal_calories = Math.round(1.15 * TDEE)
-        goal_carbs = Math.round((goal_calories * 0.45) / 4)
-        goal_protein = Math.round((goal_calories * 0.3) / 4)
-        goal_fat = Math.round((goal_calories * 0.25) / 9)
-        break
-      }
-    }
-    $('#goal_calories').attr('value', goal_calories)
-    $('#goal_carbs').attr('value', goal_carbs)
-    $('#goal_protein').attr('value', goal_protein)
-    $('#goal_fat').attr('value', goal_fat)
-  }
-
-  $('#btn_submit').click(async function () {
-    if (!birthday || !height || !weight || !gender || !diet_goal || !activity_level) {
+    if (!TDEE) {
       Swal.fire({
         icon: 'warning',
-        text: '資訊輸入不完全'
+        text: '請先輸入基本資訊並計算TDEE!'
       })
     } else {
-      const data = await axios.post('/api/1.0/user/target', { birthday, height, weight, gender, activity_level, TDEE, diet_goal, goal_carbs, goal_protein, goal_fat, goal_calories }, { headers: { Authorization: `Bearer ${accessToken}` } })
-      // console.log('data: ', data)
-      if (data.data.error) {
+      /* 由系統依照diet goal計算default營養素 */
+      diet_goal = ($(goalBtn).attr('value'))
+      diet_goal = parseInt(diet_goal)
+      switch (diet_goal) {
+        case 1: {
+          goal_calories = Math.round(0.85 * TDEE)
+          goal_carbs = Math.round((goal_calories * 0.35) / 4)
+          goal_protein = Math.round((goal_calories * 0.4) / 4)
+          goal_fat = Math.round((goal_calories * 0.25) / 9)
+          break
+        }
+        case 2: {
+          goal_calories = TDEE
+          goal_carbs = Math.round((goal_calories * 0.35) / 4)
+          goal_protein = Math.round((goal_calories * 0.4) / 4)
+          goal_fat = Math.round((goal_calories * 0.25) / 9)
+          break
+        }
+        case 3: {
+          goal_calories = Math.round(1.15 * TDEE)
+          goal_carbs = Math.round((goal_calories * 0.45) / 4)
+          goal_protein = Math.round((goal_calories * 0.3) / 4)
+          goal_fat = Math.round((goal_calories * 0.25) / 9)
+          break
+        }
+      }
+      $('#goal_calories').attr('value', goal_calories)
+      $('#goal_carbs').attr('value', goal_carbs)
+      $('#goal_protein').attr('value', goal_protein)
+      $('#goal_fat').attr('value', goal_fat)
+    }
+
+    $('#btn_submit').click(async function () {
+      if (!birthday || !height || !weight || !gender || !diet_goal || !activity_level) {
         Swal.fire({
           icon: 'warning',
-          text: '資訊格式有誤'
+          text: '資訊輸入不完全'
         })
-      } else if (data.data.message) {
-        Swal.fire({
-          icon: 'success',
-          title: '設定成功',
-          footer: '<a href="/profile.html" class="text-secondary">前往個人頁面</a>'
-        })
+      } else {
+        const data = await axios.post('/api/1.0/user/target', { birthday, height, weight, gender, activity_level, TDEE, diet_goal, goal_carbs, goal_protein, goal_fat, goal_calories }, { headers: { Authorization: `Bearer ${accessToken}` } })
+        // console.log('data: ', data)
+        if (data.data.error) {
+          Swal.fire({
+            icon: 'warning',
+            text: '資訊格式有誤'
+          })
+        } else if (data.data.message) {
+          Swal.fire({
+            icon: 'success',
+            title: '設定成功',
+            footer: '<a href="/profile.html" class="text-secondary">前往個人頁面</a>'
+          })
+        }
       }
-    }
-  })
+    })
+  }
 }

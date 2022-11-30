@@ -46,6 +46,8 @@ $('#signupBtn').click(async function () {
         icon: 'success',
         title: '註冊成功',
         footer: '<a href="/target.html" class="text-secondary">前往填寫體態與設定目標💪🏼</a>'
+      }).then((result) => {
+        window.location.href = '/target.html'
       })
     }
   }
