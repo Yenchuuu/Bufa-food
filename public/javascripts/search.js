@@ -104,27 +104,26 @@ $('.pop-background').click(function () {
   $('.pop-window').fadeOut(200)
 })
 
-$('#submit_foodInfo').click(async function () {
-  let name = $('#name').val()
-  /* 名稱不應含空白以及特殊符號 */
-  name.trim()
-  // name = validator.escape(name)
-  // TODO: 只擋半形，那全形呢？
-  name = name.replace(/[\-\_\,\.\!\|\~\`\(\)\#\@\%\-\+\=\/\'\$\%\^\&\*\{\}\:\;\"\L\<\>\?\\]/g, '')
-  let calories = $('#calories').val()
-  let carbs = $('#carbs').val()
-  let protein = $('#protein').val()
-  let fat = $('#fat').val()
-  let perServing = $('#per_serving').val()
-
-  if (validator.isEmpty(name) === true || validator.isNumeric(name)) {
+function checkFoodname() {
+  const reg = new RegExp('^[A-Za-z0-9\u4e00-\u9fa5]+$')
+  const name = $('#name').val().trim()
+  if (!reg.test(name) || validator.isNumeric(name)) {
     Swal.fire({
       icon: 'warning',
       text: '請重新輸入食物名稱',
       footer: '註：請檢查名稱是否為有效文字(不應空白、輸入純數字或包含特殊符號，字數上限為20字元)'
     })
-    return
+    $('#name').val('')
   }
+}
+
+$('#submit_foodInfo').click(async function () {
+  const name = $('#name').val()
+  let calories = $('#calories').val()
+  let carbs = $('#carbs').val()
+  let protein = $('#protein').val()
+  let fat = $('#fat').val()
+  let perServing = $('#per_serving').val()
 
   /* 若數字為0將被判斷為true，故不將C P F檢查放置於此 */
   if (!perServing || !calories) {
