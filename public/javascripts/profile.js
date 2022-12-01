@@ -115,6 +115,19 @@ if (!accessToken) {
   //   }
   // }
 
+  function checkUsername() {
+    const reg = new RegExp('^[A-Za-z0-9\u4e00-\u9fa5]+$')
+    const name = $('#name').val().trim()
+    if (!reg.test(name) || validator.isNumeric(name)) {
+      Swal.fire({
+        icon: 'warning',
+        text: '請重新輸入名稱',
+        footer: '註：請檢查名稱是否為有效文字(不應空白、輸入純數字或包含特殊符號，字數上限為20字元)'
+      })
+      $('#name').val('')
+    }
+  }
+
   $('#submit_userInfo').click(async function () {
     const name = $('#name').val()
     const birthday = $('#birthday').val()

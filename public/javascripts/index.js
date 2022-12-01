@@ -19,6 +19,19 @@ if (accessToken) {
     $('.pop-window').fadeOut(200)
   })
 
+  function checkUsername() {
+    const reg = new RegExp('^[A-Za-z0-9\u4e00-\u9fa5]+$')
+    const name = $('#name').val().trim()
+    if (!reg.test(name)) {
+      Swal.fire({
+        icon: 'warning',
+        text: '請重新輸入名稱',
+        footer: '註：請檢查名稱是否為有效文字(不應空白或包含特殊符號，字數上限為20字元)'
+      })
+      $('#name').val('')
+    }
+  }
+
   $('#signupBtn').click(async function () {
     const name = $('#name').val()
     const email = $('#register_email').val()
