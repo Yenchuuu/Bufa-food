@@ -53,7 +53,7 @@
   </nav>
   
   <main class="d-flex flex-nowrap container-color">
-    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
+    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color mb-4" style="width: 13EM;">
       <div class="sidebar mt-3">
         <a href="/diary.html">飲食紀錄</a>
         <a href="/footprint.html">每週摘要</a>
@@ -61,11 +61,11 @@
         <a href="/profile.html">個人資訊</a>
       </div>
     </div>
-  <div style="height: 1000px; max-width: 750px;" class="container col-lg-6 p-3 mb-4">
+  <div style="height: 1050px; max-width: 750px;" class="container col-lg-6 p-3 mb-4">
     <div class="row column-style mt-4 mb-4">
       <h3 class="text-secondary">我的每週摘要 👣</h3>
     </div>
-    <div style="align-items: center;" class="row">
+    <div style="align-items: center;" class="row mt-4 mb-4">
       <div class="col-4">
         <input type="week" name="week" id="weekPicker" required>
       </div>
@@ -73,11 +73,14 @@
         <button class="button" id="weekSubmit">查詢</button>
       </div>
     </div>
-    <div class="mt-4 mb-4 hiddenChart" style="display: none;">
+    <div>
+      <h5 class="text-secondary mt-4 mb-4" id="weekInfo"></h5>
+    </div>
+    <div class="mt-4 mb-4">
       <h4 class="text-secondary">卡路里</h4>
       <canvas id="calories" width="400" height="200"></canvas>
     </div>
-    <div class="mt-6 mb-6 hiddenChart" style="display: none;">
+    <div class="mt-6 mb-6">
       <h4 class="text-secondary">營養素</h4>
       <canvas id="nutrition" width="400" height="200"></canvas>
     </div>

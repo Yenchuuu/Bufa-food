@@ -15,18 +15,37 @@ if (!accessToken) {
     window.location.href = '/index.html'
   })
 
+  $(document).ready(async function () {
+    const weekVal = $('#weekPicker').val()
+    if (weekVal === '') {
+      const today = moment().format('YYYY-MM-DD')
+      const dayOfweek = moment(today).day()
+      const startDate = moment(today).add(-(dayOfweek - 1), 'day').format('YYYY-MM-DD')
+      const endDate = moment(today).add((7 - dayOfweek), 'day').format('YYYY-MM-DD')
+
+      const data = await axios.get(`/api/1.0/user/footprint?date=${startDate}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+      chart(data)
+      $('#weekInfo').text(`當週數據 ( ${startDate} ~ ${endDate} )`)
+    }
+  })
+
   $('#weekSubmit').click(async function () {
-    $('.hiddenChart').show()
+    $('#currentWeek').hide()
     const weekVal = $('#weekPicker').val()
     const year = weekVal.split('-')[0]
     const week = parseInt(weekVal.split('-')[1].split('W')[1])
     // FIXME: 不知道為什麼2022年的週數都會少一，但+1週後2023的日期又會錯
-    const startDate = moment().year(year).week((week + 1)).format('YYYY-MM-DD')
-    const endDate = moment(startDate, 'YYYY-MM-DD').add(6, 'day').format('YYYY-MM-DD')
+    const dayInChosenWeek = moment().year(year).week((week + 1)).format('YYYY-MM-DD')
+    /* 選取某週取到的日期會因為今天星期幾而有所不同，所以先辨識出今天星期幾，再分別推斷星期一與星期日作為start and end date */
+    const dayOfweek = moment(dayInChosenWeek).day()
+    const startDate = moment(dayInChosenWeek).add(-(dayOfweek - 1), 'day').format('YYYY-MM-DD')
+    const endDate = moment(dayInChosenWeek).add((7 - dayOfweek), 'day').format('YYYY-MM-DD')
 
     const data = await axios.get(`/api/1.0/user/footprint?date=${startDate}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-    // console.log('data: ', data);
-
+    chart(data)
+    $('#weekInfo').text(`彙總數據 ( ${startDate} ~ ${endDate} )`)
+  })
+  function chart(data) {
     const calories = document.getElementById('calories').getContext('2d')
 
     const caloriesChart = new Chart(calories, {
@@ -37,22 +56,22 @@ if (!accessToken) {
             label: '累積',
             data: data.data.dailyCaloriesArray,
             backgroundColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)'
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)'
             ],
             borderColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)'
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)'
             ],
             borderWidth: 1
           },
@@ -86,22 +105,22 @@ if (!accessToken) {
             label: '碳水化合物',
             data: data.data.dailyCarbsArray,
             backgroundColor: [
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)'
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)'
             ],
             borderColor: [
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(54, 162, 235, 0.2)'
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)',
+              'rgb(205, 194, 174, 1)'
             ],
             borderWidth: 1
           },
@@ -109,22 +128,22 @@ if (!accessToken) {
             label: '蛋白質',
             data: data.data.dailyProteinArray,
             backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)'
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)'
             ],
             borderColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)'
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)',
+              'rgb(194, 222, 209, 1)'
             ],
             borderWidth: 1
           },
@@ -132,22 +151,22 @@ if (!accessToken) {
             label: '脂肪',
             data: data.data.dailyFatArray,
             backgroundColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)'
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)'
             ],
             borderColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)'
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)',
+              'rgb(236, 229, 199, 1)'
             ],
             borderWidth: 1
           },
@@ -158,8 +177,8 @@ if (!accessToken) {
             pointRadius: 4,
             pointHoverRadius: 7,
             data: data.data.goalCarbsArray,
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 0.2)',
+            backgroundColor: 'rgb(205, 194, 174, 1)',
+            borderColor: 'rgb(205, 194, 174, 1)',
             type: 'line'
           },
           {
@@ -170,8 +189,8 @@ if (!accessToken) {
             pointRadius: 4,
             pointHoverRadius: 7,
             data: data.data.goalProteinArray,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 0.2)',
+            backgroundColor: 'rgb(194, 222, 209, 1)',
+            borderColor: 'rgb(194, 222, 209, 1)',
             type: 'line'
           },
           {
@@ -182,8 +201,8 @@ if (!accessToken) {
             pointRadius: 6,
             pointHoverRadius: 9,
             data: data.data.goalFatArray,
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 0.2)',
+            backgroundColor: 'rgb(236, 229, 199, 1)',
+            borderColor: 'rgb(236, 229, 199, 1)',
             type: 'line'
           }
         ],
@@ -197,5 +216,5 @@ if (!accessToken) {
         }
       }
     })
-  })
+  }
 }
