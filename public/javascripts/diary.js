@@ -91,8 +91,7 @@ if (!accessToken) {
           break
         }
       }
-      console.log('switchMeal', switchMeal)
-      recommendMeal.map(food => $(`#${switchMeal}Record`).append += `<div class="col-4 text-secondary card-body-text">${food.name}</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${food.per_serving}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.calories)}</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.carbs)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.protein)}g</p></li><li class="nav-card-title"><p class="text-secondary">${Math.round(food.fat)}g</p></li></ul></div></div></div>`)
+      // console.log('switchMeal', switchMeal)
       window.location.href = `/diary.html?date=${date}`
     }
   })
@@ -170,10 +169,7 @@ if (!accessToken) {
     const dateB = dateA - (1000 * 60 * 60 * 24)
     // console.log('dateB', dateB)
   })
-  // getDiaryRecord(date)
-  // onclick="changeDate(this)"
 
-  // FIXME: 用.hide() .show()優化
   /* 取得飲食紀錄資訊 */
   const getDate = $('#showDate')
   const getBreakfast = $('#breakfastRecord')
@@ -183,10 +179,10 @@ if (!accessToken) {
 
   async function getDiaryRecord(date) {
     const diaryRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-    // console.log('diaryRecord', diaryRecord)
-    getDate.append(`<span class="text-secondary" id="currentDate">${date}</span>`)
+    getDate.append(`<span class="text-secondary" id="currentDate" title="以日曆切換至指定日期">${date}</span>`)
 
-    const breakfast = diaryRecord.data.mealRecords.filter(e => e.meal === 1)
+    const breakfast = diaryRecord.data.mealRecords.mealRecords.filter(e => e.meal === 1)
+    const [breakfastSummary] = diaryRecord.data.mealRecords.recordSummary.filter(e => e.meal === 1)
 
     /* 早餐 */
     if (breakfast.length === 0) {
@@ -205,7 +201,7 @@ if (!accessToken) {
 
         fields: [
           { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
-          { name: 'serving_amount', type: 'number', width: 50, editing: true },
+          { name: 'amountTotal', type: 'number', width: 50, editing: true },
           { name: 'calories', type: 'number', width: 50, editing: false },
           { name: 'carbs', type: 'number', width: 50, editing: false },
           { name: 'protein', type: 'number', width: 50, editing: false },
@@ -228,7 +224,6 @@ if (!accessToken) {
             })
           },
           deleteItem: function (item) {
-            console.log('item: ', item)
             return $.ajax({
               headers: {
                 'Content-Type': 'application/json',
@@ -242,23 +237,16 @@ if (!accessToken) {
           }
         }
       })
-      const breakfastCaloriesTotal = breakfast.reduce((acc, item) => {
-        return acc + parseInt(item.calories)
-      }, 0)
-      const breakfastCarbsTotal = breakfast.reduce((acc, item) => {
-        return acc + parseInt(item.carbs)
-      }, 0)
-      const breakfastProteinTotal = breakfast.reduce((acc, item) => {
-        return acc + parseInt(item.protein)
-      }, 0)
-      const breakfastFatTotal = breakfast.reduce((acc, item) => {
-        return acc + parseInt(item.fat)
-      }, 0)
-      document.querySelector('#breakfastTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${breakfastCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${breakfastFatTotal}g</p></li></ul></div></div></div>`
+      $('#breakfastTotal').show()
+      $('#breakfastCaloriesTotal').text(breakfastSummary.caloriesTotal)
+      $('#breakfastCarbsTotal').text(`${breakfastSummary.carbsTotal}g`)
+      $('#breakfastProteinTotal').text(`${breakfastSummary.proteinTotal}g`)
+      $('#breakfastFatTotal').text(`${breakfastSummary.fatTotal}g`)
     }
 
     /* 午餐 */
-    const lunch = diaryRecord.data.mealRecords.filter(e => e.meal === 2)
+    const lunch = diaryRecord.data.mealRecords.mealRecords.filter(e => e.meal === 2)
+    const [lunchSummary] = diaryRecord.data.mealRecords.recordSummary.filter(e => e.meal === 2)
     if (lunch.length === 0) {
       getLunch.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有午餐紀錄喔～</p></div>')
     } else {
@@ -274,7 +262,7 @@ if (!accessToken) {
 
         fields: [
           { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
-          { name: 'serving_amount', type: 'number', width: 50, editing: true },
+          { name: 'amountTotal', type: 'number', width: 50, editing: true },
           { name: 'calories', type: 'number', width: 50, editing: false },
           { name: 'carbs', type: 'number', width: 50, editing: false },
           { name: 'protein', type: 'number', width: 50, editing: false },
@@ -296,8 +284,6 @@ if (!accessToken) {
             })
           },
           deleteItem: function (item) {
-            // console.log('item: ', item)
-            // $('.jsgrid-header-cell').parent().hide()
             return $.ajax({
               headers: {
                 'Content-Type': 'application/json',
@@ -311,23 +297,16 @@ if (!accessToken) {
           }
         }
       })
-      const lunchCaloriesTotal = lunch.reduce((acc, item) => {
-        return acc + parseInt(item.calories)
-      }, 0)
-      const lunchCarbsTotal = lunch.reduce((acc, item) => {
-        return acc + parseInt(item.carbs)
-      }, 0)
-      const lunchProteinTotal = lunch.reduce((acc, item) => {
-        return acc + parseInt(item.protein)
-      }, 0)
-      const lunchFatTotal = lunch.reduce((acc, item) => {
-        return acc + parseInt(item.fat)
-      }, 0)
-      document.querySelector('#lunchTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${lunchCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${lunchCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${lunchProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${lunchFatTotal}g</p></li></ul></div></div></div>`
+      $('#lunchTotal').show()
+      $('#lunchCaloriesTotal').text(lunchSummary.caloriesTotal)
+      $('#lunchCarbsTotal').text(`${lunchSummary.carbsTotal}g`)
+      $('#lunchProteinTotal').text(`${lunchSummary.proteinTotal}g`)
+      $('#lunchFatTotal').text(`${lunchSummary.fatTotal}g`)
     }
 
     /* 晚餐 */
-    const dinner = diaryRecord.data.mealRecords.filter(e => e.meal === 3)
+    const dinner = diaryRecord.data.mealRecords.mealRecords.filter(e => e.meal === 3)
+    const [dinnerSummary] = diaryRecord.data.mealRecords.recordSummary.filter(e => e.meal === 3)
     if (dinner.length === 0) {
       getDinner.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有晚餐紀錄喔～</p></div>')
     } else {
@@ -343,7 +322,7 @@ if (!accessToken) {
 
         fields: [
           { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
-          { name: 'serving_amount', type: 'number', width: 50, editing: true },
+          { name: 'amountTotal', type: 'number', width: 50, editing: true },
           { name: 'calories', type: 'number', width: 50, editing: false },
           { name: 'carbs', type: 'number', width: 50, editing: false },
           { name: 'protein', type: 'number', width: 50, editing: false },
@@ -365,7 +344,6 @@ if (!accessToken) {
             })
           },
           deleteItem: function (item) {
-            console.log('item: ', item)
             return $.ajax({
               headers: {
                 'Content-Type': 'application/json',
@@ -379,23 +357,16 @@ if (!accessToken) {
           }
         }
       })
-      const dinnerCaloriesTotal = dinner.reduce((acc, item) => {
-        return acc + parseInt(item.calories)
-      }, 0)
-      const dinnerCarbsTotal = dinner.reduce((acc, item) => {
-        return acc + parseInt(item.carbs)
-      }, 0)
-      const dinnerProteinTotal = dinner.reduce((acc, item) => {
-        return acc + parseInt(item.protein)
-      }, 0)
-      const dinnerFatTotal = dinner.reduce((acc, item) => {
-        return acc + parseInt(item.fat)
-      }, 0)
-      document.querySelector('#dinnerTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${dinnerCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${dinnerFatTotal}g</p></li></ul></div></div></div>`
+      $('#dinnerTotal').show()
+      $('#dinnerCaloriesTotal').text(dinnerSummary.caloriesTotal)
+      $('#dinnerCarbsTotal').text(`${dinnerSummary.carbsTotal}g`)
+      $('#dinnerProteinTotal').text(`${dinnerSummary.proteinTotal}g`)
+      $('#dinnerFatTotal').text(`${dinnerSummary.fatTotal}g`)
     }
 
     /* 點心 */
-    const snack = diaryRecord.data.mealRecords.filter(e => e.meal === 4)
+    const snack = diaryRecord.data.mealRecords.mealRecords.filter(e => e.meal === 4)
+    const [snackSummary] = diaryRecord.data.mealRecords.recordSummary.filter(e => e.meal === 4)
     if (snack.length === 0) {
       getSnack.append('<div class="col-12 text-secondary card-body-text"><p>今日還沒有點心紀錄喔～</p></div>')
     } else {
@@ -411,7 +382,7 @@ if (!accessToken) {
 
         fields: [
           { name: 'name', type: 'text', width: 150, validate: 'required', editing: false },
-          { name: 'serving_amount', type: 'number', width: 50, editing: true },
+          { name: 'amountTotal', type: 'number', width: 50, editing: true },
           { name: 'calories', type: 'number', width: 50, editing: false },
           { name: 'carbs', type: 'number', width: 50, editing: false },
           { name: 'protein', type: 'number', width: 50, editing: false },
@@ -433,7 +404,6 @@ if (!accessToken) {
             })
           },
           deleteItem: function (item) {
-            console.log('item: ', item)
             return $.ajax({
               headers: {
                 'Content-Type': 'application/json',
@@ -447,26 +417,18 @@ if (!accessToken) {
           }
         }
       })
-      const snackCaloriesTotal = snack.reduce((acc, item) => {
-        return acc + parseInt(item.calories)
-      }, 0)
-      const snackCarbsTotal = snack.reduce((acc, item) => {
-        return acc + parseInt(item.carbs)
-      }, 0)
-      const snackProteinTotal = snack.reduce((acc, item) => {
-        return acc + parseInt(item.protein)
-      }, 0)
-      const snackFatTotal = snack.reduce((acc, item) => {
-        return acc + parseInt(item.fat)
-      }, 0)
-      document.querySelector('#snackTotal').innerHTML += `<div class="col-4 text-secondary card-body-text">總計</div><div class="col-8"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary"></p></li><li class="nav-card-title"><p class="text-secondary">${snackCaloriesTotal}</p></li><li class="nav-card-title"><p class="text-secondary">${snackCarbsTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${snackProteinTotal}g</p></li><li class="nav-card-title"><p class="text-secondary">${snackFatTotal}g</p></li></ul></div></div></div>`
+      $('#snackTotal').show()
+      $('#snackCaloriesTotal').text(snackSummary.caloriesTotal)
+      $('#snackCarbsTotal').text(`${snackSummary.carbsTotal}g`)
+      $('#snackProteinTotal').text(`${snackSummary.proteinTotal}g`)
+      $('#snackFatTotal').text(`${snackSummary.fatTotal}g`)
     }
 
     /* 總計圓餅圖 */
-    $('#dailyCaloriesTotal').append(`<p class="text-secondary">${diaryRecord.data.caloriesTotal}</p>`)
-    $('#dailyCarbsTotal').append(`<p class="text-secondary">${diaryRecord.data.carbsTotal}g</p>`)
-    $('#dailyProteinTotal').append(`<p class="text-secondary">${diaryRecord.data.proteinTotal}g</p>`)
-    $('#dailyFatTotal').append(`<p class="text-secondary">${diaryRecord.data.fatTotal}g</p>`)
+    $('#dailyCaloriesTotal').text(diaryRecord.data.caloriesTotal)
+    $('#dailyCarbsTotal').text(`${diaryRecord.data.carbsTotal}g`)
+    $('#dailyProteinTotal').text(`${diaryRecord.data.proteinTotal}g`)
+    $('#dailyFatTotal').text(`${diaryRecord.data.fatTotal}g`)
     const carbsPercentage = parseFloat(diaryRecord.data.carbsTotal * 4 / diaryRecord.data.caloriesTotal).toFixed(3)
     const proteinPercentage = parseFloat(diaryRecord.data.proteinTotal * 4 / diaryRecord.data.caloriesTotal).toFixed(3)
     const fatPercentage = parseFloat(diaryRecord.data.fatTotal * 9 / diaryRecord.data.caloriesTotal).toFixed(3)

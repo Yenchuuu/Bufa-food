@@ -47,23 +47,23 @@ const updateMealRecord = async (req, res) => {
   }
   // let { meal, serving_amount: servingAmount, food_id: foodId, calories, carbs, protein, fat } = req.body
 
-  /* 用修改份數呈上食物之原始營養素渲染至前端 */
-  // FIXME: 修改食物資訊時應該要可以輸入小數點
+  /* 用修改克數乘上食物之原始營養素渲染至前端 */
   const data = req.body
+  console.log('data: ', data);
   data.meal = parseInt(data.meal)
   data.food_id = parseInt(data.food_id)
-  data.serving_amount = parseFloat(data.serving_amount).toFixed(1)
   const foodId = data.food_id
   const foodDetail = await Food.getFoodDetail(foodId)
-  data.calories = Math.round(foodDetail[0].calories * data.serving_amount)
-  data.carbs = parseInt(foodDetail[0].carbs * data.serving_amount)
-  data.protein = parseInt(foodDetail[0].protein * data.serving_amount)
-  data.fat = parseInt(foodDetail[0].fat * data.serving_amount)
+  const perServing = foodDetail[0].per_serving
+  const servingAmount = parseFloat(data.amountTotal / perServing).toFixed(2)
+  data.calories = Math.round(foodDetail[0].calories * servingAmount)
+  data.carbs = parseInt(foodDetail[0].carbs * servingAmount)
+  data.protein = parseInt(foodDetail[0].protein * servingAmount)
+  data.fat = parseInt(foodDetail[0].fat * servingAmount)
 
   try {
     const foodId = data.food_id
     const meal = data.meal
-    const servingAmount = data.serving_amount
     const userDetail = await User.getUserDetail(email)
     const userId = userDetail[0].id
     await Food.updateMealRecord(userId, foodId, meal, servingAmount, date)
@@ -108,27 +108,26 @@ const getDiaryRecord = async (req, res) => {
     date = getDate
   }
   // console.log('date', date)
-  // FIXME: 可以改用SQL計算
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
   const mealRecords = await Food.getUserRecord(userId, date)
-  mealRecords.map(e => e.serving_amount = parseFloat(e.serving_amount).toFixed(1))
-  mealRecords.map(e => e.calories = parseInt(e.calories))
-  mealRecords.map(e => e.carbs = parseInt(e.carbs))
-  mealRecords.map(e => e.protein = parseInt(e.protein))
-  mealRecords.map(e => e.fat = parseInt(e.fat))
+  // mealRecords.map(e => e.serving_amount = parseFloat(e.serving_amount).toFixed(1))
+  // mealRecords.map(e => e.calories = parseInt(e.calories))
+  // mealRecords.map(e => e.carbs = parseInt(e.carbs))
+  // mealRecords.map(e => e.protein = parseInt(e.protein))
+  // mealRecords.map(e => e.fat = parseInt(e.fat))
 
-  const caloriesTotal = mealRecords.reduce((acc, item) => {
-    return acc + parseInt(item.calories)
+  const caloriesTotal = mealRecords.recordSummary.reduce((acc, item) => {
+    return acc + parseInt(item.caloriesTotal)
   }, 0)
-  const carbsTotal = mealRecords.reduce((acc, item) => {
-    return acc + parseInt(item.carbs)
+  const carbsTotal = mealRecords.recordSummary.reduce((acc, item) => {
+    return acc + parseInt(item.carbsTotal)
   }, 0)
-  const proteinTotal = mealRecords.reduce((acc, item) => {
-    return acc + parseInt(item.protein)
+  const proteinTotal = mealRecords.recordSummary.reduce((acc, item) => {
+    return acc + parseInt(item.proteinTotal)
   }, 0)
-  const fatTotal = mealRecords.reduce((acc, item) => {
-    return acc + parseInt(item.fat)
+  const fatTotal = mealRecords.recordSummary.reduce((acc, item) => {
+    return acc + parseInt(item.fatTotal)
   }, 0)
   res.json({ mealRecords, caloriesTotal, carbsTotal, proteinTotal, fatTotal })
 }
@@ -144,7 +143,6 @@ const createFoodDetail = async (req, res) => {
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
   let { name, calories, carbs, protein, fat, perServing } = req.body
-  console.log('req.body: ', req.body)
 
   calories = parseInt(calories)
   carbs = parseInt(carbs)

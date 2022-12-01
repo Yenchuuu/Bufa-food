@@ -74,7 +74,7 @@
           <button type="button" class="btn btn-outline-secondary btn-sm" id="previousDay">前一天</button>
         </form>
           <div id="showDate">
-            <input type="date" id="datepicker" style="display:none;" onblur="chooseDate()">
+            <input type="date" id="datepicker" class="text-secondary" style="display:none; border: none;background-color: transparent;" onblur="chooseDate()">
           </div>  
         <form>
           <button type="button" class="btn btn-outline-secondary btn-sm" id="followingDay">後一天</button>
@@ -111,16 +111,7 @@
             <!-- <img src="/icons/add_green.png" style="width: 35px;" id="add_diary"> -->
             <button class="btn btn-outline-secondary justify-content-md-center" type="button" id="add_diary">新增紀錄</button>
           </a>
-        <!-- </div> -->
-        <!-- <div class="col-4"> -->
-          <!-- <img src="/icons/magic.png" style="width: 45px;" id="generateDayMeals"> -->
-          <button class="btn btn-outline-secondary justify-content-md-center" type="button" id="generateDayMeals">一日菜單</button>
-        <!-- </div> -->
-        <!-- <div style="padding: 0;" class="col-8">
-        <div class="row">
-          
-        </div>
-        </div> -->
+          <button class="btn btn-outline-secondary justify-content-md-center" type="button" id="generateDayMeals" title="不知道要吃什麼嗎？讓我們為你推薦一日菜單吧！">一日菜單</button>
       </div>
     </div>
     <div class="container d-grid gap-3">
@@ -136,7 +127,7 @@
             <div class="col-8">
             <ul class="nav nav-pills">
               <li class="nav-card-title">
-                <p class="text-secondary">份數</p>
+                <p class="text-secondary">份量<br>g</p>
               </li>
               <li class="nav-card-title">
                 <p class="text-secondary">熱量<br>kcal</br></p>
@@ -153,29 +144,19 @@
             </ul>
             </div>
           </div>
-          <div class="row card-body-title" id="breakfastRecord">
-            <!-- <div class="col-4 text-secondary card-body-text">漢堡</div>
+          <div class="row card-body-title" id="breakfastRecord"></div>
+          <div class="row" id="breakfastTotal" style="display: none;">
+            <div class="col-4 text-secondary card-body-text">總計</div>
             <div class="col-8">
               <ul class="nav nav-pills">
-                <li class="nav-card-title">
-                  <p class="text-secondary">1.0</p>
-                </li>
-                <li class="nav-card-title">
-                  <p class="text-secondary">350</p>
-                </li>
-                <li class="nav-card-title">
-                  <p class="text-secondary">80g</p>
-                </li>
-                <li class="nav-card-title">
-                  <p class="text-secondary">12g</p>
-                </li>
-                <li class="nav-card-title">
-                  <p class="text-secondary">8g</p>
-                </li>
+                <li class="nav-card-title"><p class="text-secondary"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastCaloriesTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastCarbsTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastProteinTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastFatTotal"></p></li>
               </ul>
-            </div> -->
+            </div>
           </div>
-          <div class="row" id="breakfastTotal"></div>
         </div>
       </div>
       <div class="card text-center">
@@ -185,7 +166,7 @@
             <div class="col-8">
             <ul class="nav nav-pills">
               <li class="nav-card-title">
-                <p class="text-secondary">份數</p>
+                <p class="text-secondary">份量<br>g</p>
               </li>
               <li class="nav-card-title">
                 <p class="text-secondary">熱量<br>kcal</br></p>
@@ -204,7 +185,17 @@
           </div>
             <div class="row card-body-title" id="lunchRecord">
             </div>
-            <div class="row" id="lunchTotal">
+            <div class="row" id="lunchTotal" style="display: none;">
+              <div class="col-4 text-secondary card-body-text">總計</div>
+              <div class="col-8">
+                <ul class="nav nav-pills">
+                  <li class="nav-card-title"><p class="text-secondary"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchCaloriesTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchCarbsTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchProteinTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchFatTotal"></p></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -215,7 +206,7 @@
               <div class="col-8">
               <ul class="nav nav-pills">
                 <li class="nav-card-title">
-                  <p class="text-secondary">份數</p>
+                  <p class="text-secondary">份量<br>g</p>
                 </li>
                 <li class="nav-card-title">
                   <p class="text-secondary">熱量<br>kcal</br></p>
@@ -233,7 +224,18 @@
               </div>
             </div>
               <div class="row card-body-title" id="dinnerRecord"></div>
-              <div class="row" id="dinnerTotal"></div>
+              <div class="row" id="dinnerTotal" style="display: none;">
+                <div class="col-4 text-secondary card-body-text">總計</div>
+                <div class="col-8">
+                  <ul class="nav nav-pills">
+                    <li class="nav-card-title"><p class="text-secondary"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerCaloriesTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerCarbsTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerProteinTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerFatTotal"></p></li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
           <div class="card text-center">
@@ -243,7 +245,7 @@
                 <div class="col-8">
                 <ul class="nav nav-pills">
                   <li class="nav-card-title">
-                    <p class="text-secondary">份數</p>
+                    <p class="text-secondary">份量<br>g</p>
                   </li>
                   <li class="nav-card-title">
                     <p class="text-secondary">熱量<br>kcal</br></p>
@@ -261,7 +263,18 @@
                 </div>
               </div>
                 <div class="row card-body-title" id="snackRecord"></div>
-                <div class="row" id="snackTotal"></div>
+                <div class="row" id="snackTotal" style="display: none;">
+                  <div class="col-4 text-secondary card-body-text">總計</div>
+                  <div class="col-8">
+                    <ul class="nav nav-pills">
+                      <li class="nav-card-title"><p class="text-secondary"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackCaloriesTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackCarbsTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackProteinTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackFatTotal"></p></li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -293,11 +306,11 @@
                     <div class="col-4 text-secondary card-body-text">當日總計</div>
                       <div class="col-8">
                         <ul class="nav nav-pills">
-                          <li class="nav-card-title"><p class="text-secondary"></p></li>
-                          <li class="nav-card-title" id="dailyCaloriesTotal"></li>
-                          <li class="nav-card-title" id="dailyCarbsTotal"></li>
-                          <li class="nav-card-title" id="dailyProteinTotal"></li>
-                          <li class="nav-card-title" id="dailyFatTotal"></li>
+                          <li class="nav-card-title text-secondary"><p class="text-secondary"></p></li>
+                          <li class="nav-card-title text-secondary" id="dailyCaloriesTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyCarbsTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyProteinTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyFatTotal"></li>
                         </ul>
                       </div>
                     </div>
@@ -308,7 +321,7 @@
 
       </div>
     </div>
-    <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 26EM;">
+    <div class="flex-shrink-0 sidebar-custom pt-3" style="width: 24EM;">
       <div class="sidebar mt-2" id="pieChartContainer">
         <div id="pieChart"  style="width:100%; height:350px;"></div>
       </div>

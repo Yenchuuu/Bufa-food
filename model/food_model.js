@@ -16,12 +16,23 @@ const deleteMealRecord = async (recordId) => {
 }
 
 const getUserRecord = async (userId, date) => {
-  const [mealRecords] = await db.execute(
-    'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, (food.calories * serving_amount) AS calories, (food.carbs * serving_amount) AS carbs, (food.protein * serving_amount) AS protein, (food.fat * serving_amount) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
-    [userId, date]
-  )
-  // console.log('mealRecords', mealRecords)
-  return mealRecords
+  const conn = await db.getConnection()
+  try {
+    await conn.query('START TRANSACTION')
+    const [mealRecords] = await conn.execute(
+      'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, ROUND(food.per_serving * serving_amount, 0) AS amountTotal, ROUND(food.calories * serving_amount, 0) AS calories, ROUND(food.carbs * serving_amount, 0) AS carbs, ROUND(food.protein * serving_amount, 0) AS protein, ROUND(food.fat * serving_amount, 0) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
+      [userId, date])
+    const [recordSummary] = await conn.execute('SELECT user_meal.meal, ROUND(SUM(food.calories * serving_amount), 0) AS caloriesTotal, ROUND(SUM(food.carbs * serving_amount), 0) AS carbsTotal, ROUND(SUM(food.protein * serving_amount), 0) AS proteinTotal, ROUND(SUM(food.fat * serving_amount), 0) AS fatTotal FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?) GROUP BY user_meal.meal;', [userId, date])
+    // console.log('mealRecords', mealRecords)
+    await conn.query('COMMIT')
+    return { mealRecords, recordSummary }
+  } catch (err) {
+    console.error(err)
+    await conn.query('ROLL BACK')
+    throw err
+  } finally {
+    await conn.release()
+  }
 }
 
 const getFoodDetail = async (foodId) => {
