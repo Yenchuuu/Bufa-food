@@ -38,3 +38,7 @@
   width: 30rem;
   z-index: 2;
 }
+
+#add_food:hover{
+  color: #7BB08A;
+}

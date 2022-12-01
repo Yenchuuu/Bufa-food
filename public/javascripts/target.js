@@ -156,7 +156,9 @@ if (!accessToken) {
           Swal.fire({
             icon: 'success',
             title: '設定成功',
-            footer: '<a href="/profile.html" class="text-secondary">前往個人頁面</a>'
+            footer: '<a href="/diary.html" class="text-secondary">前往紀錄飲食</a>'
+          }).then(()=>{
+            window.location.href = '/diary.html'
           })
         }
       }

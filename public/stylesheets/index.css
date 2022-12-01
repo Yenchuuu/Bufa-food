@@ -31,10 +31,10 @@ a:hover {
   display:none;
   border-radius: 1em;
   width:600px;
-  height:550px;
+  height:600px;
   position:fixed;
   top:25%;
-  margin-top:-100px; 
+  margin-top:-80px; 
   background:ghostwhite;
   z-index:3;
   left:50%;
@@ -46,6 +46,13 @@ a:hover {
   display: flex;
   flex-direction: column;
   margin: 20px 0;
+  justify-content: center;
+  align-content: center;
+}
+
+.form-container{
+  height: 500px;
+  display: flex;
   justify-content: center;
   align-content: center;
 }

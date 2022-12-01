@@ -53,43 +53,43 @@ async function getFoodDetail(foodId) {
 
 $(document).ready(async function () {
   if (!accessToken) {
-    $('#add_collection').append('<i class="click_icon fa-regular fa-heart"></i>')
-    $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up"></i>')
-    $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down"></i>')
-    $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark"></i>')
-    $('#add_diary').append('<i class="click_icon fa-regular fa-calendar-plus"></i>')
+    $('#add_collection').append('<i class="click_icon fa-regular fa-heart" title="收藏"></i>')
+    $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up" title="喜歡"></i>')
+    $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down" title="不喜歡"></i>')
+    $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark" title="挑食"></i>')
+    $('#add_diary').append('<i class="click_icon fa-regular fa-calendar-plus" title="新增至飲食紀錄"></i>')
   } else {
-    $('#add_diary').append('<i class="click_icon fa-regular fa-calendar-plus"></i>')
+    $('#add_diary').append('<i class="click_icon fa-regular fa-calendar-plus" title="新增至飲食紀錄"></i>')
     const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
     // console.log('data', data);
     const preference = data.data.preference.filter(e => e.food_id == foodId)
     if (preference.length === 0) {
-      $('#add_collection').append('<i class="click_icon fa-regular fa-heart"></i>')
-      $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up"></i>')
-      $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down"></i>')
-      $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark"></i>')
+      $('#add_collection').append('<i class="click_icon fa-regular fa-heart" title="收藏"></i>')
+      $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up" title="喜歡"></i>')
+      $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down" title="不喜歡"></i>')
+      $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark" title="挑食"></i>')
       return
     }
     if (preference[0].collection === 0) {
-      $('#add_collection').append('<i class="click_icon fa-regular fa-heart"></i>')
+      $('#add_collection').append('<i class="click_icon fa-regular fa-heart" title="收藏"></i>')
     } else if (preference[0].collection === 1) {
-      $('#add_collection').append('<i class="click_icon fa-solid fa-heart"></i>')
+      $('#add_collection').append('<i class="click_icon fa-solid fa-heart" title="取消收藏"></i>')
     }
 
     if (preference[0].likeIt === 0) {
-      $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up"></i>')
+      $('#thumb_up').append('<i class="click_icon fa-regular fa-thumbs-up" title="喜歡"></i>')
     } else if (preference[0].likeIt === 1) {
-      $('#thumb_up').append('<i class="click_icon fa-solid fa-thumbs-up"></i>')
+      $('#thumb_up').append('<i class="click_icon fa-solid fa-thumbs-up" title="收回喜歡"></i>')
     }
     if (preference[0].dislikeIt === 0) {
-      $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down"></i>')
+      $('#thumb_down').append('<i class="click_icon fa-regular fa-thumbs-down" title="不喜歡"></i>')
     } else if (preference[0].dislikeIt === 1) {
-      $('#thumb_down').append('<i class="click_icon fa-solid fa-thumbs-down"></i>')
+      $('#thumb_down').append('<i class="click_icon fa-solid fa-thumbs-down" title="收回不喜歡"></i>')
     }
     if (preference[0].exclusion === 0) {
-      $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark"></i>')
+      $('#add_exclusiion').append('<i class="click_icon fa-regular fa-circle-xmark" title="挑食"></i>')
     } else if (preference[0].exclusion === 1) {
-      $('#add_exclusiion').append('<i class="click_icon fa-solid fa-circle-xmark"></i>')
+      $('#add_exclusiion').append('<i class="click_icon fa-solid fa-circle-xmark" title="取消挑食"></i>')
     }
   }
 })
@@ -130,19 +130,19 @@ async function updateInfo(iconBtn) {
       console.log('collection', collection)
       if (collection.length === 0 || collection[0].collection === 0) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        $('#add_collection').replaceWith('<i class="click_icon fa-solid fa-heart"></i>')
+        $('#add_collection').replaceWith('<i class="click_icon fa-solid fa-heart" title="取消收藏"></i>')
         Toast.fire({
           icon: 'success',
           title: `已將${foodName}加入收藏列表`,
-          footer: '<a href="/mine.html" class="text-secondary">前往我的食物清單</a>'
+          footer: '<a href="/mine.html" class="text-secondary">前往喜好清單</a>'
         })
       } else if (collection[0].collection === 1) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        $('#add_collection').replaceWith('<i class="click_icon fa-regular fa-heart"></i>')
+        $('#add_collection').replaceWith('<i class="click_icon fa-regular fa-heart" title="收藏"></i>')
         Toast.fire({
           icon: 'success',
           title: `已將${foodName}從收藏列表移除`,
-          footer: '<a href="/mine.html" class="text-secondary">前往我的食物清單</a>'
+          footer: '<a href="/mine.html" class="text-secondary">前往喜好清單</a>'
         })
       }
       break
@@ -153,16 +153,16 @@ async function updateInfo(iconBtn) {
       console.log('likedItem', likedItem)
       if (likedItem.length === 0 || likedItem[0].likeIt === 0) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        $('#thumb_up').replaceWith('<i class="click_icon fa-solid fa-thumbs-up"></i>')
-        $('#thumb_down').replaceWith('<i class="click_icon fa-regular fa-thumbs-down"></i>')
-        $('#add_exclusiion').replaceWith('<i class="click_icon fa-regular fa-circle-xmark"></i>')
+        $('#thumb_up').replaceWith('<i class="click_icon fa-solid fa-thumbs-up" title="收回喜歡"></i>')
+        $('#thumb_down').replaceWith('<i class="click_icon fa-regular fa-thumbs-down" title="不喜歡"></i>')
+        $('#add_exclusiion').replaceWith('<i class="click_icon fa-regular fa-circle-xmark" title="挑食"></i>')
         Toast.fire({
           icon: 'success',
           title: `我喜歡${foodName}😍`
         })
       } else if (likedItem[0].likeIt === 1) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up"></i>')
+        $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up" title="喜歡"></i>')
         Toast.fire({
           icon: 'success',
           title: `收回對${foodName}的喜歡`
@@ -176,15 +176,15 @@ async function updateInfo(iconBtn) {
       console.log('dislikedItem', dislikedItem)
       if (dislikedItem.length === 0 || dislikedItem[0].dislikeIt === 0) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        $('#thumb_down').replaceWith('<i class="click_icon fa-solid fa-thumbs-down"></i>')
-        $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up"></i>')
+        $('#thumb_down').replaceWith('<i class="click_icon fa-solid fa-thumbs-down" title="收回不喜歡"></i>')
+        $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up" title="喜歡"></i>')
         Toast.fire({
           icon: 'success',
           title: `我不喜歡${foodName}🤢`
         })
       } else if (dislikedItem[0].dislikeIt === 1) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        $('#thumb_down').replaceWith('<i class="click_icon fa-regular fa-thumbs-down"></i>')
+        $('#thumb_down').replaceWith('<i class="click_icon fa-regular fa-thumbs-down" title="不喜歡"></i>')
         Toast.fire({
           icon: 'success',
           title: `收回對${foodName}的不喜歡`
@@ -198,20 +198,20 @@ async function updateInfo(iconBtn) {
       console.log('exclusion', exclusion)
       if (exclusion.length === 0 || exclusion[0].exclusion === 0) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        $('#add_exclusiion').replaceWith('<i class="click_icon fa-solid fa-circle-xmark"></i>')
-        $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up"></i>')
+        $('#add_exclusiion').replaceWith('<i class="click_icon fa-solid fa-circle-xmark" title="取消挑食"></i>')
+        $('#thumb_up').replaceWith('<i class="click_icon fa-regular fa-thumbs-up" title="喜歡"></i>')
         Toast.fire({
           icon: 'success',
           title: `我不吃${foodName}😵`,
-          footer: '<a href="/mine.html" class="text-secondary">前往我的食物清單</a>'
+          footer: '<a href="/mine.html" class="text-secondary">前往喜好清單</a>'
         })
       } else if (exclusion[0].exclusion === 1) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        $('#add_exclusiion').replaceWith('<i class="click_icon fa-regular fa-circle-xmark"></i>')
+        $('#add_exclusiion').replaceWith('<i class="click_icon fa-regular fa-circle-xmark" title="挑食"></i>')
         Toast.fire({
           icon: 'success',
           title: `將${foodName}從挑食清單中移除`,
-          footer: '<a href="/mine.html" class="text-secondary">前往我的食物清單</a>'
+          footer: '<a href="/mine.html" class="text-secondary">前往喜好清單</a>'
         })
       }
       break
