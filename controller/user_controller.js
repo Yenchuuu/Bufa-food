@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
 const User = require('../model/user_model')
+const Cron = require('../utils/crontab')
+const Food = require('../model/food_model')
 const moment = require('moment')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
@@ -387,6 +389,12 @@ const getUserPreference = async (req, res) => {
   const userId = userDetail[0].id
   const preference = await User.getUserPreference(userId)
   res.status(200).json({ preference })
+}
+
+/* 設定排程定時將使用者每日目標鍵入資料庫 */
+const setDailyGoal = async (req, res) => {
+  await Cron.setDailyGoal().start()
+  res.json({ message: 'Users daily goals insert successfully' })
 }
 
 const getDailyGoal = async (req, res) => {

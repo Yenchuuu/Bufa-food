@@ -182,6 +182,25 @@ const getFacebookProfile = async function (accessToken) {
   }
 }
 
+const setDailyGoal = async function (date) {
+  const conn = await db.getConnection()
+  try {
+    await conn.query('START TRANSACTION')
+    const [users] = await conn.execute('SELECT user_id, goal_calories, goal_carbs, goal_protein, goal_fat FROM `user_bodyInfo`')
+    for (let userInfo of users) {
+      await conn.execute('INSERT INTO `user_goal` (user_id, goal_calories, goal_carbs, goal_protein, goal_fat, date) VALUES (?, ?, ?, ?, ?, ?)', [userInfo.user_id, userInfo.goal_calories, userInfo.goal_carbs, userInfo.goal_protein, userInfo.goal_fat, date])
+    }
+    await conn.query('COMMIT')
+    return
+  } catch (error) {
+    console.error(error)
+    await conn.query('ROLLBACK')
+    return { error }
+  } finally {
+    await conn.release()
+  }
+}
+
 const getDailyGoal = async function (userId, startDate, endDate) {
   const [goalData] = await db.execute('SELECT * FROM `user_goal` WHERE user_id = ? AND date BETWEEN ? AND ?', [userId, startDate, endDate])
   return goalData
@@ -192,4 +211,4 @@ const getDailySummary = async function (userId, startDate, endDate) {
   return summaryData
 }
 
-module.exports = { signUp, nativeSignIn, fbSignIn, getFacebookProfile, setUserTarget, getDailySummary, getDailyGoal, getUserDetail, updateUserProfile, deleteUserImage, uploadUserImage, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
+module.exports = { signUp, nativeSignIn, fbSignIn, getFacebookProfile, setUserTarget, setDailyGoal, getDailySummary, getDailyGoal, getUserDetail, updateUserProfile, deleteUserImage, uploadUserImage, updateUserBodyInfo, updateNutritionTarget, getUserPreference }
