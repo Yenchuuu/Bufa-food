@@ -16,8 +16,11 @@ if (!accessToken) {
   })
 
   $(document).ready(async function () {
-    const weekVal = $('#weekPicker').val()
-    if (weekVal === '') {
+    const webUrl = window.location.search
+    const splitUrl = webUrl.split('=')[1]
+    console.log('splitUrl: ', splitUrl);
+    // const weekVal = $('#weekPicker').val()
+    if (splitUrl === undefined) {
       const today = moment().format('YYYY-MM-DD')
       const dayOfweek = moment(today).day()
       const startDate = moment(today).add(-(dayOfweek - 1), 'day').format('YYYY-MM-DD')
@@ -26,6 +29,12 @@ if (!accessToken) {
       const data = await axios.get(`/api/1.0/user/footprint?date=${startDate}`, { headers: { Authorization: `Bearer ${accessToken}` } })
       chart(data)
       $('#weekInfo').text(`當週數據 ( ${startDate} ~ ${endDate} )`)
+    } else {
+      const startDate = splitUrl
+      const data = await axios.get(`/api/1.0/user/footprint?date=${startDate}`, { headers: { Authorization: `Bearer ${accessToken}` } })
+      const endDate = moment(startDate).add(6, 'day').format('YYYY-MM-DD')
+      chart(data)
+      $('#weekInfo').text(`彙總數據 ( ${startDate} ~ ${endDate} )`)
     }
   })
 
@@ -41,9 +50,7 @@ if (!accessToken) {
     const startDate = moment(dayInChosenWeek).add(-(dayOfweek - 1), 'day').format('YYYY-MM-DD')
     const endDate = moment(dayInChosenWeek).add((7 - dayOfweek), 'day').format('YYYY-MM-DD')
 
-    const data = await axios.get(`/api/1.0/user/footprint?date=${startDate}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-    chart(data)
-    $('#weekInfo').text(`彙總數據 ( ${startDate} ~ ${endDate} )`)
+    window.location.href = `/footprint.html?date=${startDate}`
   })
   function chart(data) {
     const calories = document.getElementById('calories').getContext('2d')

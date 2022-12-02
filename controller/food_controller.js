@@ -49,7 +49,7 @@ const updateMealRecord = async (req, res) => {
 
   /* 用修改克數乘上食物之原始營養素渲染至前端 */
   const data = req.body
-  console.log('data: ', data);
+  // console.log('data: ', data);
   data.meal = parseInt(data.meal)
   data.food_id = parseInt(data.food_id)
   const foodId = data.food_id
