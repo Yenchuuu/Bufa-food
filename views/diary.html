@@ -15,6 +15,7 @@
   <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css" />
   <link href="/icons/favicon.ico" rel="shortcut icon" type="image/ico" />
   <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/validator@13.7.0/validator.min.js"></script>
 </head>
 <body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -22,8 +23,8 @@
   <script type="text/javascript" src="/javascripts/jsgrid.min.js"></script>
   <script src="https://rawgit.com/moment/moment/2.2.1/min/moment.min.js"></script>
 
-  <nav style="background-color: #495464;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
-    <div class="container-fluid">
+  <nav style="background-color: #495464; padding: 8px 0;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
+    <div class="container-fluid" style="padding:0 12px;">
       <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logo.png" class="brand-logo">  BUFA FOOD | 不發福</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -35,17 +36,17 @@
           <li class="nav-item">
             <a class="nav-link active" href="/search.html">食物庫</a>
           </li>
-          <li>
+          <!-- <li>
             <a class="nav-link disabled">|</a>
           </li>
           <li class="nav-item">
             <a class="nav-link active" href="/mine.html">我的食物</a>
-          </li>
+          </li> -->
           <li>
             <a class="nav-link disabled">|</a>
           </li>
           <li class="nav-item" id="nav-profile-change">
-            <a id="profile-icon" class="active" href="/profile.html"><img src="/icons/member-mobile.png"></a>
+            <a class="nav-link active" href="/login.html" id="profile-icon">登入</a>
           </li>
 
         </ul>
@@ -56,10 +57,10 @@
   <main class="d-flex flex-nowrap container-color">
     <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
       <div class="sidebar mt-3">
-        <a href="/index.html">Home</a>
-        <a href="/profile.html">Profile</a>
-        <a href="/diary.html">Diary</a>
-        <a href="/footprint.html">Footprint</a>
+        <a href="/diary.html">飲食紀錄</a>
+        <a href="/footprint.html">每週摘要</a>
+        <a href="/mine.html">喜好清單</a>
+        <a href="/profile.html">個人資訊</a>
       </div>
     </div>
   
@@ -73,7 +74,7 @@
           <button type="button" class="btn btn-outline-secondary btn-sm" id="previousDay">前一天</button>
         </form>
           <div id="showDate">
-            <!-- <input type="text" id="datepicker"> -->
+            <input type="date" id="datepicker" class="text-secondary" style="display:none; border: none;background-color: transparent;" onblur="chooseDate()">
           </div>  
         <form>
           <button type="button" class="btn btn-outline-secondary btn-sm" id="followingDay">後一天</button>
@@ -110,16 +111,7 @@
             <!-- <img src="/icons/add_green.png" style="width: 35px;" id="add_diary"> -->
             <button class="btn btn-outline-secondary justify-content-md-center" type="button" id="add_diary">新增紀錄</button>
           </a>
-        <!-- </div> -->
-        <!-- <div class="col-4"> -->
-          <!-- <img src="/icons/magic.png" style="width: 45px;" id="generateDayMeals"> -->
-          <button class="btn btn-outline-secondary justify-content-md-center" type="button" id="generateDayMeals">一日菜單</button>
-        <!-- </div> -->
-        <!-- <div style="padding: 0;" class="col-8">
-        <div class="row">
-          
-        </div>
-        </div> -->
+          <button class="btn btn-outline-secondary justify-content-md-center" type="button" id="generateDayMeals" title="不知道要吃什麼嗎？讓我們為你推薦一日菜單吧！">一日菜單</button>
       </div>
     </div>
     <div class="container d-grid gap-3">
@@ -135,7 +127,7 @@
             <div class="col-8">
             <ul class="nav nav-pills">
               <li class="nav-card-title">
-                <p class="text-secondary">份數</p>
+                <p class="text-secondary">份量<br>g</p>
               </li>
               <li class="nav-card-title">
                 <p class="text-secondary">熱量<br>kcal</br></p>
@@ -152,29 +144,19 @@
             </ul>
             </div>
           </div>
-          <div class="row card-body-title" id="breakfastRecord">
-            <!-- <div class="col-4 text-secondary card-body-text">漢堡</div>
+          <div class="row card-body-title" id="breakfastRecord"></div>
+          <div class="row" id="breakfastTotal" style="display: none;">
+            <div class="col-4 text-secondary card-body-text">總計</div>
             <div class="col-8">
               <ul class="nav nav-pills">
-                <li class="nav-card-title">
-                  <p class="text-secondary">1.0</p>
-                </li>
-                <li class="nav-card-title">
-                  <p class="text-secondary">350</p>
-                </li>
-                <li class="nav-card-title">
-                  <p class="text-secondary">80g</p>
-                </li>
-                <li class="nav-card-title">
-                  <p class="text-secondary">12g</p>
-                </li>
-                <li class="nav-card-title">
-                  <p class="text-secondary">8g</p>
-                </li>
+                <li class="nav-card-title"><p class="text-secondary"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastCaloriesTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastCarbsTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastProteinTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastFatTotal"></p></li>
               </ul>
-            </div> -->
+            </div>
           </div>
-          <div class="row" id="breakfastTotal"></div>
         </div>
       </div>
       <div class="card text-center">
@@ -184,7 +166,7 @@
             <div class="col-8">
             <ul class="nav nav-pills">
               <li class="nav-card-title">
-                <p class="text-secondary">份數</p>
+                <p class="text-secondary">份量<br>g</p>
               </li>
               <li class="nav-card-title">
                 <p class="text-secondary">熱量<br>kcal</br></p>
@@ -203,7 +185,17 @@
           </div>
             <div class="row card-body-title" id="lunchRecord">
             </div>
-            <div class="row" id="lunchTotal">
+            <div class="row" id="lunchTotal" style="display: none;">
+              <div class="col-4 text-secondary card-body-text">總計</div>
+              <div class="col-8">
+                <ul class="nav nav-pills">
+                  <li class="nav-card-title"><p class="text-secondary"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchCaloriesTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchCarbsTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchProteinTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchFatTotal"></p></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -214,7 +206,7 @@
               <div class="col-8">
               <ul class="nav nav-pills">
                 <li class="nav-card-title">
-                  <p class="text-secondary">份數</p>
+                  <p class="text-secondary">份量<br>g</p>
                 </li>
                 <li class="nav-card-title">
                   <p class="text-secondary">熱量<br>kcal</br></p>
@@ -232,7 +224,18 @@
               </div>
             </div>
               <div class="row card-body-title" id="dinnerRecord"></div>
-              <div class="row" id="dinnerTotal"></div>
+              <div class="row" id="dinnerTotal" style="display: none;">
+                <div class="col-4 text-secondary card-body-text">總計</div>
+                <div class="col-8">
+                  <ul class="nav nav-pills">
+                    <li class="nav-card-title"><p class="text-secondary"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerCaloriesTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerCarbsTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerProteinTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerFatTotal"></p></li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
           <div class="card text-center">
@@ -242,7 +245,7 @@
                 <div class="col-8">
                 <ul class="nav nav-pills">
                   <li class="nav-card-title">
-                    <p class="text-secondary">份數</p>
+                    <p class="text-secondary">份量<br>g</p>
                   </li>
                   <li class="nav-card-title">
                     <p class="text-secondary">熱量<br>kcal</br></p>
@@ -260,7 +263,18 @@
                 </div>
               </div>
                 <div class="row card-body-title" id="snackRecord"></div>
-                <div class="row" id="snackTotal"></div>
+                <div class="row" id="snackTotal" style="display: none;">
+                  <div class="col-4 text-secondary card-body-text">總計</div>
+                  <div class="col-8">
+                    <ul class="nav nav-pills">
+                      <li class="nav-card-title"><p class="text-secondary"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackCaloriesTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackCarbsTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackProteinTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackFatTotal"></p></li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -292,11 +306,11 @@
                     <div class="col-4 text-secondary card-body-text">當日總計</div>
                       <div class="col-8">
                         <ul class="nav nav-pills">
-                          <li class="nav-card-title"><p class="text-secondary"></p></li>
-                          <li class="nav-card-title" id="dailyCaloriesTotal"></li>
-                          <li class="nav-card-title" id="dailyCarbsTotal"></li>
-                          <li class="nav-card-title" id="dailyProteinTotal"></li>
-                          <li class="nav-card-title" id="dailyFatTotal"></li>
+                          <li class="nav-card-title text-secondary"><p class="text-secondary"></p></li>
+                          <li class="nav-card-title text-secondary" id="dailyCaloriesTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyCarbsTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyProteinTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyFatTotal"></li>
                         </ul>
                       </div>
                     </div>
@@ -307,7 +321,7 @@
 
       </div>
     </div>
-    <div class="flex-shrink-0 p-3 sidebar-custom" style="width: 26EM;">
+    <div class="flex-shrink-0 sidebar-custom pt-3" style="width: 24EM;">
       <div class="sidebar mt-2" id="pieChartContainer">
         <div id="pieChart"  style="width:100%; height:350px;"></div>
       </div>
@@ -348,27 +362,24 @@
     <footer>
       <div class="container">
           <div class="row">
-              <div class="col-sm-6 col-md-3 item">
-                  <h3>Services</h3>
+              <div class="col-sm-6 col-md-4 item">
+                  <h3>關於我們</h3>
                   <ul>
-                      <li><a href="#">Web design</a></li>
-                      <li><a href="#">Development</a></li>
-                      <li><a href="#">Hosting</a></li>
+                      <li><a target="_blank" href="https://school.appworks.tw/">從何發跡</a></li>
+                      <li><a target="_blank" href="/privacy.html">隱私政策</a></li>
                   </ul>
               </div>
-              <div class="col-sm-6 col-md-3 item">
-                  <h3>About</h3>
+              <div class="col-sm-6 col-md-4 item">
+                  <h3>參考資料</h3>
                   <ul>
-                      <li><a href="#">Company</a></li>
-                      <li><a href="#">Team</a></li>
-                      <li><a href="#">Careers</a></li>
+                      <li><a target="_blank" href="https://consumer.fda.gov.tw/Food/TFND.aspx?nodeID=178&rand=1470733090">食品藥物管理署</a></li>
+                      <li><a target="_blank" href="https://www.peeta.tw/">Peeta Fitness</a></li>
                   </ul>
               </div>
-              <div class="col-md-6 item text">
-                  <h3>BUFA FOOD</h3>
-                  <p>Praesent sed lobortis mi. Suspendisse vel placerat ligula. Vivamus ac sem lacus. Ut vehicula rhoncus elementum. Etiam quis tristique lectus. Aliquam in arcu eget velit pulvinar dictum vel in justo.</p>
+              <div class="col-md-4 item text">
+                  <h3>近一步了解 BUFA FOOD</h3>
+                  <a href="mailto:shin180555@gmail.com" class="link">聯絡信箱：shin180555@gmail.com</a>
               </div>
-              <!-- <div class="col item social"><a href="#"><i class="icon ion-social-facebook"></i></a><a href="#"><i class="icon ion-social-twitter"></i></a><a href="#"><i class="icon ion-social-snapchat"></i></a><a href="#"><i class="icon ion-social-instagram"></i></a></div> -->
           </div>
           <p class="copyright">BUFA FOOD © 2022</p>
       </div>

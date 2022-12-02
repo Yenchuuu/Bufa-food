@@ -34,17 +34,17 @@
           <li class="nav-item">
             <a class="nav-link active" href="/search.html">食物庫</a>
           </li>
-          <li>
+          <!-- <li>
             <a class="nav-link disabled">|</a>
           </li>
           <li class="nav-item">
             <a class="nav-link active" href="/mine.html">我的食物</a>
-          </li>
+          </li> -->
           <li>
             <a class="nav-link disabled">|</a>
           </li>
           <li class="nav-item" id="nav-profile-change">
-            <a id="profile-icon" class="active" href="/profile.html"><img src="/icons/member-mobile.png"></a>
+            <a class="nav-link active" href="/login.html" id="profile-icon">登入</a>
           </li>
 
         </ul>
@@ -53,19 +53,19 @@
   </nav>
   
   <main class="d-flex flex-nowrap container-color">
-    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
+    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color mb-4" style="width: 13EM;">
       <div class="sidebar mt-3">
-        <a href="/index.html">Home</a>
-        <a href="/profile.html">Profile</a>
-        <a href="/diary.html">Diary</a>
-        <a href="/footprint.html">Footprint</a>
+        <a href="/diary.html">飲食紀錄</a>
+        <a href="/footprint.html">每週摘要</a>
+        <a href="/mine.html">喜好清單</a>
+        <a href="/profile.html">個人資訊</a>
       </div>
     </div>
-  <div style="height: 1000px;" class="container col-lg-6 p-3 mb-4">
+  <div style="height: 1050px; max-width: 750px;" class="container col-lg-6 p-3 mb-4">
     <div class="row column-style mt-4 mb-4">
-      <h3 class="text-secondary">我的足跡 👣</h3>
+      <h3 class="text-secondary">我的每週摘要 👣</h3>
     </div>
-    <div style="align-items: center;" class="row">
+    <div style="align-items: center;" class="row mt-4 mb-4">
       <div class="col-4">
         <input type="week" name="week" id="weekPicker" required>
       </div>
@@ -73,11 +73,14 @@
         <button class="button" id="weekSubmit">查詢</button>
       </div>
     </div>
-    <div class="mt-4 mb-4 hiddenChart" style="display: none;">
+    <div>
+      <h5 class="text-secondary mt-4 mb-4" id="weekInfo"></h5>
+    </div>
+    <div class="mt-4 mb-4">
       <h4 class="text-secondary">卡路里</h4>
       <canvas id="calories" width="400" height="200"></canvas>
     </div>
-    <div class="mt-6 mb-6 hiddenChart" style="display: none;">
+    <div class="mt-6 mb-6">
       <h4 class="text-secondary">營養素</h4>
       <canvas id="nutrition" width="400" height="200"></canvas>
     </div>
@@ -86,29 +89,26 @@
 
 <div class="footer-dark">
   <footer>
-      <div class="container">
-          <div class="row">
-              <div class="col-sm-6 col-md-3 item">
-                  <h3>Services</h3>
-                  <ul>
-                      <li><a href="#">Web design</a></li>
-                      <li><a href="#">Development</a></li>
-                      <li><a href="#">Hosting</a></li>
-                  </ul>
-              </div>
-              <div class="col-sm-6 col-md-3 item">
-                  <h3>About</h3>
-                  <ul>
-                      <li><a href="#">Company</a></li>
-                      <li><a href="#">Team</a></li>
-                      <li><a href="#">Careers</a></li>
-                  </ul>
-              </div>
-              <div class="col-md-6 item text">
-                  <h3>BUFA FOOD</h3>
-                  <p>Praesent sed lobortis mi. Suspendisse vel placerat ligula. Vivamus ac sem lacus. Ut vehicula rhoncus elementum. Etiam quis tristique lectus. Aliquam in arcu eget velit pulvinar dictum vel in justo.</p>
-              </div>
-              <!-- <div class="col item social"><a href="#"><img src="/icons/instagram.webp" class="footer-icon"><a href="#"><img src="/icons/facebook.webp" class="footer-icon"></a><a href="#"><img src="/icons/twitter.png" class="footer-icon"></a><a href="#"><img src="/icons/youtube.webp" class="footer-icon"></a></div> -->
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6 col-md-4 item">
+                <h3>關於我們</h3>
+                <ul>
+                    <li><a target="_blank" href="https://school.appworks.tw/">從何發跡</a></li>
+                    <li><a target="_blank" href="/privacy.html">隱私政策</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-6 col-md-4 item">
+                <h3>參考資料</h3>
+                <ul>
+                    <li><a target="_blank" href="https://consumer.fda.gov.tw/Food/TFND.aspx?nodeID=178&rand=1470733090">食品藥物管理署</a></li>
+                    <li><a target="_blank" href="https://www.peeta.tw/">Peeta Fitness</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 item text">
+                <h3>近一步了解 BUFA FOOD</h3>
+                <a href="mailto:shin180555@gmail.com" class="link">聯絡信箱：shin180555@gmail.com</a>
+            </div>
           </div>
           <p class="copyright">BUFA FOOD © 2022</p>
       </div>
@@ -117,209 +117,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js" integrity="sha384-lpyLfhYuitXl2zRZ5Bn2fqnhNAKOAaM/0Kr9laMspuaMiZfGmfwRNFh8HlMy49eQ" crossorigin="anonymous"></script>
 
-<script>
-  const userId = window.localStorage.getItem('userId');
-
-  let accessToken = window.localStorage.getItem('accessToken');
-  if (!accessToken) {
-    alert('請先登入')
-    window.location.href = '/index.html'
-  }
-
-  $('#nav-profile-change').children().hide()
-  $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
-
-  $('#nav-profile-change').click(() => {
-    localStorage.clear()
-    alert('已成功登出～')
-    window.location.href = '/index.html'
-  })
-
-  $('#weekSubmit').click(async function(){
-    $('.hiddenChart').show()
-    const weekVal = $('#weekPicker').val()
-    const year = weekVal.split('-')[0]
-    const week = parseInt(weekVal.split('-')[1].split('W')[1])
-    // FIXME: 不知道為什麼2022年的週數都會少一，但+1週後2023的日期又會錯
-    const startDate = moment().year(year).week((week+1)).format('YYYY-MM-DD')
-    const endDate = moment(startDate, 'YYYY-MM-DD').add(6, 'day').format('YYYY-MM-DD')
-
-    const data = await axios.get(`/api/1.0/user/footprint?date=${startDate}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-    // console.log('data: ', data);
-
-const calories = document.getElementById('calories').getContext('2d')
-
-const caloriesChart = new Chart(calories, {
-  type: "bar",
-  data: {
-      datasets: [
-          {
-              label: "累積",
-              data: data.data.dailyCaloriesArray,
-              backgroundColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-          ],
-          borderColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-          ],
-          borderWidth: 1
-          },
-          {
-            label: "目標",
-            fill: false,
-            pointRadius: 2,
-            showLine: true,
-            data: data.data.goalCaloriesArray,
-              type: "line"
-          }
-      ],
-      labels: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
-  },
-  options: {
-      scales: {
-          y: {
-              beginAtZero: true
-          }
-      }
-  }
-});
-
-  const nutrition = document.getElementById('nutrition').getContext('2d')
-
-  const nutritionChart = new Chart(nutrition, {
-    type: "bar",
-    data: {
-        datasets: [
-            {
-                label: "碳水化合物",
-                data: data.data.dailyCarbsArray,
-                backgroundColor: [
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-            ],
-            borderColor: [
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(54, 162, 235, 0.2)'
-            ],
-            borderWidth: 1
-            },
-            {
-              label: "蛋白質",
-              data: data.data.dailyProteinArray,
-              backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)'
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 99, 132, 0.2)'
-            ],
-            borderWidth: 1
-            },
-            {
-              label: "脂肪",
-              data: data.data.dailyFatArray,
-              backgroundColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)'
-            ],
-            borderColor: [
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(75, 192, 192, 0.2)'
-            ],
-            borderWidth: 1
-            },
-            {
-              label: "目標碳水化合物",
-              fill: false,
-              showLine: false,
-              pointRadius: 4,
-              pointHoverRadius: 7,
-              data: data.data.goalCarbsArray,
-              backgroundColor: 'rgba(54, 162, 235, 0.2)',
-              borderColor:'rgba(54, 162, 235, 0.2)',
-                type: "line"
-            },
-            {
-              label: "目標蛋白質",
-              fill: false,
-              showLine: false,
-              pointStyle: 'triangle',
-              pointRadius: 4,
-              pointHoverRadius: 7,
-              data: data.data.goalProteinArray,
-              backgroundColor: 'rgba(255, 99, 132, 0.2)',
-              borderColor:'rgba(255, 99, 132, 0.2)',
-                type: "line"
-            },
-            {
-              label: "目標脂肪",
-              fill: false,
-              showLine: false,
-              pointStyle: 'rectRot',
-              pointRadius: 6,
-              pointHoverRadius: 9,
-              data: data.data.goalFatArray,
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              borderColor:'rgba(75, 192, 192, 0.2)',
-                type: "line"
-            }
-        ],
-        labels: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-})
-
-})
-
-</script>
+<script src="/javascripts/footprint.js"></script>
 </body>
 </html>

@@ -1,7 +1,9 @@
 const accessToken = window.localStorage.getItem('accessToken')
 if (!accessToken) {
-  alert('請先登入')
-  window.location.href = '/index.html'
+  Swal.fire({
+    icon: 'warning',
+    text: '請先登入'
+  }).then((result) => { window.location.href = '/index.html' })
   //  return
 } else {
   $('#nav-profile-change').children().hide()
@@ -20,11 +22,11 @@ if (!accessToken) {
 
     /* 用for of 遍歷array */
     for (const foodObject of collectionRecord) {
+      console.log('foodObject: ', foodObject);
       const newDom = $('.collection-card').first().clone()
       newDom.children('.mine-card-body')
-      // newDom.children('.card-body').append(`<a href="/detail.html?id=${foodObject.food_id}>`)
-      newDom.children('.mine-card-body').children('.card-title').append(`${foodObject.name}`)
-      // newDom.children('.card-body').append(`</a>`)
+      newDom.children('.mine-card-body').children('.food-link').attr('href', `/detail.html?id=${foodObject.food_id}`)
+      newDom.children('.mine-card-body').find('.card-title').text(`${foodObject.name}`)
       newDom.show()
       $('.display-collection').append(newDom)
     }
@@ -32,7 +34,8 @@ if (!accessToken) {
     for (const foodObject of createdFoodRecord) {
       const newDom = $('.collection-card').first().clone()
       newDom.children('.mine-card-body')
-      newDom.children('.mine-card-body').children('.card-title').append(`${foodObject.name}`)
+      newDom.children('.mine-card-body').children('.food-link').attr('href', `/detail.html?id=${foodObject.food_id}`)
+      newDom.children('.mine-card-body').find('.card-title').text(`${foodObject.name}`)
       newDom.show()
       $('.display-createdFood').append(newDom)
     }
@@ -40,7 +43,8 @@ if (!accessToken) {
     for (const foodObject of exclusionRecord) {
       const newDom = $('.collection-card').first().clone()
       newDom.children('.mine-card-body')
-      newDom.children('.mine-card-body').children('.card-title').append(`${foodObject.name}`)
+      newDom.children('.mine-card-body').children('.food-link').attr('href', `/detail.html?id=${foodObject.food_id}`)
+      newDom.children('.mine-card-body').find('.card-title').text(`${foodObject.name}`)
       newDom.show()
       $('.display-exclusion').append(newDom)
     }
@@ -50,6 +54,5 @@ if (!accessToken) {
 
 $('#nav-profile-change').click(() => {
   localStorage.clear()
-  alert('已成功登出～')
   window.location.href = '/index.html'
 })

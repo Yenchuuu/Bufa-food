@@ -16,12 +16,23 @@ const deleteMealRecord = async (recordId) => {
 }
 
 const getUserRecord = async (userId, date) => {
-  const [mealRecords] = await db.execute(
-    'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, (food.calories * serving_amount) AS calories, (food.carbs * serving_amount) AS carbs, (food.protein * serving_amount) AS protein, (food.fat * serving_amount) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
-    [userId, date]
-  )
-  // console.log('mealRecords', mealRecords)
-  return mealRecords
+  const conn = await db.getConnection()
+  try {
+    await conn.query('START TRANSACTION')
+    const [mealRecords] = await conn.execute(
+      'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, ROUND(food.per_serving * serving_amount, 0) AS amountTotal, ROUND(food.calories * serving_amount, 0) AS calories, ROUND(food.carbs * serving_amount, 0) AS carbs, ROUND(food.protein * serving_amount, 0) AS protein, ROUND(food.fat * serving_amount, 0) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
+      [userId, date])
+    const [recordSummary] = await conn.execute('SELECT user_meal.meal, ROUND(SUM(food.calories * serving_amount), 0) AS caloriesTotal, ROUND(SUM(food.carbs * serving_amount), 0) AS carbsTotal, ROUND(SUM(food.protein * serving_amount), 0) AS proteinTotal, ROUND(SUM(food.fat * serving_amount), 0) AS fatTotal FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?) GROUP BY user_meal.meal;', [userId, date])
+    // console.log('mealRecords', mealRecords)
+    await conn.query('COMMIT')
+    return { mealRecords, recordSummary }
+  } catch (err) {
+    console.error(err)
+    await conn.query('ROLL BACK')
+    throw err
+  } finally {
+    await conn.release()
+  }
 }
 
 const getFoodDetail = async (foodId) => {
@@ -29,11 +40,11 @@ const getFoodDetail = async (foodId) => {
   return result
 }
 
-const createFoodDetail = async (name, calories, carbs, protein, fat, per_serving, userId) => {
+const createFoodDetail = async (name, calories, carbs, protein, fat, perServing, userId) => {
   const conn = await db.getConnection()
   try {
     await conn.query('START TRANSACTION')
-    const [food] = await conn.execute('INSERT INTO `food` (name, calories, carbs, protein, fat, per_serving, creator_user_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, calories, carbs, protein, fat, per_serving, userId])
+    const [food] = await conn.execute('INSERT INTO `food` (name, calories, carbs, protein, fat, per_serving, creator_user_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, calories, carbs, protein, fat, perServing, userId])
     const foodId = food.insertId
     const [preference] = await conn.execute('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (4, 0, 0, 1, 0, 0, ?, ?)', [foodId, userId])
     await conn.query('COMMIT')
@@ -47,32 +58,12 @@ const createFoodDetail = async (name, calories, carbs, protein, fat, per_serving
   }
 }
 
-// FIXME: 這種撈取方式，一旦輸入數值太大就會噴error
-const getRecommendSingleMeal = async (target, value) => {
-  const condition = { sql: '', binding: [] }
-  if (target === 'calories') {
-    condition.sql =
-      'WHERE (recommend_categories_id = 5 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 1 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 2 AND calories BETWEEN ? AND ?) OR (recommend_categories_id = 3) OR (recommend_categories_id = 4);'
-    condition.binding = [value - 30, value + 30, (value * 0.35) - 30, (value * 0.35) + 30, (value * 0.40) - 30, (value * 0.40) + 30]
-  } else if (target === 'carbs') {
-    condition.sql =
-      'WHERE recommend_categories_id = 1 AND carbs BETWEEN ? AND ?'
-    condition.binding = [value - 5, value + 5]
-  } else if (target === 'protein') {
-    condition.sql =
-      'WHERE recommend_categories_id = 2 AND protein BETWEEN ? AND ?'
-    condition.binding = [value - 5, value + 5]
-  } else if (target === 'fat') {
-    condition.sql = 'WHERE recommend_categories_id = 3 AND fat BETWEEN ? AND ?'
-    condition.binding = [value - 5, value + 5]
-  }
-  const recommendMealQuery =
-    'SELECT id, name, per_serving, calories, carbs, protein, fat, recommend_categories_id FROM `food`' + condition.sql
+const getRecommendSingleMeal = async (userId) => {
+  const singleMealQuery = 'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
   const [recommendMealList] = await db.execute(
-    recommendMealQuery,
-    condition.binding
+    singleMealQuery, [userId]
   )
-  console.log('recommendMealList', recommendMealList)
+  // console.log('recommendMealList', recommendMealList)
   return recommendMealList
 }
 
@@ -125,7 +116,7 @@ const setRecommendMultipleMeals = async (userId, recommendBreakfast, recommendLu
 /* 選出所有recommend食物，排除該使用者不喜歡的食物 */
 const getRecommendMultipleMeals = async (userId) => {
   const multipleMealsQuery =
-    'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id, (carbs * 4 /calories) AS carbsPercentage, (fat * 9 /calories) AS fatPercentage, (protein * 4 /calories) AS proteinPercentage FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
+    'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
   const [recommendMealsList] = await db.execute(multipleMealsQuery, [userId])
   // console.log('recommendMealsList', recommendMealsList)
   return recommendMealsList

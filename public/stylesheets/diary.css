@@ -74,3 +74,7 @@ th, td {
 .table-title{
   padding: 5px 0;
 }
+
+.card-body-text p{
+  margin: 10px 0;
+}

@@ -19,10 +19,10 @@ app.use('/', express.static(path.join(__dirname, '/images')))
 /* Build API route */
 app.use('/api/' + API_VERSION, [require('./routes/food_route'), require('./routes/user_route')])
 
-// // catch 404 and forward to error handler
-// app.use(function (req, res, next) {
-//   next(createError(404))
-// })
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+  res.status(404).sendFile(path.join(__dirname, '/views/404page.html'))
+})
 
 // error handler
 app.use(function (err, req, res, next) {

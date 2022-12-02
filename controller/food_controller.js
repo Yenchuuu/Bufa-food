@@ -47,23 +47,23 @@ const updateMealRecord = async (req, res) => {
   }
   // let { meal, serving_amount: servingAmount, food_id: foodId, calories, carbs, protein, fat } = req.body
 
-  /* 用修改份數呈上食物之原始營養素渲染至前端 */
-  // FIXME: 修改食物資訊時應該要可以輸入小數點
+  /* 用修改克數乘上食物之原始營養素渲染至前端 */
   const data = req.body
+  // console.log('data: ', data);
   data.meal = parseInt(data.meal)
   data.food_id = parseInt(data.food_id)
-  data.serving_amount = parseFloat(data.serving_amount).toFixed(1)
   const foodId = data.food_id
   const foodDetail = await Food.getFoodDetail(foodId)
-  data.calories = Math.round(foodDetail[0].calories * data.serving_amount)
-  data.carbs = parseInt(foodDetail[0].carbs * data.serving_amount)
-  data.protein = parseInt(foodDetail[0].protein * data.serving_amount)
-  data.fat = parseInt(foodDetail[0].fat * data.serving_amount)
+  const perServing = foodDetail[0].per_serving
+  const servingAmount = parseFloat(data.amountTotal / perServing).toFixed(2)
+  data.calories = Math.round(foodDetail[0].calories * servingAmount)
+  data.carbs = parseInt(foodDetail[0].carbs * servingAmount)
+  data.protein = parseInt(foodDetail[0].protein * servingAmount)
+  data.fat = parseInt(foodDetail[0].fat * servingAmount)
 
   try {
     const foodId = data.food_id
     const meal = data.meal
-    const servingAmount = data.serving_amount
     const userDetail = await User.getUserDetail(email)
     const userId = userDetail[0].id
     await Food.updateMealRecord(userId, foodId, meal, servingAmount, date)
@@ -108,27 +108,26 @@ const getDiaryRecord = async (req, res) => {
     date = getDate
   }
   // console.log('date', date)
-  // FIXME: 可以改用SQL計算
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
   const mealRecords = await Food.getUserRecord(userId, date)
-  mealRecords.map(e => e.serving_amount = parseFloat(e.serving_amount).toFixed(1))
-  mealRecords.map(e => e.calories = parseInt(e.calories))
-  mealRecords.map(e => e.carbs = parseInt(e.carbs))
-  mealRecords.map(e => e.protein = parseInt(e.protein))
-  mealRecords.map(e => e.fat = parseInt(e.fat))
+  // mealRecords.map(e => e.serving_amount = parseFloat(e.serving_amount).toFixed(1))
+  // mealRecords.map(e => e.calories = parseInt(e.calories))
+  // mealRecords.map(e => e.carbs = parseInt(e.carbs))
+  // mealRecords.map(e => e.protein = parseInt(e.protein))
+  // mealRecords.map(e => e.fat = parseInt(e.fat))
 
-  const caloriesTotal = mealRecords.reduce((acc, item) => {
-    return acc + parseInt(item.calories)
+  const caloriesTotal = mealRecords.recordSummary.reduce((acc, item) => {
+    return acc + parseInt(item.caloriesTotal)
   }, 0)
-  const carbsTotal = mealRecords.reduce((acc, item) => {
-    return acc + parseInt(item.carbs)
+  const carbsTotal = mealRecords.recordSummary.reduce((acc, item) => {
+    return acc + parseInt(item.carbsTotal)
   }, 0)
-  const proteinTotal = mealRecords.reduce((acc, item) => {
-    return acc + parseInt(item.protein)
+  const proteinTotal = mealRecords.recordSummary.reduce((acc, item) => {
+    return acc + parseInt(item.proteinTotal)
   }, 0)
-  const fatTotal = mealRecords.reduce((acc, item) => {
-    return acc + parseInt(item.fat)
+  const fatTotal = mealRecords.recordSummary.reduce((acc, item) => {
+    return acc + parseInt(item.fatTotal)
   }, 0)
   res.json({ mealRecords, caloriesTotal, carbsTotal, proteinTotal, fatTotal })
 }
@@ -143,11 +142,16 @@ const createFoodDetail = async (req, res) => {
   const { email } = req.user
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
-  const { name, calories, carbs, protein, fat, per_serving } = req.body
-  /* 接進來的req.body datatype 為 number */
+  let { name, calories, carbs, protein, fat, perServing } = req.body
+
+  calories = parseInt(calories)
+  carbs = parseInt(carbs)
+  protein = parseInt(protein)
+  fat = parseInt(fat)
+  perServing = parseInt(perServing)
 
   try {
-    const data = await Food.createFoodDetail(name, calories, carbs, protein, fat, per_serving, userId)
+    const data = await Food.createFoodDetail(name, calories, carbs, protein, fat, perServing, userId)
     res.json({ message: 'Food created successfully.' })
   } catch (err) {
     console.error(err)
@@ -161,17 +165,20 @@ const generateSingleMeal = async (req, res) => {
   const { email } = req.user
   const userDetail = await User.getUserDetail(email)
   const [{ id: userId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
-  // const userId = userDetail[0].id
-  // FIXME: 判斷式沒有控管好
+
   try {
-    if (target === 'calories' && value < (goalCalories * 0.1)) return res.json({ errorMessage: '為求飲食均衡，一餐熱量不建議低於TDEE 10%喔！請重新輸入' })
-    if (target === 'calories' && value > (goalCalories * 2)) return res.json({ errorMessage: '輸入之熱量已遠高於TDEE囉！請再想想吧～' })
+    /* 一餐熱量不應低於TDEE 10% */
+    if (target === 'calories' && value < (goalCalories * 0.1)) return res.json({ errorMessage: 'lowCalories' })
+    /* 輸入過高之熱量 */
+    if (target === 'calories' && value > (goalCalories * 0.7)) return res.json({ errorMessage: 'highCalories' })
+    /* 不建議營養素過度集中在某一餐攝取 */
+    if ((target === 'carbs' && value > goalCarbs * 0.7) || (target === 'protein' && value > goalProtein * 0.7) || (target === 'fat' && value > goalFat * 0.7)) return res.json({ errorMessage: 'outOfRange' })
     /* 計算使用者C P F的目標營養素分別對總熱量佔比為多少 */
     const userCarbsPercentage = Math.round((goalCarbs * 4) / goalCalories * 100) / 100
     const userProteinPercentage = Math.round((goalProtein * 4) / goalCalories * 100) / 100
     const userFatPercentage = Math.round((goalFat * 9) / goalCalories * 100) / 100
 
-    const recommendMealList = await Food.getRecommendSingleMeal(target, value)
+    const recommendMealList = await Food.getRecommendSingleMeal(userId)
     const len = recommendMealList.length
     const recommendMeal = []
     switch (target) {
@@ -229,7 +236,7 @@ const generateSingleMeal = async (req, res) => {
         const remainCarbsV1 = value * userCarbsPercentage - carbsSubtotal
         const remainProteinV1 = value * userProteinPercentage - proteinSubtotal
         const remainFatV1 = value * userFatPercentage - fatSubtotal
-        console.log('remaining:', remainCaloriesV1, remainCarbsV1, remainProteinV1, remainFatV1)
+        // console.log('remaining:', remainCaloriesV1, remainCarbsV1, remainProteinV1, remainFatV1)
 
         const fatList = recommendMealList.filter(
           (e) => e.recommend_categories_id === 3
@@ -246,16 +253,56 @@ const generateSingleMeal = async (req, res) => {
         recommendMeal.push(fat)
         break
       }
-      case 'protein':
-      case 'carbs':
+      case 'protein': {
+        const ProteinList = recommendMealList.filter(
+          (e) => e.recommend_categories_id === 2
+        )
+        // console.log('ProteinList: ', ProteinList)
+        const protein = ProteinList[Math.floor(Math.random() * ProteinList.length)]
+        const servingAmountProtein = Math.round(value / protein.protein * 100)
+        protein.per_serving = servingAmountProtein
+        protein.calories = Math.round(protein.calories * (servingAmountProtein / 100))
+        protein.carbs = Math.round(protein.carbs * servingAmountProtein / 100)
+        protein.protein = value
+        protein.fat = Math.round(protein.fat * servingAmountProtein / 100)
+        recommendMeal.push(protein)
+        break
+      }
+      case 'carbs': {
+        const carbsList = recommendMealList.filter(
+          (e) => e.recommend_categories_id === 1
+        )
+        const carbs = carbsList[Math.floor(Math.random() * carbsList.length)]
+        /* 依目標碳水克數計算應攝取幾份 */
+        const servingAmountCarbs = Math.round(value / carbs.carbs * 100)
+        // console.log('servingAmountCarbs', servingAmountCarbs)
+        carbs.per_serving = servingAmountCarbs
+        carbs.calories = Math.round(carbs.calories * (servingAmountCarbs / 100))
+        carbs.carbs = value
+        carbs.protein = Math.round(carbs.protein * (servingAmountCarbs / 100))
+        carbs.fat = Math.round(carbs.fat * (servingAmountCarbs / 100))
+        recommendMeal.push(carbs)
+        break
+      }
       case 'fat': {
-        const randomNum = Math.floor(Math.random() * len)
-        recommendMeal.push(recommendMealList[randomNum])
+        const fatList = recommendMealList.filter(
+          (e) => e.recommend_categories_id === 3
+        )
+        const fat = fatList[Math.floor(Math.random() * fatList.length)]
+        // console.log('nutrition', recommendMeal)
+
+        const servingAmountFat = Math.round(value / fat.fat * 100)
+        fat.per_serving = servingAmountFat
+        fat.calories = Math.round(fat.calories * (servingAmountFat / 100))
+        fat.carbs = Math.round(fat.carbs * (servingAmountFat / 100))
+        fat.protein = Math.round(fat.protein * (servingAmountFat / 100))
+        fat.fat = value
+        recommendMeal.push(fat)
         break
       }
     }
     const setMealRecord = await Food.setRecommendSingleMeal(userId, meal, recommendMeal, date)
-    console.log('InfoC', userId, recommendMeal, date)
+    // console.log('InfoC', userId, recommendMeal, date)
     return res.json({ meal, recommendMeal })
   } catch (err) {
     console.error(err)

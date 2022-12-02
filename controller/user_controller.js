@@ -70,7 +70,7 @@ const nativeSignIn = async (req, res) => {
 
   try {
     const result = await User.nativeSignIn(email, password)
-    console.log('result', result)
+    // console.log('result', result)
     if (result.length === 0) {
       return res.json({ error: 'Email or password is wrong.' })
     } else if (!bcrypt.compareSync(password, result[0].password)) {
@@ -152,13 +152,13 @@ const setUserTarget = async (req, res) => {
 }
 
 const getUserProfile = async (req, res) => {
-  const { name, email } = req.user
+  const { email } = req.user
   const userDetail = await User.getUserDetail(email)
-  const [{ picture, birthday, height, weight, gender, diet_type: dietType, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE }] = userDetail
+  const [{ name, picture, birthday, height, weight, gender, diet_type: dietType, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE }] = userDetail
   // console.log('userDetail', userDetail)
   let imagePath
   if (picture == null) {
-    imagePath = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1200px-User-avatar.svg.png'
+    imagePath = ''
   } else {
     imagePath = `${process.env.CLOUDFRONT_URL}/${picture}`
   }
@@ -281,6 +281,7 @@ const updateUserBodyInfo = async (req, res) => {
     const date = new Date()
     const today = date.toISOString().split('T')[0]
     const age = parseInt(today) - parseInt(birthday)
+    if (age <= 0) return res.status(400).json({ errorMessage: 'age should not less than one' })
 
     switch (gender) {
       case 1: {

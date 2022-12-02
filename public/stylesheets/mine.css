@@ -21,3 +21,6 @@
   padding: 1rem 1rem;
 }
 
+.mine-card-body h6 {
+  margin: 0;
+}
