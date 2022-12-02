@@ -182,15 +182,13 @@ const getFacebookProfile = async function (accessToken) {
   }
 }
 
-const setDailyGoal = async function () {
+const setDailyGoal = async function (date) {
   const conn = await db.getConnection()
-  const date = '2022-11-26'
   try {
     await conn.query('START TRANSACTION')
-    const [userInfo] = await conn.execute('SELECT user_id, goal_calories, goal_carbs, goal_protein, goal_fat FROM `user_bodyInfo`')
-    const len = userInfo.length
-    for (let i = 0; i < len; i++) {
-      await conn.execute('INSERT INTO `user_goal` (user_id, goal_calories, goal_carbs, goal_protein, goal_fat, date) VALUES (?, ?, ?, ?, ?, ?)', [userInfo[i].user_id, userInfo[i].goal_calories, userInfo[i].goal_carbs, userInfo[i].goal_protein, userInfo[i].goal_fat, date])
+    const [users] = await conn.execute('SELECT user_id, goal_calories, goal_carbs, goal_protein, goal_fat FROM `user_bodyInfo`')
+    for (let userInfo of users) {
+      await conn.execute('INSERT INTO `user_goal` (user_id, goal_calories, goal_carbs, goal_protein, goal_fat, date) VALUES (?, ?, ?, ?, ?, ?)', [userInfo.user_id, userInfo.goal_calories, userInfo.goal_carbs, userInfo.goal_protein, userInfo.goal_fat, date])
     }
     await conn.query('COMMIT')
     return
