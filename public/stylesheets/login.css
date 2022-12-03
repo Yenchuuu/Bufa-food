@@ -1,0 +1,45 @@
+a:hover {
+  color: #959595(117, 176, 117);
+}
+
+.pop-background{
+  display: none;
+  position: fixed;
+  width:100%;
+  height:100%;
+  background:#000;
+  z-index:2;
+  top:0;
+  left:0;
+  opacity:0.7;
+}
+
+.pop-window{
+  display:none;
+  border-radius: 1em;
+  width:600px;
+  height:600px;
+  position:fixed;
+  top:25%;
+  margin-top:-80px; 
+  background:ghostwhite;
+  z-index:3;
+  left:50%;
+  margin-left:-250px;
+  padding: 3rem 6rem;
+}
+
+.pop-content{
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0;
+  justify-content: center;
+  align-content: center;
+}
+
+.form-container{
+  height: 500px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
