@@ -13,7 +13,6 @@ router.route('/food/multiple').post(authentication(), wrapAsync(generateMultiple
 /* search page */
 router.route('/food/search').get(wrapAsync(getFoodFromKeyword))
 router.route('/food/trend').get(wrapAsync(getFoodTrend))
-// FIXME: 推薦機制壞掉了，Error: No default engine was specified and no extension was provided.
 router.route('/food/recommend').get(authentication(), wrapAsync(getUserRecommendation))
 
 router.route('/food/mealrecord').post(authentication(), wrapAsync(addMealRecord))

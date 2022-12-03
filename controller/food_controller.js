@@ -1,9 +1,10 @@
 const Food = require('../model/food_model')
 const User = require('../model/user_model')
 const Euc = require('../utils/euclidean_distance')
-const Util = require('../utils/util')
+const Cache = require('../utils/cache')
 const moment = require('moment')
 // FIXME: date是倫敦時間
+const CACHE_TRENDFOOD_KEY = 'cacheTrendFood'
 
 const addMealRecord = async (req, res) => {
   const { email } = req.user
@@ -45,7 +46,6 @@ const updateMealRecord = async (req, res) => {
   if (!date || date === 'undefined') {
     date = moment().format('YYYY-MM-DD')
   }
-  // let { meal, serving_amount: servingAmount, food_id: foodId, calories, carbs, protein, fat } = req.body
 
   /* 用修改克數乘上食物之原始營養素渲染至前端 */
   const data = req.body
@@ -524,12 +524,36 @@ const getFoodFromKeyword = async (req, res) => {
 
 const getFoodTrend = async (req, res) => {
   /* 設定撈取熱門食物之區間 */
-  const periodStart = moment().add(-7, 'days').format('YYYY-MM-DD')
+  const periodStart = moment().add(-6, 'days').format('YYYY-MM-DD')
   const periodEnd = moment().format('YYYY-MM-DD')
-  const trendFood = await Food.getFoodTrend(periodStart, periodEnd)
-  // const trendFood = trendFoodInfo.map((e) => e.name)
-  // console.log('trendFood', trendFood)
-  res.json({ trendFood })
+  let trendFood
+  try {
+    if (Cache.ready) {
+      trendFood = await Cache.get(CACHE_TRENDFOOD_KEY)
+    }
+  } catch (err) {
+    console.error(`Get trend food cache error: ${err}`)
+  }
+  if (trendFood) {
+    console.log('Get trend food from cache')
+    res.json(JSON.parse(trendFood))
+    return
+  }
+
+  trendFood = await Food.getFoodTrend(periodStart, periodEnd)
+  // console.log('trendFood: ', trendFood)
+
+  try {
+    if (Cache.ready) {
+      await Cache.set(CACHE_TRENDFOOD_KEY, JSON.stringify(trendFood))
+      const todayEnd = new Date().setHours(23, 59, 59, 999)
+      /* 熱搜食物快取於每日11:59pm清除 */
+      await Cache.expireAt(CACHE_TRENDFOOD_KEY, parseInt(todayEnd / 1000))
+    }
+  } catch (err) {
+    console.error(`Set trend food cache error: ${err}`)
+  }
+  res.json(trendFood)
 }
 
 const getUserRecommendation = async (req, res) => {

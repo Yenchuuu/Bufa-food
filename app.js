@@ -3,6 +3,7 @@ const express = require('express')
 const path = require('path')
 const axios = require('axios')
 const moment = require('moment')
+const Cache = require('./utils/cache')
 const { PORT, API_VERSION } = process.env
 
 const app = express()
@@ -32,6 +33,7 @@ app.use(function (err, req, res, next) {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
+  Cache.connect()
 })
 
 module.exports = app

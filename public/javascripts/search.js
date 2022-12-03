@@ -4,7 +4,7 @@ const foodTrendElement = document.getElementById('food_trend')
 async function getFoodTrendInfo() {
   const foodTrendInfo = await axios.get('/api/1.0/food/trend')
   // console.log('foodTrendInfo', foodTrendInfo);
-  const foodTrend = foodTrendInfo.data.trendFood
+  const foodTrend = foodTrendInfo.data
   foodTrend.map(food =>
     foodTrendElement.innerHTML += `<a href="/detail.html?id=${food.food_id}" class="btn btn-outline-secondary">${food.name}</a>`
   )
@@ -26,7 +26,7 @@ if (!accessToken) {
   const guessUserElement = document.getElementById('guess_user_preference')
   async function getUserRecommendation(currentUserId) {
     const foodRecommendInfo = await axios.get(`/api/1.0/food/recommend?currentUserId=${currentUserId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-    console.log('foodRecommendInfo', foodRecommendInfo)
+    // console.log('foodRecommendInfo', foodRecommendInfo)
     const foodRecommendation = foodRecommendInfo.data.foodNutritionInfo
     foodRecommendation.map(recommendation =>
       guessUserElement.innerHTML += `<a href="/detail.html?id=${recommendation.id}"><div class="card text-center"><div style="padding:5px" class="card-header"></div><div class="card-body"><div class="row card-body-title"><div class="col-5"></div><div class="col-7"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">熱量<br>kcal</br></p></li><li class="nav-card-title"><p class="text-secondary">碳水化合物</p></li><li class="nav-card-title"><p class="text-secondary">蛋白質</p></li><li class="nav-card-title"><p class="text-secondary">脂肪</p></li></ul></div></div><div class="row card-body-title"><div class="col-5 text-secondary card-body-text">${recommendation.name}</div><div class="col-7"><ul class="nav nav-pills"><li class="nav-card-title"><p class="text-secondary">${recommendation.calories}</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.carbs}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.protein}g</p></li><li class="nav-card-title"><p class="text-secondary">${recommendation.fat}g</p></li></ul></div></div></div></a>`
