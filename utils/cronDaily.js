@@ -1,6 +1,6 @@
 const moment = require('moment')
 require('dotenv').config()
-const db = require('./utils/mysqlconf')
+const db = require('./mysqlconf')
 
 async function crontab() {
   try {
