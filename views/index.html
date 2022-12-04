@@ -58,7 +58,7 @@
   </div>
   <div class="container col-6 mt-5 mb-5">
       <div class="mt-5 col-8">
-        <h5 class="text-secondary mb-4">您體態管理的好夥伴✨</h5>
+        <h5 class="text-secondary mb-4" style="display:flex; justify-content:center">您體態管理的好夥伴✨</h5>
         <!-- <h5 class="text-secondary mt-3">Your diet-planner, life-saver!</h5> -->
         <div class="text-box-left-1 modal-show-transform">好餓喔！中午要吃什麼？</div>
         <div class="right-box">
@@ -115,6 +115,11 @@
       $('.text-box-right-2').show()
     }, 3000)
   })
+  const accessToken = window.localStorage.getItem('accessToken')
+  if (accessToken) {
+    $('#nav-profile-change').children().hide()
+    $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
+  }
 </script>
 <script type='text/javascript'>document.addEventListener('DOMContentLoaded', function () {window.setTimeout(document.querySelector('svg').classList.add('animated'),1000);})</script>
 </body>
