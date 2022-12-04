@@ -19,10 +19,11 @@ const addMealRecord = async (req, res) => {
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
   const mealRecords = await Food.getUserRecord(userId, date)
+  // console.log('mealRecords: ', mealRecords);
   // console.log(userId, foodId, meal, servingAmount, date)
   try {
     /* 若當天飲食紀錄已有此餐點 -> 調整份數；若無則建立 */
-    const findItem = mealRecords.filter(e => e.meal === meal).filter(e => e.food_id === foodId)
+    const findItem = mealRecords.mealRecords.filter(e => e.meal === meal).filter(e => e.food_id === foodId)
     // console.log('findItem', findItem)
     if (findItem.length !== 0) {
       servingAmount += parseFloat((findItem[0].serving_amount))
