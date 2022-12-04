@@ -50,9 +50,13 @@
   <main class="d-flex flex-nowrap container-color">
   <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
     <div class="sidebar mt-3">
+      <!-- <i class="fa-regular fa-file-lines"></i> -->
       <a href="/diary.html">飲食紀錄</a>
+      <!-- <i class="fa-solid fa-chart-column"></i> -->
       <a href="/footprint.html">每週摘要</a>
+      <!-- <i class="fa-light fa-rectangle-history-circle-user"></i> -->
       <a href="/mine.html">喜好清單</a>
+      <!-- <i class="fa-light fa-address-card"></i> -->
       <a href="/profile.html">個人資訊</a>
     </div>
   </div>
@@ -71,31 +75,18 @@
       <div id="food_trend" class="mt-3 mb-3" style="display: flex; flex-wrap:wrap; justify-content: space-between;">
       </div>
     </div>
-    <div class="mb-6" id="hidden-div" style="display: none; height: 50px;"></div>
+    <div class="mb-6" id="hidden-div" style="display: none; height: 150px;"></div>
     <div class="text-center mt-5 mb-5" style="border: #5d6c82 solid 2px; border-radius: 1em; padding: 2em;" id="guess_title">
     <h4 class="text-secondary mb-5">猜你喜歡</h4>
     <div class="g-3" id="guess_user_preference">
-      <!-- <div class="card text-center">
-        <div style="padding:5px" class="card-header">
-          <ul style="justify-content: end; align-items: center;" class="nav nav-pills">
-            <li class="nav-item">
-              <img src="/icons/thumb_up.png" class="click_icon" id="thumb_up">
-            </li>
-            <li class="nav-item">
-              <img src="/icons/thumb_down.png" class="click_icon" id="thumb_down">
-            </li>
-            <li class="nav-item">
-              <img src="/icons/empty_heart.webp" class="click_icon" id="add_collection">
-            </li>
-            <li class="nav-item">
-              <img src="/icons/add.png" class="click_icon" id="add_diary">
-            </li>
-          </ul>
-        </div>
+      <div hidden>
+      <div class="food-card card text-center">
+        <div style="padding:5px" class="card-header"></div>
+        <a class="food-link">
         <div class="card-body">
           <div class="row card-body-title">
-            <div class="col-4"></div>
-            <div class="col-8">
+            <div class="col-5"></div>
+            <div class="col-7">
             <ul class="nav nav-pills">
               <li class="nav-card-title">
                 <p class="text-secondary">熱量<br>kcal</br></p>
@@ -113,26 +104,28 @@
             </div>
           </div>
           <div class="row card-body-title">
-            <div class="col-4 text-secondary card-body-text">漢堡</div>
-            <div class="col-8">
+            <div class="col-5 text-secondary card-body-text food-name"></div>
+            <div class="col-7">
               <ul class="nav nav-pills">
                 <li class="nav-card-title">
-                  <p class="text-secondary">350</p>
+                  <p class="text-secondary food-calories"></p>
                 </li>
                 <li class="nav-card-title">
-                  <p class="text-secondary">80g</p>
+                  <p class="text-secondary food-carbs"></p>
                 </li>
                 <li class="nav-card-title">
-                  <p class="text-secondary">12g</p>
+                  <p class="text-secondary food-protein"></p>
                 </li>
                 <li class="nav-card-title">
-                  <p class="text-secondary">8g</p>
+                  <p class="text-secondary food-fat"></p>
                 </li>
               </ul>
             </div>
           </div>
         </div>
-      </div> -->
+      </a>
+      </div>
+    </div>
     </div>
     </div>
     </div>
