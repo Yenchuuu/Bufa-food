@@ -318,7 +318,7 @@ const generateMultipleMeals = async (req, res) => {
   console.log('userInfo', userId, goalCalories, goalCarbs, goalProtein, goalFat)
 
   const mealRecords = await Food.getUserRecord(userId, date)
-  if (mealRecords.length !== 0) {
+  if (mealRecords.mealRecords.length !== 0) {
     return res.json({ errorMessage: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！' })
   } else {
     const multipleMealsList = await Food.getRecommendMultipleMeals(userId)
