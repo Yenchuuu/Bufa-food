@@ -120,6 +120,10 @@
     $('#nav-profile-change').children().hide()
     $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
   }
+  $('#nav-profile-change').click(() => {
+  localStorage.clear()
+  window.location.href = '/index.html'
+})
 </script>
 <script type='text/javascript'>document.addEventListener('DOMContentLoaded', function () {window.setTimeout(document.querySelector('svg').classList.add('animated'),1000);})</script>
 </body>
