@@ -17,36 +17,32 @@ const wrapAsync = (fn) => {
 }
 
 // FIXME: 不用多包一層fn、.send應該改成.JSON
-const authentication = () => {
-  return async function (req, res, next) {
-    let accessToken = req.get('Authorization')
-    if (!accessToken) {
-      res.status(401).send({ error: 'Unauthenticated' })
-      return
-    }
+async function authentication (req, res, next) {
+  let accessToken = req.get('Authorization')
+  if (!accessToken) {
+    res.status(401).json({ error: 'Unauthenticated' })
+    return
+  }
 
-    accessToken = accessToken.replace('Bearer ', '')
-    if (accessToken === 'null') {
-      res.status(401).send({ error: 'Unauthenticated' })
+  accessToken = accessToken.replace('Bearer ', '')
+  if (accessToken === 'null') {
+    res.status(401).json({ error: 'Unauthenticated' })
+  }
+  try {
+    const user = jwt.verify(accessToken, TOKEN_SECRET)
+    req.user = user
+    // console.log('user', user)
+    const userDetail = await User.getUserDetail(user.email)
+    if (!userDetail) {
+      res.status(401).json({ error: 'Invalid token' })
+    } else {
+      req.user.id = userDetail.id
+      next()
     }
-    try {
-      // 為何要await promisify？因為他本身就是同步啊 cb才需要這樣包
-      const user = await promisify(jwt.verify)(accessToken, TOKEN_SECRET)
-      req.user = user
-      // console.log('user', user)
-      const userDetail = await User.getUserDetail(user.email)
-      if (!userDetail) {
-        // FIXME: 應該也是401
-        res.status(400).send({ error: 'Invalid token' })
-      } else {
-        req.user.id = userDetail.id
-        next()
-      }
-      return
-    } catch (err) {
-      console.error(err)
-      res.status(403).send({ error: 'Forbidden' })
-    }
+    return
+  } catch (err) {
+    console.error(err)
+    res.status(403).json({ error: 'Forbidden' })
   }
 }
 
