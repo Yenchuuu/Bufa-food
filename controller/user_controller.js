@@ -32,6 +32,7 @@ const signUp = async (req, res) => {
   name = validator.escape(name)
   const provider = 'native'
   const result = await User.signUp(provider, name, email, password)
+  console.log('result: ', result);
   if (result.error) {
     res.send({ error: result.error })
     return
@@ -42,6 +43,7 @@ const signUp = async (req, res) => {
     res.status(500).send({ error: 'Database Query Error' })
     return
   }
+  // FIXME: 在這裡重打一次
 
   res.status(200).send({
     data: {
@@ -124,6 +126,7 @@ const setUserTarget = async (req, res) => {
     const userDetail = await User.getUserDetail(email)
     const userId = userDetail[0].id
     const userInfo = {
+      // FIXME: camal case?
       birthday: req.body.birthday,
       height: req.body.height,
       weight: req.body.weight,
@@ -185,7 +188,7 @@ const getUserProfile = async (req, res) => {
 const uploadUserImage = async (req, res) => {
   const id = parseInt(req.params.id)
   const { email } = req.user
-  const img = req.file.filename
+  const img = req.file.filename // FIXME: 可能因為他抓不到filename?
 
   /* 把使用者照片上傳至S3，並於本機刪除 */
   // FIXME: 照片都有上傳成功但會噴s3 err: [Error: ENOENT: no such file or directory, unlink

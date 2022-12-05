@@ -487,4 +487,14 @@ if (!accessToken) {
     $('#diffProtein').append(diffProtein)
     $('#diffFat').append(diffFat)
   }
+
+  /* 頁面導覽 */
+  $('#hint').click(function () {
+    $('.pop-background').fadeIn(100)
+    $('.pop-window').fadeIn(100)
+  })
+  $('.pop-background').click(function () {
+    $('.pop-background').fadeOut(200)
+    $('.pop-window').fadeOut(200)
+  })
 }

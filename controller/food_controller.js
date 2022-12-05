@@ -4,6 +4,7 @@ const Euc = require('../utils/euclidean_distance')
 const Util = require('../utils/util')
 const moment = require('moment')
 // FIXME: date是倫敦時間
+// FIXME: 
 
 const addMealRecord = async (req, res) => {
   const { email } = req.user
@@ -156,6 +157,7 @@ const createFoodDetail = async (req, res) => {
     res.json({ message: 'Food created successfully.' })
   } catch (err) {
     console.error(err)
+    // FIXME: error or errorMessage統一用法
     res.json({ error: 'Food cannot be created.' })
   }
 }
@@ -183,6 +185,7 @@ const generateSingleMeal = async (req, res) => {
     const len = recommendMealList.length
     const recommendMeal = []
     switch (target) {
+      // FIXME: 計算份數拆成fn
       case 'calories': {
         /* 若目標為calories，先將C P F分別變成三個array再從中抓取random index作為推薦項目 */
         const carbsList = recommendMealList.filter(
@@ -192,7 +195,7 @@ const generateSingleMeal = async (req, res) => {
         /* 依目標碳水比例乘以總熱量，計算碳水應攝取幾份 */
         const carbsCalories = Math.round(value * userCarbsPercentage * 0.9) // 留 10% buffer
         const servingAmountCarbs = Math.round(carbsCalories / carbs.calories * 100)
-        console.log('carbsCalories', carbsCalories, 'servingAmountCarbs', servingAmountCarbs)
+        // console.log('carbsCalories', carbsCalories, 'servingAmountCarbs', servingAmountCarbs)
         carbs.per_serving = servingAmountCarbs
         carbs.calories = carbsCalories
         carbs.carbs = Math.round(carbs.carbs * (servingAmountCarbs / 100))
@@ -543,6 +546,7 @@ const getUserRecommendation = async (req, res) => {
 }
 
 const updateFoodPreference = async (req, res) => {
+  // TODO: 不用try catch>> wrapasync
   try {
     const { email } = req.user
     const userDetail = await User.getUserDetail(email)

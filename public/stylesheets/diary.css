@@ -78,3 +78,38 @@ th, td {
 .card-body-text p{
   margin: 10px 0;
 }
+
+.pop-background{
+  display: none;
+  position: fixed;
+  width:100%;
+  height:100%;
+  background:#000;
+  z-index:2;
+  top:0;
+  left:0;
+  opacity:0.7;
+}
+
+.pop-window{
+  display:none;
+  border-radius: 1em;
+  width:500px;
+  height:700px;
+  position:fixed;
+  top:50%;
+  margin-top:-350px; 
+  background:ghostwhite;
+  z-index:3;
+  left:50%;
+  margin-left:-250px;
+  padding: 10px 80px 30px 150px;
+}
+
+.pop-content{
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0;
+  justify-content: center;
+  align-content: center;
+}
