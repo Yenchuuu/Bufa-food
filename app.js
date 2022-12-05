@@ -1,8 +1,6 @@
 require('dotenv').config()
 const express = require('express')
 const path = require('path')
-const axios = require('axios')
-const moment = require('moment')
 const Cache = require('./utils/cache')
 const { PORT, API_VERSION } = process.env
 
