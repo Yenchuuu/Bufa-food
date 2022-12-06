@@ -4,10 +4,8 @@ const db = require('../utils/mysqlconf')
 const jwt = require('jsonwebtoken')
 const { TOKEN_EXPIRE, TOKEN_SECRET } = process.env // 30 days by seconds
 
-// (birthday, height, weight, gender, diet_type, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-
 const setUserTarget = async (userId, userInfo) => {
-  const [result] = await db.execute('INSERT INTO `user_bodyInfo` (user_id, birthday, height, weight, gender, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [userId, userInfo.birthday, userInfo.height, userInfo.weight, userInfo.gender, userInfo.diet_goal, userInfo.activity_level, userInfo.goal_calories, userInfo.goal_carbs, userInfo.goal_protein, userInfo.goal_fat, userInfo.TDEE])
+  const [result] = await db.execute('INSERT INTO `user_bodyInfo` (user_id, birthday, height, weight, gender, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [userId, userInfo.birthday, userInfo.height, userInfo.weight, userInfo.gender, userInfo.dietGoal, userInfo.activityLevel, userInfo.goalCalories, userInfo.goalCarbs, userInfo.goalProtein, userInfo.goalFat, userInfo.TDEE])
   return result
 }
 
@@ -58,7 +56,6 @@ const updateUserBodyInfo = async (updateData, userId) => {
 
 /* PATCH 目標營養素比例or目標熱量 */
 const updateNutritionTarget = async (updateData, userId) => {
-  console.log('updateData', updateData)
   if (Object.keys(updateData).length === 0) return
   let sql = 'UPDATE user_bodyInfo SET'
   Object.entries(updateData).forEach(([key, value]) => {

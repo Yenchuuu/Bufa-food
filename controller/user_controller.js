@@ -2,6 +2,7 @@
 const User = require('../model/user_model')
 const moment = require('moment')
 const validator = require('validator')
+const joi = require('joi')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const salt = parseInt(process.env.BCRYPT_SALT)
@@ -61,83 +62,67 @@ const nativeSignIn = async (req, res) => {
     return res.json({ error: 'Request Error: email and password are required.' })
   }
 
-  try {
-    const result = await User.nativeSignIn(email)
-    // console.log('result', result)
-    if (result.length === 0) {
-      return res.json({ error: 'Email or password is wrong.' })
-    } else if (!bcrypt.compareSync(password, result[0].password)) {
-      return res.json({ error: 'Email or password is wrong.' })
-    } else {
-      bcrypt.compare(password, result[0].password)
-      delete result[0].password
-      const user = result[0]
-      const accessToken = jwt.sign(
-        user,
-        TOKEN_SECRET
-      )
-      return res.status(200).json({
-        data: {
-          access_token: accessToken,
-          access_expired: TOKEN_EXPIRE,
-          user
-        }
-      })
-    }
-  } catch (error) {
-    console.error(error)
-    return { error }
+  const result = await User.nativeSignIn(email)
+  // console.log('result', result)
+  if (result.length === 0) {
+    return res.json({ error: 'Email or password is wrong.' })
   }
+  if (!bcrypt.compareSync(password, result[0].password)) {
+    return res.json({ error: 'Email or password is wrong.' })
+  }
+  bcrypt.compare(password, result[0].password)
+  delete result[0].password
+  const user = result[0]
+  const accessToken = jwt.sign(
+    user,
+    TOKEN_SECRET
+  )
+  return res.status(200).json({
+    data: {
+      access_token: accessToken,
+      access_expired: TOKEN_EXPIRE,
+      user
+    }
+  })
 }
 
 const fbSignIn = async (req, res) => {
   // 確認是否有fb token
-  const data = req.body
-  const accessToken = data.access_token
-  try {
-    const profile = await User.getFacebookProfile(accessToken)
-    const { id, name, email } = profile
+  const token = req.body
+  const accessToken = token.access_token
+  const profile = await User.getFacebookProfile(accessToken)
+  const { id, name, email } = profile
 
-    if (!id || !name || !email) {
-      return { error: 'Permissions Error: facebook access token can not get user id, name or email' }
-    }
-    const data = await User.fbSignIn(id, name, email)
-    res.status(200).json(data)
-  } catch (error) {
-    return { error }
+  if (!id || !name || !email) {
+    return { error: 'Permissions Error: facebook access token can not get user id, name or email' }
   }
+  const data = await User.fbSignIn(id, name, email)
+  res.status(200).json(data)
 }
 
 const setUserTarget = async (req, res) => {
-  try {
-    const { id: userId } = req.user
-    // const {birthday, height, weight, gender, diet_type, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE} = req.body
-    const userInfo = {
-      // FIXME: camal case?
-      birthday: req.body.birthday,
-      height: req.body.height,
-      weight: req.body.weight,
-      gender: req.body.gender,
-      // diet_type: req.body.diet_type,
-      diet_goal: req.body.diet_goal,
-      activity_level: req.body.activity_level,
-      goal_calories: req.body.goal_calories,
-      goal_carbs: req.body.goal_carbs,
-      goal_protein: req.body.goal_protein,
-      goal_fat: req.body.goal_fat,
-      TDEE: req.body.TDEE
-    }
-    /* 確認所有項目皆有輸入 */
-    // FIXME: 可以改用套件驗證 -> 寫得更簡潔
-    if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.diet_goal || !userInfo.activity_level || !userInfo.goal_calories || !userInfo.goal_carbs || !userInfo.goal_protein || !userInfo.goal_fat || !userInfo.TDEE) return res.json({ error: 'imcomplete info' })
-
-    /* 確認所有數字項之格式皆正確 */
-    if (isNaN(userInfo.height) || isNaN(userInfo.weight) || isNaN(userInfo.gender) || isNaN(userInfo.diet_goal) || isNaN(userInfo.activity_level) || isNaN(userInfo.goal_calories) || isNaN(userInfo.goal_carbs) || isNaN(userInfo.goal_protein) || isNaN(userInfo.goal_fat) || isNaN(userInfo.TDEE)) return res.json({ error: 'incorrect format' })
-    await User.setUserTarget(userId, userInfo)
-    res.status(200).json({ message: 'data added successfully' })
-  } catch (err) {
-    console.log(err)
+  const { id: userId } = req.user
+  const userInfo = {
+    birthday: req.body.birthday,
+    height: req.body.height,
+    weight: req.body.weight,
+    gender: req.body.gender,
+    dietGoal: req.body.diet_goal,
+    activityLevel: req.body.activity_level,
+    goalCalories: req.body.goal_calories,
+    goalCarbs: req.body.goal_carbs,
+    goalProtein: req.body.goal_protein,
+    goalFat: req.body.goal_fat,
+    TDEE: req.body.TDEE
   }
+  /* 確認所有項目皆有輸入 */
+  // FIXME: 可以改用套件驗證 -> 寫得更簡潔
+  if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.dietGoal || !userInfo.activityLevel || !userInfo.goalCalories || !userInfo.goalCarbs || !userInfo.goalProtein || !userInfo.goalFat || !userInfo.TDEE) return res.json({ error: 'imcomplete info' })
+
+  /* 確認所有數字項之格式皆正確 */
+  if (isNaN(userInfo.height) || isNaN(userInfo.weight) || isNaN(userInfo.gender) || isNaN(userInfo.dietGoal) || isNaN(userInfo.activityLevel) || isNaN(userInfo.goalCalories) || isNaN(userInfo.goalCarbs) || isNaN(userInfo.goalProtein) || isNaN(userInfo.goalFat) || isNaN(userInfo.TDEE)) return res.json({ error: 'incorrect format' })
+  await User.setUserTarget(userId, userInfo)
+  res.status(200).json({ message: 'data added successfully' })
 }
 
 const getUserProfile = async (req, res) => {
@@ -174,7 +159,6 @@ const getUserProfile = async (req, res) => {
 const uploadUserImage = async (req, res) => {
   const id = parseInt(req.params.id)
   const { id: userId } = req.user
-  // const { email } = req.user
   const img = req.file.filename // FIXME: 可能因為他抓不到filename?
 
   /* 把使用者照片上傳至S3，並於本機刪除 */
@@ -186,49 +170,35 @@ const uploadUserImage = async (req, res) => {
   } catch (err) {
     console.log('s3 err:', err)
   }
-  try {
-    // const data = await User.getUserDetail(email)
-    // const userId = data[0].id
-    if (id === userId) {
-      await User.uploadUserImage(img, userId)
-      return res.status(200).json({ message: 'User image uploaded successfully.' })
-    } else {
-      return res.status(401).json({ error: 'Authentication failed to do any uploads.' })
-    }
-  } catch (err) {
-    console.error(err)
+  if (id === userId) {
+    await User.uploadUserImage(img, userId)
+    return res.status(200).json({ message: 'User image uploaded successfully.' })
+  } else {
+    return res.status(401).json({ error: 'Authentication failed to do any uploads.' })
   }
 }
 
 const deleteUserImage = async (req, res) => {
   const id = parseInt(req.params.id)
   const { id: userId } = req.user
-  try {
-    if (id === userId) {
-      await User.deleteUserImage(userId)
-      return res.status(200).json({ message: 'User image removed successfully.' })
-    } else {
-      return res.status(401).json({ error: 'Authentication failed to do any updates.' })
-    }
-  } catch (err) {
-    console.error(err)
+  if (id === userId) {
+    await User.deleteUserImage(userId)
+    return res.status(200).json({ message: 'User image removed successfully.' })
+  } else {
+    return res.status(401).json({ error: 'Authentication failed to do any updates.' })
   }
 }
 
 /* PATCH api 更新使用者基本資訊 */
 const updateUserProfile = async (req, res) => {
-  try {
-    const id = parseInt(req.params.id)
-    const { id: userId } = req.user
-    const updateData = req.body
-    if (id === userId) {
-      await User.updateUserProfile(updateData, userId)
-      return res.status(200).json({ message: 'User account information updated successfully.' })
-    } else {
-      return res.status(401).json({ errorMessage: 'Authentication failed to do any updates.' })
-    }
-  } catch (err) {
-    console.error(err)
+  const id = parseInt(req.params.id)
+  const { id: userId } = req.user
+  const updateData = req.body
+  if (id === userId) {
+    await User.updateUserProfile(updateData, userId)
+    return res.status(200).json({ message: 'User account information updated successfully.' })
+  } else {
+    return res.status(401).json({ errorMessage: 'Authentication failed to do any updates.' })
   }
 }
 
@@ -244,7 +214,6 @@ const updateUserBodyInfo = async (req, res) => {
     height: originHeight,
     weight: originWeight,
     gender: originGender,
-    // diet_type: originDietType,
     diet_goal: originDietGoal,
     activity_level: originActivityLevel
   }] = data
@@ -252,85 +221,82 @@ const updateUserBodyInfo = async (req, res) => {
 
   if (id !== userId) return res.status(401).json({ errorMessage: 'Authentication failed to do any updates.' })
   let BMR, goal_carbs, goal_protein, goal_fat, goal_calories
-  try {
-    if (!height) height = originHeight
-    if (!weight) weight = originWeight
-    if (!birthday) birthday = originBirthday
-    if (!gender) gender = originGender
-    // if (!diet_type) diet_type = originDietType
-    if (!activity_level) activity_level = originActivityLevel
-    if (!diet_goal) diet_goal = originDietGoal
 
-    const date = new Date()
-    const today = date.toISOString().split('T')[0]
-    const age = parseInt(today) - parseInt(birthday)
-    if (age <= 0) return res.status(400).json({ errorMessage: 'age should not less than one' })
+  if (!height) height = originHeight
+  if (!weight) weight = originWeight
+  if (!birthday) birthday = originBirthday
+  if (!gender) gender = originGender
+  // if (!diet_type) diet_type = originDietType
+  if (!activity_level) activity_level = originActivityLevel
+  if (!diet_goal) diet_goal = originDietGoal
 
-    switch (gender) {
-      case 1: {
-        BMR = Math.round(10 * weight + 6.25 * height - 5 * age - 161)
-        break
-      }
-      case 2: {
-        BMR = Math.round(10 * weight + 6.25 * height - 5 * age + 5)
-      }
+  const date = new Date()
+  const today = date.toISOString().split('T')[0]
+  const age = parseInt(today) - parseInt(birthday)
+  if (age <= 0) return res.status(400).json({ errorMessage: 'age should not less than one' })
+
+  switch (gender) {
+    case 1: {
+      BMR = Math.round(10 * weight + 6.25 * height - 5 * age - 161)
+      break
     }
-
-    switch (activity_level) {
-      case 1: {
-        TDEE = Math.round(1.2 * BMR)
-        break
-      }
-      case 2: {
-        TDEE = Math.round(1.375 * BMR)
-        break
-      }
-      case 3: {
-        TDEE = Math.round(1.55 * BMR)
-        break
-      }
-      case 4: {
-        TDEE = Math.round(1.725 * BMR)
-        break
-      }
-      case 5: {
-        TDEE = Math.round(1.9 * BMR)
-        break
-      }
+    case 2: {
+      BMR = Math.round(10 * weight + 6.25 * height - 5 * age + 5)
     }
-
-    /* 由系統依照diet goal計算default營養素 */
-    switch (diet_goal) {
-      case 1: {
-        goal_calories = Math.round(0.85 * TDEE)
-        goal_carbs = Math.round((goal_calories * 0.35) / 4)
-        goal_protein = Math.round((goal_calories * 0.4) / 4)
-        goal_fat = Math.round((goal_calories * 0.25) / 9)
-        break
-      }
-      case 2: {
-        goal_calories = TDEE
-        goal_carbs = Math.round((goal_calories * 0.35) / 4)
-        goal_protein = Math.round((goal_calories * 0.4) / 4)
-        goal_fat = Math.round((goal_calories * 0.25) / 9)
-        break
-      }
-      case 3: {
-        goal_calories = Math.round(1.15 * TDEE)
-        goal_carbs = Math.round((goal_calories * 0.45) / 4)
-        goal_protein = Math.round((goal_calories * 0.3) / 4)
-        goal_fat = Math.round((goal_calories * 0.25) / 9)
-        break
-      }
-    }
-
-    const updateData = { birthday, height, weight, gender, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE }
-    const updateInfo = await User.updateUserBodyInfo(updateData, userId)
-    // console.log('updateData', updateData)
-    return res.status(200).json({ message: 'User body information updated successfully.', updateData })
-  } catch (err) {
-    console.error(err)
   }
+
+  switch (activity_level) {
+    case 1: {
+      TDEE = Math.round(1.2 * BMR)
+      break
+    }
+    case 2: {
+      TDEE = Math.round(1.375 * BMR)
+      break
+    }
+    case 3: {
+      TDEE = Math.round(1.55 * BMR)
+      break
+    }
+    case 4: {
+      TDEE = Math.round(1.725 * BMR)
+      break
+    }
+    case 5: {
+      TDEE = Math.round(1.9 * BMR)
+      break
+    }
+  }
+
+  /* 由系統依照diet goal計算default營養素 */
+  switch (diet_goal) {
+    case 1: {
+      goal_calories = Math.round(0.85 * TDEE)
+      goal_carbs = Math.round((goal_calories * 0.35) / 4)
+      goal_protein = Math.round((goal_calories * 0.4) / 4)
+      goal_fat = Math.round((goal_calories * 0.25) / 9)
+      break
+    }
+    case 2: {
+      goal_calories = TDEE
+      goal_carbs = Math.round((goal_calories * 0.35) / 4)
+      goal_protein = Math.round((goal_calories * 0.4) / 4)
+      goal_fat = Math.round((goal_calories * 0.25) / 9)
+      break
+    }
+    case 3: {
+      goal_calories = Math.round(1.15 * TDEE)
+      goal_carbs = Math.round((goal_calories * 0.45) / 4)
+      goal_protein = Math.round((goal_calories * 0.3) / 4)
+      goal_fat = Math.round((goal_calories * 0.25) / 9)
+      break
+    }
+  }
+
+  const updateData = { birthday, height, weight, gender, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE }
+  await User.updateUserBodyInfo(updateData, userId)
+  // console.log('updateData', updateData)
+  return res.status(200).json({ message: 'User body information updated successfully.', updateData })
 }
 
 /* PATCH 使用者自行調整目標營養素比例 */
@@ -341,26 +307,22 @@ const updateNutritionTarget = async (req, res) => {
   let { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage } = req.body
   console.log('nutrition target', goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage)
   let goal_carbs, goal_protein, goal_fat
-  try {
-    if (id !== userId) return res.status(401).json({ error: 'Authentication failed to do any updates.' })
+  if (id !== userId) return res.status(401).json({ error: 'Authentication failed to do any updates.' })
 
-    /* 在profile頁面更新目標營養素時採用各營養素百分(ex. goal_carbs: 40 '%', goal_protein: 50 '%')，再加以計算出各營養素的克數 */
-    /* validate: 目標熱量不可不輸入、為負數或字串 */
-    if (!goal_calories || goal_calories < 0 || typeof goal_calories === 'string') return res.json({ error: 'Calories must be a positive integer.' })
-    /* validate: 目標營養素比例相加必須等於一百 */
-    if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) return res.json({ error: 'Nutrition proportions must equal 100!' })
-    goal_calories = Math.round((goal_calories))
-    goal_carbs = Math.round((goal_calories * (goal_carbs_percantage / 100)) / 4)
-    goal_protein = Math.round((goal_calories * (goal_protein_percantage / 100)) / 4)
-    goal_fat = Math.round((goal_calories * (goal_fat_percantage / 100)) / 9)
+  /* 在profile頁面更新目標營養素時採用各營養素百分(ex. goal_carbs: 40 '%', goal_protein: 50 '%')，再加以計算出各營養素的克數 */
+  /* validate: 目標熱量不可不輸入、為負數或字串 */
+  if (!goal_calories || goal_calories < 0 || typeof goal_calories === 'string') return res.json({ error: 'Calories must be a positive integer.' })
+  /* validate: 目標營養素比例相加必須等於一百 */
+  if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) return res.json({ error: 'Nutrition proportions must equal 100!' })
+  goal_calories = Math.round((goal_calories))
+  goal_carbs = Math.round((goal_calories * (goal_carbs_percantage / 100)) / 4)
+  goal_protein = Math.round((goal_calories * (goal_protein_percantage / 100)) / 4)
+  goal_fat = Math.round((goal_calories * (goal_fat_percantage / 100)) / 9)
 
-    const updateData = { goal_calories, goal_carbs, goal_protein, goal_fat }
-    const updateInfo = await User.updateNutritionTarget(updateData, userId)
-    // console.log('updateData', updateData)
-    return res.status(200).json({ message: 'User nutrition target updated successfully.', updateData })
-  } catch (err) {
-    console.error(err)
-  }
+  const updateData = { goal_calories, goal_carbs, goal_protein, goal_fat }
+  await User.updateNutritionTarget(updateData, userId)
+  // console.log('updateData', updateData)
+  return res.status(200).json({ message: 'User nutrition target updated successfully.', updateData })
 }
 
 const getUserPreference = async (req, res) => {
