@@ -147,7 +147,7 @@ if (!accessToken) {
       } else {
         const data = await axios.post('/api/1.0/user/target', { birthday, height, weight, gender, activity_level, TDEE, diet_goal, goal_carbs, goal_protein, goal_fat, goal_calories }, { headers: { Authorization: `Bearer ${accessToken}` } })
         // console.log('data: ', data)
-        if (data.data.error) {
+        if (data.data.errorMessage) {
           Swal.fire({
             icon: 'warning',
             text: '資訊格式有誤'

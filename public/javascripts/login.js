@@ -59,7 +59,7 @@ if (accessToken) {
         const data = await axios.post('/api/1.0/user/signup', { name, email, password })
         // console.log('data: ', data)
         const userInfo = data.data
-        if (data.data.error) {
+        if (data.data.errorMessage) {
           Swal.fire({
             icon: 'error',
             text: '帳號格式錯誤或已被註冊'
@@ -106,7 +106,7 @@ if (accessToken) {
         const data = await axios.post('/api/1.0/user/nativesignin', { provider: 'native', email, password })
         // console.log('data: ', data);
         const userInfo = data.data.data
-        if (data.data.error) {
+        if (data.data.errorMessage) {
           Swal.fire({
             icon: 'error',
             text: '帳號或密碼錯誤，請重新輸入'

@@ -18,12 +18,12 @@ const signUp = async (req, res) => {
   let { name, email, password } = req.body
 
   if (!name || !email || !password) {
-    res.json({ error: 'Request Error: name, email and password are required.' })
+    res.json({ errorMessage: 'Request Error: name, email and password are required.' })
     return
   }
 
   if (!validator.isEmail(email) || !email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/gi)) {
-    res.json({ error: 'Request Error: Invalid email format' })
+    res.json({ errorMessage: 'Request Error: Invalid email format' })
     return
   }
   /* replace <, >, &, ', " and / with HTML entities */
@@ -49,7 +49,7 @@ const signUp = async (req, res) => {
   user.access_token = accessToken
 
   if (result.error) {
-    res.json({ error: result.error })
+    res.json({ errorMessage: result.error })
     return
   }
   res.status(200).json(user)
@@ -59,16 +59,16 @@ const nativeSignIn = async (req, res) => {
   const { email, password } = req.body
   // console.log('email, password: ', email, password)
   if (!email || !password) {
-    return res.json({ error: 'Request Error: email and password are required.' })
+    return res.json({ errorMessage: 'Request Error: email and password are required.' })
   }
 
   const result = await User.nativeSignIn(email)
   // console.log('result', result)
   if (result.length === 0) {
-    return res.json({ error: 'Email or password is wrong.' })
+    return res.json({ errorMessage: 'Email or password is wrong.' })
   }
   if (!bcrypt.compareSync(password, result[0].password)) {
-    return res.json({ error: 'Email or password is wrong.' })
+    return res.json({ errorMessage: 'Email or password is wrong.' })
   }
   bcrypt.compare(password, result[0].password)
   delete result[0].password
@@ -117,10 +117,10 @@ const setUserTarget = async (req, res) => {
   }
   /* 確認所有項目皆有輸入 */
   // FIXME: 可以改用套件驗證 -> 寫得更簡潔
-  if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.dietGoal || !userInfo.activityLevel || !userInfo.goalCalories || !userInfo.goalCarbs || !userInfo.goalProtein || !userInfo.goalFat || !userInfo.TDEE) return res.json({ error: 'imcomplete info' })
+  if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.dietGoal || !userInfo.activityLevel || !userInfo.goalCalories || !userInfo.goalCarbs || !userInfo.goalProtein || !userInfo.goalFat || !userInfo.TDEE) return res.json({ errorMessage: 'imcomplete info' })
 
   /* 確認所有數字項之格式皆正確 */
-  if (isNaN(userInfo.height) || isNaN(userInfo.weight) || isNaN(userInfo.gender) || isNaN(userInfo.dietGoal) || isNaN(userInfo.activityLevel) || isNaN(userInfo.goalCalories) || isNaN(userInfo.goalCarbs) || isNaN(userInfo.goalProtein) || isNaN(userInfo.goalFat) || isNaN(userInfo.TDEE)) return res.json({ error: 'incorrect format' })
+  if (isNaN(userInfo.height) || isNaN(userInfo.weight) || isNaN(userInfo.gender) || isNaN(userInfo.dietGoal) || isNaN(userInfo.activityLevel) || isNaN(userInfo.goalCalories) || isNaN(userInfo.goalCarbs) || isNaN(userInfo.goalProtein) || isNaN(userInfo.goalFat) || isNaN(userInfo.TDEE)) return res.json({ errorMessage: 'incorrect format' })
   await User.setUserTarget(userId, userInfo)
   res.status(200).json({ message: 'data added successfully' })
 }
@@ -305,15 +305,14 @@ const updateNutritionTarget = async (req, res) => {
   const { id: userId } = req.user
   // const updateData = req.body
   let { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage } = req.body
-  console.log('nutrition target', goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage)
   let goal_carbs, goal_protein, goal_fat
   if (id !== userId) return res.status(401).json({ error: 'Authentication failed to do any updates.' })
 
   /* 在profile頁面更新目標營養素時採用各營養素百分(ex. goal_carbs: 40 '%', goal_protein: 50 '%')，再加以計算出各營養素的克數 */
   /* validate: 目標熱量不可不輸入、為負數或字串 */
-  if (!goal_calories || goal_calories < 0 || typeof goal_calories === 'string') return res.json({ error: 'Calories must be a positive integer.' })
+  if (!goal_calories || goal_calories < 0 || typeof goal_calories === 'string') return
   /* validate: 目標營養素比例相加必須等於一百 */
-  if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) return res.json({ error: 'Nutrition proportions must equal 100!' })
+  if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) return
   goal_calories = Math.round((goal_calories))
   goal_carbs = Math.round((goal_calories * (goal_carbs_percantage / 100)) / 4)
   goal_protein = Math.round((goal_calories * (goal_protein_percantage / 100)) / 4)
