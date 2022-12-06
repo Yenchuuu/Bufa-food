@@ -1,9 +1,7 @@
 require('dotenv').config()
 const axios = require('axios')
 const db = require('../utils/mysqlconf')
-const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const salt = parseInt(process.env.BCRYPT_SALT)
 const { TOKEN_EXPIRE, TOKEN_SECRET } = process.env // 30 days by seconds
 
 // (birthday, height, weight, gender, diet_type, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -30,7 +28,7 @@ const deleteUserImage = async (userId) => {
 
 /* PATCH account相關資訊 */
 const updateUserProfile = async (updateData, userId) => {
-  console.log('updateData', updateData)
+  // console.log('updateData', updateData)
   if (Object.keys(updateData).length === 0) return
   let sql = 'UPDATE user SET'
   Object.entries(updateData).forEach(([key, value]) => {
@@ -45,7 +43,7 @@ const updateUserProfile = async (updateData, userId) => {
 
 /* PATCH TDEE相關參數 */
 const updateUserBodyInfo = async (updateData, userId) => {
-  console.log('updateData', updateData)
+  // console.log('updateData', updateData)
   if (Object.keys(updateData).length === 0) return
   let sql = 'UPDATE user_bodyInfo SET'
   Object.entries(updateData).forEach(([key, value]) => {
@@ -81,46 +79,22 @@ const getUserPreference = async (userId) => {
 const signUp = async (provider, name, email, password) => {
   const conn = await db.getConnection()
   try {
-    const loginAt = new Date()
-    const user = {
-      provider,
-      email,
-      password: bcrypt.hashSync(password, salt),
-      name,
-      picture: null,
-      access_expired: TOKEN_EXPIRE,
-      login_at: loginAt
-    }
-    // FIXME: 應該不需要
-    const accessToken = jwt.sign(
-      {
-        provider: user.provider,
-        name: user.name,
-        email: user.email,
-        picture: user.picture
-      },
-      TOKEN_SECRET
-    )
-    user.access_token = accessToken
-
     const [result] = await conn.execute(
       'INSERT INTO `user` (name, email, password, provider) VALUES (?, ?, ?, ?)',
-      [user.name, user.email, user.password, user.provider]
+      [name, email, password, provider]
     )
-    user.id = result.insertId
-    return { user }
+    const id = result.insertId
+    return id
   } catch (error) {
     console.error(error)
     return {
       error: 'Email Already Exists',
       status: 400
     }
-  } finally {
-    await conn.release()
   }
 }
 
-const nativeSignIn = async (email, password) => {
+const nativeSignIn = async (email) => {
   const [user] = await db.query('SELECT * FROM user WHERE email = ?', [email])
   // console.log('user: ', user)
   return user

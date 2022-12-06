@@ -12,8 +12,13 @@ const updateMealRecord = async (userId, foodId, meal, servingAmount, date) => {
 }
 
 const deleteMealRecord = async (recordId) => {
-  const [result] = await db.execute('DELETE FROM `user_meal` WHERE id = ?', [recordId])
-  return result
+  try {
+    const [result] = await db.execute('DELETE FROM `user_meal` WHERE id = ?', [recordId])
+    return result
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
 }
 
 const getUserRecord = async (userId, date) => {
@@ -21,10 +26,7 @@ const getUserRecord = async (userId, date) => {
   try {
     await conn.query('START TRANSACTION')
     const [mealRecords] = await conn.execute(
-      `SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount,
-      ROUND(food.per_serving * serving_amount, 0) AS amountTotal, ROUND(food.calories * serving_amount, 0) AS calories, ROUND(food.carbs * serving_amount, 0) AS carbs, ROUND(food.protein * serving_amount, 0) AS protein, ROUND(food.fat * serving_amount, 0) AS fat 
-      FROM \`food\` INNER JOIN \`user_meal\` ON user_meal.food_id = food.id 
-      WHERE user_id = (?) AND date_record = (?);`,
+      'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, ROUND(food.per_serving * serving_amount, 0) AS amountTotal, ROUND(food.calories * serving_amount, 0) AS calories, ROUND(food.carbs * serving_amount, 0) AS carbs, ROUND(food.protein * serving_amount, 0) AS protein, ROUND(food.fat * serving_amount, 0) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
       [userId, date])
     const [recordSummary] = await conn.execute('SELECT user_meal.meal, ROUND(SUM(food.calories * serving_amount), 0) AS caloriesTotal, ROUND(SUM(food.carbs * serving_amount), 0) AS carbsTotal, ROUND(SUM(food.protein * serving_amount), 0) AS proteinTotal, ROUND(SUM(food.fat * serving_amount), 0) AS fatTotal FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?) GROUP BY user_meal.meal;', [userId, date])
     // console.log('mealRecords', mealRecords)

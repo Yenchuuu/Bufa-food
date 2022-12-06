@@ -4,7 +4,6 @@ const moment = require('moment')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const path = require('path')
 const salt = parseInt(process.env.BCRYPT_SALT)
 const { TOKEN_EXPIRE, TOKEN_SECRET } = process.env // 30 days by seconds
 /* 圖片上傳--S3相關 */
@@ -14,51 +13,45 @@ const fs = require('fs')
 const unlinkFile = util.promisify(fs.unlink)
 require('dotenv').config({ path: '../.env' })
 
-// FIXME: model 跟 controller 沒拆乾淨
 const signUp = async (req, res) => {
-  let { name } = req.body
-  const { email, password } = req.body
+  let { name, email, password } = req.body
 
   if (!name || !email || !password) {
-    res.send({ error: 'Request Error: name, email and password are required.' })
+    res.json({ error: 'Request Error: name, email and password are required.' })
     return
   }
 
   if (!validator.isEmail(email) || !email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/gi)) {
-    res.send({ error: 'Request Error: Invalid email format' })
+    res.json({ error: 'Request Error: Invalid email format' })
     return
   }
   /* replace <, >, &, ', " and / with HTML entities */
   name = validator.escape(name)
   const provider = 'native'
+
+  password = bcrypt.hashSync(password, salt)
+
   const result = await User.signUp(provider, name, email, password)
-  console.log('result: ', result);
+  const id = result
+  const user = {
+    id,
+    provider,
+    email,
+    name
+  }
+  user.password = password
+
+  const accessToken = jwt.sign(
+    user,
+    TOKEN_SECRET
+  )
+  user.access_token = accessToken
+
   if (result.error) {
-    res.send({ error: result.error })
+    res.json({ error: result.error })
     return
   }
-
-  const user = result.user
-  if (!user) {
-    res.status(500).send({ error: 'Database Query Error' })
-    return
-  }
-  // FIXME: 在這裡重打一次
-
-  res.status(200).send({
-    data: {
-      access_token: user.access_token,
-      access_expired: user.access_expired,
-      login_at: user.login_at,
-      user: {
-        id: user.id,
-        provider: user.provider,
-        name: user.name,
-        email: user.email,
-        picture: user.picture
-      }
-    }
-  })
+  res.status(200).json(user)
 }
 
 const nativeSignIn = async (req, res) => {
@@ -69,7 +62,7 @@ const nativeSignIn = async (req, res) => {
   }
 
   try {
-    const result = await User.nativeSignIn(email, password)
+    const result = await User.nativeSignIn(email)
     // console.log('result', result)
     if (result.length === 0) {
       return res.json({ error: 'Email or password is wrong.' })
@@ -80,18 +73,13 @@ const nativeSignIn = async (req, res) => {
       delete result[0].password
       const user = result[0]
       const accessToken = jwt.sign(
-        {
-          provider: user.provider,
-          name: user.name,
-          email: user.email,
-          picture: user.picture
-        },
+        user,
         TOKEN_SECRET
       )
       return res.status(200).json({
         data: {
           access_token: accessToken,
-          access_expired: 3600,
+          access_expired: TOKEN_EXPIRE,
           user
         }
       })
@@ -122,9 +110,8 @@ const fbSignIn = async (req, res) => {
 
 const setUserTarget = async (req, res) => {
   try {
-    const { email } = req.user
-    const userDetail = await User.getUserDetail(email)
-    const userId = userDetail[0].id
+    const { id: userId } = req.user
+    // const {birthday, height, weight, gender, diet_type, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE} = req.body
     const userInfo = {
       // FIXME: camal case?
       birthday: req.body.birthday,
@@ -141,6 +128,7 @@ const setUserTarget = async (req, res) => {
       TDEE: req.body.TDEE
     }
     /* 確認所有項目皆有輸入 */
+    // FIXME: 可以改用套件驗證 -> 寫得更簡潔
     if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.diet_goal || !userInfo.activity_level || !userInfo.goal_calories || !userInfo.goal_carbs || !userInfo.goal_protein || !userInfo.goal_fat || !userInfo.TDEE) return res.json({ error: 'imcomplete info' })
 
     /* 確認所有數字項之格式皆正確 */
@@ -155,7 +143,7 @@ const setUserTarget = async (req, res) => {
 const getUserProfile = async (req, res) => {
   const { email } = req.user
   const userDetail = await User.getUserDetail(email)
-  const [{ name, picture, birthday, height, weight, gender, diet_type: dietType, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE }] = userDetail
+  const [{ name, picture, birthday, height, weight, gender, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE }] = userDetail
   // console.log('userDetail', userDetail)
   let imagePath
   if (picture == null) {
@@ -165,7 +153,6 @@ const getUserProfile = async (req, res) => {
   }
   res.status(200).json({
     data: {
-      // provider,
       name,
       email,
       imagePath,
@@ -173,7 +160,6 @@ const getUserProfile = async (req, res) => {
       height,
       weight,
       gender,
-      dietType,
       dietGoal,
       activityLevel,
       goalCalories,
@@ -187,7 +173,8 @@ const getUserProfile = async (req, res) => {
 
 const uploadUserImage = async (req, res) => {
   const id = parseInt(req.params.id)
-  const { email } = req.user
+  const { id: userId } = req.user
+  // const { email } = req.user
   const img = req.file.filename // FIXME: 可能因為他抓不到filename?
 
   /* 把使用者照片上傳至S3，並於本機刪除 */
@@ -200,8 +187,8 @@ const uploadUserImage = async (req, res) => {
     console.log('s3 err:', err)
   }
   try {
-    const data = await User.getUserDetail(email)
-    const userId = data[0].id
+    // const data = await User.getUserDetail(email)
+    // const userId = data[0].id
     if (id === userId) {
       await User.uploadUserImage(img, userId)
       return res.status(200).json({ message: 'User image uploaded successfully.' })
@@ -215,10 +202,8 @@ const uploadUserImage = async (req, res) => {
 
 const deleteUserImage = async (req, res) => {
   const id = parseInt(req.params.id)
-  const { email } = req.user
+  const { id: userId } = req.user
   try {
-    const data = await User.getUserDetail(email)
-    const userId = data[0].id
     if (id === userId) {
       await User.deleteUserImage(userId)
       return res.status(200).json({ message: 'User image removed successfully.' })
@@ -234,10 +219,8 @@ const deleteUserImage = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     const id = parseInt(req.params.id)
-    const { email } = req.user
+    const { id: userId } = req.user
     const updateData = req.body
-    const data = await User.getUserDetail(email)
-    const userId = data[0].id
     if (id === userId) {
       await User.updateUserProfile(updateData, userId)
       return res.status(200).json({ message: 'User account information updated successfully.' })
@@ -253,7 +236,6 @@ const updateUserProfile = async (req, res) => {
 const updateUserBodyInfo = async (req, res) => {
   const id = parseInt(req.params.id)
   const { email } = req.user
-  // const updateData = req.body
   let { birthday, height, weight, gender, diet_goal, activity_level, TDEE } = req.body
   const data = await User.getUserDetail(email)
   const [{
@@ -354,12 +336,10 @@ const updateUserBodyInfo = async (req, res) => {
 /* PATCH 使用者自行調整目標營養素比例 */
 const updateNutritionTarget = async (req, res) => {
   const id = parseInt(req.params.id)
-  const { email } = req.user
+  const { id: userId } = req.user
   // const updateData = req.body
   let { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage } = req.body
   console.log('nutrition target', goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage)
-  const data = await User.getUserDetail(email)
-  const userId = data[0].id
   let goal_carbs, goal_protein, goal_fat
   try {
     if (id !== userId) return res.status(401).json({ error: 'Authentication failed to do any updates.' })
@@ -384,22 +364,16 @@ const updateNutritionTarget = async (req, res) => {
 }
 
 const getUserPreference = async (req, res) => {
-  const { email } = req.user
-  const userDetail = await User.getUserDetail(email)
-  // console.log('userDetail', userDetail)
-  const userId = userDetail[0].id
+  const { id: userId } = req.user
   const preference = await User.getUserPreference(userId)
   res.status(200).json({ preference })
 }
 
-
 const getDailyGoal = async (req, res) => {
-  const { email } = req.user
+  const { id: userId } = req.user
   const startDate = req.query.date
   const endDate = moment(startDate, 'YYYY-MM-DD').add(6, 'day').format('YYYY-MM-DD')
 
-  const userDetail = await User.getUserDetail(email)
-  const userId = userDetail[0].id
   const goalRecords = await User.getDailyGoal(userId, startDate, endDate)
 
   const dailyRecords = await User.getDailySummary(userId, startDate, endDate)

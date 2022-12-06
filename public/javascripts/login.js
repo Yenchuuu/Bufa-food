@@ -58,7 +58,7 @@ if (accessToken) {
       } else {
         const data = await axios.post('/api/1.0/user/signup', { name, email, password })
         // console.log('data: ', data)
-        const userInfo = data.data.data
+        const userInfo = data.data
         if (data.data.error) {
           Swal.fire({
             icon: 'error',
@@ -68,9 +68,9 @@ if (accessToken) {
           /* 註冊即登入 */
           const accessToken = userInfo.access_token
           window.localStorage.setItem('accessToken', accessToken)
-          window.localStorage.setItem('userName', userInfo.user.name)
-          window.localStorage.setItem('userId', userInfo.user.id)
-          window.localStorage.setItem('userEmail', userInfo.user.email)
+          window.localStorage.setItem('userName', userInfo.name)
+          window.localStorage.setItem('userId', userInfo.id)
+          window.localStorage.setItem('userEmail', userInfo.email)
           Swal.fire({
             icon: 'success',
             title: '註冊成功',

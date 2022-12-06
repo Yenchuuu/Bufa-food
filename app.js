@@ -26,6 +26,10 @@ app.use(function (req, res, next) {
 // error handler
 app.use(function (err, req, res, next) {
   console.error(err.stack)
+  // FIXME: 不可以只有這種種簡單訊息，應該在別的地方用new Error
+  // TODO: 可以用class...extend的寫法客製化error message，還可以toJSON把它組起來 -> 也剛好回傳JSON給前端
+  // TODO: error message可以離出bug的地方越近越好，比較知道源頭到底在哪
+  // https://javascript.info/custom-errors
   res.status(500).send('Something broke!')
 })
 

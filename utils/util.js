@@ -16,7 +16,6 @@ const wrapAsync = (fn) => {
   }
 }
 
-// FIXME: 不用多包一層fn、.send應該改成.JSON
 async function authentication (req, res, next) {
   let accessToken = req.get('Authorization')
   if (!accessToken) {
@@ -32,14 +31,14 @@ async function authentication (req, res, next) {
     const user = jwt.verify(accessToken, TOKEN_SECRET)
     req.user = user
     // console.log('user', user)
-    const userDetail = await User.getUserDetail(user.email)
+    const [userDetail] = await User.getUserDetail(user.email)
     if (!userDetail) {
       res.status(401).json({ error: 'Invalid token' })
-    } else {
-      req.user.id = userDetail.id
-      next()
+      // } else {
+      // req.user.id = userDetail.id
     }
-    return
+    next()
+    // return
   } catch (err) {
     console.error(err)
     res.status(403).json({ error: 'Forbidden' })
