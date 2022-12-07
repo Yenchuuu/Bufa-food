@@ -2,13 +2,21 @@ const db = require('../utils/mysqlconf')
 
 // FIXME: try catch起來; catch err 可以用throw new Error(err) 並在app.js的500那邊接起來並印出來（可以加上時間）
 const createMealRecord = async (userId, foodId, meal, servingAmount, date) => {
-  const [result] = await db.execute('INSERT INTO `user_meal` (user_id, food_id, meal, serving_amount, date_record) VALUES (?, ?, ?, ?, ?)', [userId, foodId, meal, servingAmount, date])
-  return result
+  try {
+    const [result] = await db.execute('INSERT INTO `user_meal` (user_id, food_id, meal, serving_amount, date_record) VALUES (?, ?, ?, ?, ?)', [userId, foodId, meal, servingAmount, date])
+    return result
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const updateMealRecord = async (userId, foodId, meal, servingAmount, date) => {
-  const [result] = await db.execute('UPDATE `user_meal` SET serving_amount = ? WHERE user_id = ? AND food_id = ? AND meal = ?', [servingAmount, userId, foodId, meal])
-  return result
+  try {
+    const [result] = await db.execute('UPDATE `user_meal` SET serving_amount = ? WHERE user_id = ? AND food_id = ? AND meal = ?', [servingAmount, userId, foodId, meal])
+    return result
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const deleteMealRecord = async (recordId) => {
@@ -65,12 +73,16 @@ const createFoodDetail = async (name, calories, carbs, protein, fat, perServing,
 }
 
 const getRecommendSingleMeal = async (userId) => {
-  const singleMealQuery = 'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
-  const [recommendMealList] = await db.execute(
-    singleMealQuery, [userId]
-  )
-  // console.log('recommendMealList', recommendMealList)
-  return recommendMealList
+  try {
+    const singleMealQuery = 'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
+    const [recommendMealList] = await db.execute(
+      singleMealQuery, [userId]
+    )
+    // console.log('recommendMealList', recommendMealList)
+    return recommendMealList
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const setRecommendSingleMeal = async (userId, meal, recommendMeal, date) => {
@@ -87,8 +99,7 @@ const setRecommendSingleMeal = async (userId, meal, recommendMeal, date) => {
     return writeRecommendMeals
   } catch (err) {
     await conn.query('ROLLBACK')
-    console.error(err)
-    return
+    throw new Error(err)
   } finally {
     await conn.release()
   }
@@ -112,8 +123,7 @@ const setRecommendMultipleMeals = async (userId, recommendBreakfast, recommendLu
     return
   } catch (err) {
     await conn.query('ROLLBACK')
-    console.error(err)
-    return
+    throw new Error(err)
   } finally {
     await conn.release()
   }
@@ -121,65 +131,97 @@ const setRecommendMultipleMeals = async (userId, recommendBreakfast, recommendLu
 
 /* 選出所有recommend食物，排除該使用者不喜歡的食物 */
 const getRecommendMultipleMeals = async (userId) => {
-  const multipleMealsQuery =
-    'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
-  const [recommendMealsList] = await db.execute(multipleMealsQuery, [userId])
-  // console.log('recommendMealsList', recommendMealsList)
-  return recommendMealsList
+  try {
+    const multipleMealsQuery =
+      'SELECT id, name, per_serving, calories, carbs, protein, fat, food_categories_id, recommend_categories_id FROM `food` WHERE food.recommend_categories_id BETWEEN 1 AND 4 AND id NOT IN (SELECT food_id FROM `user_preference` WHERE user_id = ? AND (preference IN (1, 2)))'
+    const [recommendMealsList] = await db.execute(multipleMealsQuery, [userId])
+    // console.log('recommendMealsList', recommendMealsList)
+    return recommendMealsList
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const getFoodFromSearchbox = async (keyword) => {
-  const [searchFood] = await db.query(
-    `SELECT id, name FROM food WHERE name LIKE '%${keyword}%' LIMIT 7`
-  )
-  // console.log('searchFoodM', searchFood)
-  return searchFood
+  try {
+    const [searchFood] = await db.query(
+      `SELECT id, name FROM food WHERE name LIKE '%${keyword}%' LIMIT 7`
+    )
+    // console.log('searchFoodM', searchFood)
+    return searchFood
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const getFoodTrend = async (periodStart, periodEnd) => {
-  const [trendFood] = await db.execute(
-    'SELECT food_id, COUNT(food_id) AS counts, food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` ORDER BY counts DESC LIMIT 5;',
-    [periodStart, periodEnd]
-  )
-  return trendFood
+  try {
+    const [trendFood] = await db.execute(
+      'SELECT food_id, COUNT(food_id) AS counts, food.name FROM `user_meal` INNER JOIN `food` ON user_meal.food_id = food.id WHERE `date_record` BETWEEN ? AND ? GROUP BY `food_id` ORDER BY counts DESC LIMIT 5;',
+      [periodStart, periodEnd]
+    )
+    return trendFood
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 /* 比較使用者之喜好分數計算歐式距離 */
 const getCurrentUserPreference = async (currentUserId) => {
-  const [currentUser] = await db.execute(
-    'SELECT food_id, preference FROM `user_preference` WHERE user_id = ? AND preference NOT IN (1, 2)',
-    [currentUserId]
-  )
-  return currentUser
+  try {
+    const [currentUser] = await db.execute(
+      'SELECT food_id, preference FROM `user_preference` WHERE user_id = ? AND preference NOT IN (1, 2)',
+      [currentUserId]
+    )
+    return currentUser
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const getOtherUsersList = async (currentUserId) => {
-  const [otherUsers] = await db.execute(
-    'SELECT DISTINCT(user_id) FROM `user_preference` WHERE user_id != (?) AND preference NOT IN (1, 2);',
-    [currentUserId]
-  )
-  return otherUsers
+  try {
+    const [otherUsers] = await db.execute(
+      'SELECT DISTINCT(user_id) FROM `user_preference` WHERE user_id != (?) AND preference NOT IN (1, 2);',
+      [currentUserId]
+    )
+    return otherUsers
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const getAllUserRecords = async (currentUserId) => {
-  const [allRecords] = await db.execute(
-    'SELECT user_preference.user_id, user_preference.preference, food.id AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?) AND preference NOT IN (1, 2);',
-    [currentUserId]
-  )
-  return allRecords
+  try {
+    const [allRecords] = await db.execute(
+      'SELECT user_preference.user_id, user_preference.preference, food.id AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?) AND preference NOT IN (1, 2);',
+      [currentUserId]
+    )
+    return allRecords
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const getDistinctFoodList = async (currentUserId) => {
-  const [distinctFood] = await db.execute(
-    'SELECT DISTINCT(food.id) AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?);',
-    [currentUserId]
-  )
-  return distinctFood
+  try {
+    const [distinctFood] = await db.execute(
+      'SELECT DISTINCT(food.id) AS food_id, food.name AS food_name FROM `user_preference` INNER JOIN `food` ON user_preference.food_id = food.id WHERE user_id != (?);',
+      [currentUserId]
+    )
+    return distinctFood
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 const getFoodNutritionInfo = async (recommendFood) => {
-  const [foodNutritionInfo] = await db.execute('SELECT id, name, calories, carbs, protein, fat FROM `food` WHERE id IN (?, ?, ?)', [recommendFood[0], recommendFood[1], recommendFood[2]])
-  return foodNutritionInfo
+  try {
+    const [foodNutritionInfo] = await db.execute('SELECT id, name, calories, carbs, protein, fat FROM `food` WHERE id IN (?, ?, ?)', [recommendFood[0], recommendFood[1], recommendFood[2]])
+    return foodNutritionInfo
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
 // FIXME: 邏輯判斷拆去controller
@@ -281,8 +323,7 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
     return result
   } catch (err) {
     await conn.query('ROLLBACK')
-    console.error(err)
-    return
+    throw new Error(err)
   } finally {
     await conn.release()
   }
