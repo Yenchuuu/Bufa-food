@@ -1,7 +1,4 @@
 // FIXME: jsGrid更新時總計不會跟著更新
-// const userName = window.localStorage.getItem('userName');
-const userId = window.localStorage.getItem('userId')
-const userEmail = window.localStorage.getItem('userEmail')
 
 const accessToken = window.localStorage.getItem('accessToken')
 if (!accessToken) {
@@ -51,24 +48,10 @@ if (!accessToken) {
     values.push(parseInt(meal), target, parseInt(targetValue))
     // console.log('values: ', values)
     /* 判斷選擇哪一餐&目標打api */
-    const targetMeal = await axios.post('/api/1.0/food/single', { meal: values[0], target: values[1], value: values[2], date }, { headers: { Authorization: `Bearer ${accessToken}` } })
-    // console.log('targetMeal', targetMeal)
-    if (target === 'calories' && targetMeal.data.errorMessage === 'lowCalories') {
-      Swal.fire({
-        icon: 'warning',
-        text: '為求飲食均衡，一餐熱量不建議低於TDEE 10%喔！\b請重新輸入'
-      })
-    } else if (target === 'calories' && targetMeal.data.errorMessage === 'highCalories') {
-      Swal.fire({
-        icon: 'warning',
-        text: '為求飲食均衡，不建議將一日熱量集中於一餐！\b請重新輸入'
-      })
-    } else if (targetMeal.data.errorMessage === 'outOfRange') {
-      Swal.fire({
-        icon: 'warning',
-        text: '為求飲食均衡，不建議將營養素過度集中攝取於某一餐，請重新輸入'
-      })
-    } else {
+    try {
+      const targetMeal = await axios.post('/api/1.0/food/single', { meal: values[0], target: values[1], value: values[2], date }, { headers: { Authorization: `Bearer ${accessToken}` } })
+      // console.log('targetMeal', targetMeal)
+
       const recommendMeal = targetMeal.data.recommendMeal
       // console.log('recommendMeal', recommendMeal)
 
@@ -93,6 +76,23 @@ if (!accessToken) {
       }
       // console.log('switchMeal', switchMeal)
       window.location.href = `/diary.html?date=${date}`
+    } catch (err) {
+      if (target === 'calories' && err.response.data.errorMessage === 'lowCalories') {
+        Swal.fire({
+          icon: 'warning',
+          text: '為求飲食均衡，一餐熱量不建議低於TDEE 10%喔！\b請重新輸入'
+        })
+      } else if (target === 'calories' && err.response.data.errorMessage === 'highCalories') {
+        Swal.fire({
+          icon: 'warning',
+          text: '為求飲食均衡，不建議將一日熱量集中於一餐！\b請重新輸入'
+        })
+      } else if (err.response.data.errorMessage === 'outOfRange') {
+        Swal.fire({
+          icon: 'warning',
+          text: '為求飲食均衡，不建議將營養素過度集中攝取於某一餐，請重新輸入'
+        })
+      }
     }
   })
 
@@ -103,17 +103,15 @@ if (!accessToken) {
     if (!date) {
       date = moment().format('YYYY-MM-DD')
     }
-    const getDailyRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-    console.log('getDailyRecord', getDailyRecord)
-    if (getDailyRecord.data.caloriesTotal !== 0) {
-      Swal.fire({
-        icon: 'warning',
-        text: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！'
-      })
-    } else {
-      const getMeal = await axios.post('/api/1.0/food/multiple', { date }, { headers: { Authorization: `Bearer ${accessToken}` } })
+    try {
+      await axios.post('/api/1.0/food/multiple', { date }, { headers: { Authorization: `Bearer ${accessToken}` } })
       // console.log('getMeal', getMeal, 'date', date)
       window.location.href = `/diary.html?date=${date}`
+    } catch (err) {
+      Swal.fire({
+        icon: 'warning',
+        text: err.response.data.errorMessage
+      })
     }
   })
 

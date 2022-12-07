@@ -43,8 +43,8 @@ if (accessToken) {
       const email = $('#register_email').val()
       const password = $('#register_password').val()
       // console.log('info: ', name, email, password);
-
       const confirmPassword = $('#confirm_password').val()
+
       if (!name || !email || !password || !confirmPassword) {
         Swal.fire({
           icon: 'error',
@@ -55,30 +55,31 @@ if (accessToken) {
           icon: 'error',
           text: '請再次確認密碼輸入正確'
         })
-      } else {
+      }
+
+      try {
         const data = await axios.post('/api/1.0/user/signup', { name, email, password })
         // console.log('data: ', data)
         const userInfo = data.data
-        if (data.data.errorMessage) {
-          Swal.fire({
-            icon: 'error',
-            text: '帳號格式錯誤或已被註冊'
-          })
-        } else if (userInfo) {
-          /* 註冊即登入 */
-          const accessToken = userInfo.access_token
-          window.localStorage.setItem('accessToken', accessToken)
-          window.localStorage.setItem('userName', userInfo.name)
-          window.localStorage.setItem('userId', userInfo.id)
-          window.localStorage.setItem('userEmail', userInfo.email)
-          Swal.fire({
-            icon: 'success',
-            title: '註冊成功',
-            footer: '<a href="/target.html" class="text-secondary">前往填寫體態與設定目標💪🏼</a>'
-          }).then((result) => {
-            window.location.href = '/target.html'
-          })
-        }
+
+        /* 註冊即登入 */
+        const accessToken = userInfo.access_token
+        window.localStorage.setItem('accessToken', accessToken)
+        window.localStorage.setItem('userName', userInfo.name)
+        window.localStorage.setItem('userId', userInfo.id)
+        window.localStorage.setItem('userEmail', userInfo.email)
+        Swal.fire({
+          icon: 'success',
+          title: '註冊成功',
+          footer: '<a href="/target.html" class="text-secondary">前往填寫體態與設定目標💪🏼</a>'
+        }).then((result) => {
+          window.location.href = '/target.html'
+        })
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          text: '帳號格式錯誤或已被註冊'
+        })
       }
     })
   })
@@ -106,35 +107,30 @@ if (accessToken) {
         const data = await axios.post('/api/1.0/user/nativesignin', { provider: 'native', email, password })
         // console.log('data: ', data);
         const userInfo = data.data.data
-        if (data.data.errorMessage) {
-          Swal.fire({
-            icon: 'error',
-            text: '帳號或密碼錯誤，請重新輸入'
-          })
-          return
-        } else if (userInfo.access_token) {
-          const accessToken = userInfo.access_token
-          // console.log('accessToken: ', accessToken);
-          /* 輸入正確資訊時產生jwt token，進入user diary page */
-          window.localStorage.setItem('accessToken', accessToken)
-          window.localStorage.setItem('userName', userInfo.user.name)
-          window.localStorage.setItem('userId', userInfo.user.id)
-          window.localStorage.setItem('userEmail', userInfo.user.email)
-          const bodyInfo = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
-          // console.log('bodyInfo: ', bodyInfo);
-          Swal.fire({
-            icon: 'success',
-            text: '登入成功'
-          }).then((result) => {
-            if (!bodyInfo.data.data.TDEE) {
-              window.location.href = '/target.html'
-            } else {
-              window.location.href = '/diary.html'
-            }
-          })
-        }
+        const accessToken = userInfo.access_token
+        // console.log('accessToken: ', accessToken);
+        /* 輸入正確資訊時產生jwt token，進入user diary page */
+        window.localStorage.setItem('accessToken', accessToken)
+        window.localStorage.setItem('userName', userInfo.user.name)
+        window.localStorage.setItem('userId', userInfo.user.id)
+        window.localStorage.setItem('userEmail', userInfo.user.email)
+        const bodyInfo = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
+        // console.log('bodyInfo: ', bodyInfo);
+        Swal.fire({
+          icon: 'success',
+          text: '登入成功'
+        }).then((result) => {
+          if (!bodyInfo.data.data.TDEE) {
+            window.location.href = '/target.html'
+          } else {
+            window.location.href = '/diary.html'
+          }
+        })
       } catch (err) {
-        console.error(err)
+        Swal.fire({
+          icon: 'error',
+          text: '帳號或密碼錯誤，請重新輸入'
+        })
       }
     })
   })

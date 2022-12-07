@@ -239,16 +239,16 @@ if (!accessToken) {
         })
         return
       }
+      try {
+        const data = await axios.patch(`/api/1.0/user/profile/nutritiontarget/${userId}`, { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage }, { headers: { Authorization: `Bearer ${accessToken}` } })
 
-      const data = await axios.patch(`/api/1.0/user/profile/nutritiontarget/${userId}`, { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage }, { headers: { Authorization: `Bearer ${accessToken}` } })
-      if (data.data.message) {
         Swal.fire({
           icon: 'success',
           text: '設定成功'
         }).then(() => {
           window.location.href = '/profile.html'
         })
-      } else {
+      } catch (err) {
         Swal.fire({
           icon: 'warning',
           text: '請再試一次'

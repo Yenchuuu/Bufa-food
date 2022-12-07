@@ -18,12 +18,12 @@ const signUp = async (req, res) => {
   let { name, email, password } = req.body
 
   if (!name || !email || !password) {
-    res.json({ errorMessage: 'Request Error: name, email and password are required.' })
+    res.status(400).json({ errorMessage: 'Request Error: name, email and password are required.' })
     return
   }
 
   if (!validator.isEmail(email) || !email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/gi)) {
-    res.json({ errorMessage: 'Request Error: Invalid email format' })
+    res.status(400).json({ errorMessage: 'Request Error: Invalid email format' })
     return
   }
   /* replace <, >, &, ', " and / with HTML entities */
@@ -49,7 +49,7 @@ const signUp = async (req, res) => {
   user.access_token = accessToken
 
   if (result.error) {
-    res.json({ errorMessage: result.error })
+    res.status(400).json({ errorMessage: result.error })
     return
   }
   res.status(200).json(user)
@@ -59,16 +59,16 @@ const nativeSignIn = async (req, res) => {
   const { email, password } = req.body
   // console.log('email, password: ', email, password)
   if (!email || !password) {
-    return res.json({ errorMessage: 'Request Error: email and password are required.' })
+    return res.status(400).json({ errorMessage: 'Request Error: email and password are required.' })
   }
 
   const result = await User.nativeSignIn(email)
   // console.log('result', result)
   if (result.length === 0) {
-    return res.json({ errorMessage: 'Email or password is wrong.' })
+    return res.status(400).json({ errorMessage: 'Email or password is wrong.' })
   }
   if (!bcrypt.compareSync(password, result[0].password)) {
-    return res.json({ errorMessage: 'Email or password is wrong.' })
+    return res.status(400).json({ errorMessage: 'Email or password is wrong.' })
   }
   bcrypt.compare(password, result[0].password)
   delete result[0].password
@@ -102,6 +102,7 @@ const fbSignIn = async (req, res) => {
 
 const setUserTarget = async (req, res) => {
   const { id: userId } = req.user
+  // const {birthday, height, weight, gender, dietGoal: diet_goal, activity_level: activityLevel, goalCalories: goal_calories, goalCarbs: goal_carbs, goalProtein: goal_protein, goalFat: goal_fat, TDEE} = req.body
   const userInfo = {
     birthday: req.body.birthday,
     height: req.body.height,
@@ -116,11 +117,14 @@ const setUserTarget = async (req, res) => {
     TDEE: req.body.TDEE
   }
   /* 確認所有項目皆有輸入 */
-  // FIXME: 可以改用套件驗證 -> 寫得更簡潔
-  if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.dietGoal || !userInfo.activityLevel || !userInfo.goalCalories || !userInfo.goalCarbs || !userInfo.goalProtein || !userInfo.goalFat || !userInfo.TDEE) return res.json({ errorMessage: 'imcomplete info' })
 
+  // FIXME: 可以改用套件驗證 -> 寫得更簡潔
+  // if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.dietGoal || !userInfo.activityLevel || !userInfo.goalCalories || !userInfo.goalCarbs || !userInfo.goalProtein || !userInfo.goalFat || !userInfo.TDEE) return res.status(400).json({ errorMessage: 'imcomplete info' })
+
+  // FIXME: 如果postman輸入空的東西沒有成功擋下來
   /* 確認所有數字項之格式皆正確 */
-  if (isNaN(userInfo.height) || isNaN(userInfo.weight) || isNaN(userInfo.gender) || isNaN(userInfo.dietGoal) || isNaN(userInfo.activityLevel) || isNaN(userInfo.goalCalories) || isNaN(userInfo.goalCarbs) || isNaN(userInfo.goalProtein) || isNaN(userInfo.goalFat) || isNaN(userInfo.TDEE)) return res.json({ errorMessage: 'incorrect format' })
+  // if (isNaN(userInfo.height) || isNaN(userInfo.weight) || isNaN(userInfo.gender) || isNaN(userInfo.dietGoal) || isNaN(userInfo.activityLevel) || isNaN(userInfo.goalCalories) || isNaN(userInfo.goalCarbs) || isNaN(userInfo.goalProtein) || isNaN(userInfo.goalFat) || isNaN(userInfo.TDEE)) return res.status(400).json({ errorMessage: 'incorrect format' })
+
   await User.setUserTarget(userId, userInfo)
   res.status(200).json({ message: 'data added successfully' })
 }
@@ -129,7 +133,6 @@ const getUserProfile = async (req, res) => {
   const { email } = req.user
   const userDetail = await User.getUserDetail(email)
   const [{ name, picture, birthday, height, weight, gender, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE }] = userDetail
-  // console.log('userDetail', userDetail)
   let imagePath
   if (picture == null) {
     imagePath = ''
@@ -543,7 +546,7 @@ const getDailyGoal = async (req, res) => {
     goalFatArray.push(parseInt(day7Goal.goal_fat))
   }
 
-  res.json({ dailyCaloriesArray, dailyCarbsArray, dailyProteinArray, dailyFatArray, goalCaloriesArray, goalCarbsArray, goalProteinArray, goalFatArray })
+  res.status(200).json({ dailyCaloriesArray, dailyCarbsArray, dailyProteinArray, dailyFatArray, goalCaloriesArray, goalCarbsArray, goalProteinArray, goalFatArray })
 }
 
 module.exports = { signUp, nativeSignIn, fbSignIn, setUserTarget, getUserProfile, uploadUserImage, deleteUserImage, updateUserProfile, updateUserBodyInfo, updateNutritionTarget, getUserPreference, getDailyGoal }

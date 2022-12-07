@@ -32,7 +32,7 @@ const addMealRecord = async (req, res) => {
   } else {
     await Food.createMealRecord(userId, foodId, meal, servingAmount, date)
   }
-  res.json({ message: 'Record updated successfully.' })
+  res.status(200).json({ message: 'Record updated successfully.' })
 }
 
 const updateMealRecord = async (req, res) => {
@@ -58,7 +58,7 @@ const updateMealRecord = async (req, res) => {
   const meal = data.meal
   await Food.updateMealRecord(userId, foodId, meal, servingAmount, date)
 
-  res.json(data)
+  res.status(200).json(data)
 }
 
 const deleteMealRecord = async (req, res) => {
@@ -69,7 +69,7 @@ const deleteMealRecord = async (req, res) => {
   const data = req.body
   const recordId = data.record_id
   await Food.deleteMealRecord(recordId)
-  res.json(data)
+  res.status(200).json(data)
 }
 
 const getDiaryRecord = async (req, res) => {
@@ -97,13 +97,13 @@ const getDiaryRecord = async (req, res) => {
   const fatTotal = mealRecords.recordSummary.reduce((acc, item) => {
     return acc + parseInt(item.fatTotal)
   }, 0)
-  res.json({ mealRecords, caloriesTotal, carbsTotal, proteinTotal, fatTotal })
+  res.status(200).json({ mealRecords, caloriesTotal, carbsTotal, proteinTotal, fatTotal })
 }
 
 const getFoodDetail = async (req, res) => {
   const foodId = req.query.id
   const foodDetail = await Food.getFoodDetail(foodId)
-  res.json({ foodDetail })
+  res.status(200).json({ foodDetail })
 }
 
 const createFoodDetail = async (req, res) => {
@@ -118,7 +118,7 @@ const createFoodDetail = async (req, res) => {
   perServing = parseInt(perServing)
 
   await Food.createFoodDetail(name, calories, carbs, protein, fat, perServing, userId)
-  res.json({ message: 'Food created successfully.' })
+  res.status(200).json({ message: 'Food created successfully.' })
 }
 
 const generateSingleMeal = async (req, res) => {
@@ -128,11 +128,11 @@ const generateSingleMeal = async (req, res) => {
   const [{ id: userId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
 
   /* 一餐熱量不應低於TDEE 10% */
-  if (target === 'calories' && value < (goalCalories * 0.1)) return res.json({ errorMessage: 'lowCalories' })
+  if (target === 'calories' && value < (goalCalories * 0.1)) return res.status(400).json({ errorMessage: 'lowCalories' })
   /* 輸入過高之熱量 */
-  if (target === 'calories' && value > (goalCalories * 0.7)) return res.json({ errorMessage: 'highCalories' })
+  if (target === 'calories' && value > (goalCalories * 0.7)) return res.status(400).json({ errorMessage: 'highCalories' })
   /* 不建議營養素過度集中在某一餐攝取 */
-  if ((target === 'carbs' && value > goalCarbs * 0.7) || (target === 'protein' && value > goalProtein * 0.7) || (target === 'fat' && value > goalFat * 0.7)) return res.json({ errorMessage: 'outOfRange' })
+  if ((target === 'carbs' && value > goalCarbs * 0.7) || (target === 'protein' && value > goalProtein * 0.7) || (target === 'fat' && value > goalFat * 0.7)) return res.status(400).json({ errorMessage: 'outOfRange' })
   /* 計算使用者C P F的目標營養素分別對總熱量佔比為多少 */
   const userCarbsPercentage = Math.round((goalCarbs * 4) / goalCalories * 100) / 100
   const userProteinPercentage = Math.round((goalProtein * 4) / goalCalories * 100) / 100
@@ -264,7 +264,7 @@ const generateSingleMeal = async (req, res) => {
   }
   await Food.setRecommendSingleMeal(userId, meal, recommendMeal, date)
   // console.log('InfoC', userId, recommendMeal, date)
-  return res.json({ meal, recommendMeal })
+  return res.status(200).json({ meal, recommendMeal })
 }
 
 const generateMultipleMeals = async (req, res) => {
@@ -276,7 +276,7 @@ const generateMultipleMeals = async (req, res) => {
 
   const mealRecords = await Food.getUserRecord(userId, date)
   if (mealRecords.mealRecords.length !== 0) {
-    return res.json({ errorMessage: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！' })
+    return res.status(400).json({ errorMessage: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！' })
   } else {
     const multipleMealsList = await Food.getRecommendMultipleMeals(userId)
 
@@ -464,14 +464,14 @@ const generateMultipleMeals = async (req, res) => {
 
     await Food.setRecommendMultipleMeals(userId, recommendBreakfast, recommendLunch, recommendDinner, date)
     // console.log('Meals write into DB successfully.')
-    return res.json({ recommendBreakfast, recommendLunch, recommendDinner })
+    return res.status(200).json({ recommendBreakfast, recommendLunch, recommendDinner })
   }
 }
 
 const getFoodFromKeyword = async (req, res) => {
   const key = req.query.key
   const searchFood = await Food.getFoodFromSearchbox(key)
-  res.json(searchFood)
+  res.status(200).json(searchFood)
 }
 
 const getFoodTrend = async (req, res) => {
@@ -512,7 +512,7 @@ const getUserRecommendation = async (req, res) => {
   const { id: currentUserId } = req.user
   const recommendFood = await Euc.getUserPreference(currentUserId)
   const foodNutritionInfo = await Food.getFoodNutritionInfo(recommendFood)
-  res.json({ foodNutritionInfo })
+  res.status(200).json({ foodNutritionInfo })
 }
 
 const updateFoodPreference = async (req, res) => {
@@ -521,7 +521,7 @@ const updateFoodPreference = async (req, res) => {
   const { clickedBtn } = req.body
   // console.log(userId, foodId, clickedBtn)
   await Food.updateFoodPreference(userId, foodId, clickedBtn)
-  res.json({ message: 'Preference score updated successfully.' })
+  res.status(200).json({ message: 'Preference score updated successfully.' })
 }
 
 module.exports = {
