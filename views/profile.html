@@ -330,18 +330,19 @@
 async function upload() {
     const formData = new FormData(form)
     // console.log('formData: ', formData)
+    try{
     const data = await axios.patch(`/api/1.0/user/profile/image/${userId}`, formData, { headers: { Authorization: `Bearer ${accessToken}` } })
-    if (data.data.message) {
       Swal.fire({
-        icon: 'seccess',
+        icon: 'success',
         text: '上傳成功'
       }).then(() => {
         window.location.href = 'profile.html'
       })
-    } else {
+    } catch (err) {
       Swal.fire({
         icon: 'error',
-        text: '上傳失敗，請再試一次'
+        text: '上傳失敗，請再試一次',
+        footer: '格式限制：jpg, jpeg, png'
       }).then(() => {
         window.location.href = 'profile.html'
       })

@@ -50,11 +50,11 @@ const upload = multer({
     /* 限制上傳檔案的大小為 1MB */
     fileSize: 1000000
   },
-  fileFilter(req, file, cb) {
+  fileFilter (req, file, cb) {
     /* 只接受三種圖片格式 */
-    // FIXME: 格式錯誤要用error handler接起來
-    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-      cb(new Error('請上傳圖片格式'))
+    const imageType = ['image/jpg', 'image/jpeg', 'image/png']
+    if (!imageType.includes(file.mimetype)) {
+      return cb(null, false, new Error('請上傳圖片格式'))
     }
     cb(null, true)
   },

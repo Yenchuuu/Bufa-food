@@ -162,17 +162,13 @@ const getUserProfile = async (req, res) => {
 const uploadUserImage = async (req, res) => {
   const id = parseInt(req.params.id)
   const { id: userId } = req.user
-  const img = req.file.filename // FIXME: 可能因為他抓不到filename?
+  const img = req.file.path
 
   /* 把使用者照片上傳至S3，並於本機刪除 */
-  // FIXME: 照片都有上傳成功但會噴s3 err: [Error: ENOENT: no such file or directory, unlink
-  try {
-    const uploadPhoto = await uploadFile(req.file)
     // console.log('userPhoto_result:', uploadPhoto)
-    await unlinkFile(img)
-  } catch (err) {
-    console.log('s3 err:', err)
-  }
+  await uploadFile(req.file)
+  // console.log('userPhoto_result:', uploadPhoto)
+  await unlinkFile(img)
   if (id === userId) {
     await User.uploadUserImage(img, userId)
     return res.status(200).json({ message: 'User image uploaded successfully.' })
