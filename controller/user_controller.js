@@ -18,20 +18,20 @@ const signUp = async (req, res) => {
   let { name, email, password } = req.body
 
   if (!name || !email || !password) {
-    res.status(400).json({ errorMessage: 'Request Error: name, email and password are required.' })
-    return
+    return res.status(400).json({ errorMessage: 'Request Error: name, email and password are required.' })
   }
-
-  if (!validator.isEmail(email) || !email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/gi)) {
-    res.status(400).json({ errorMessage: 'Request Error: Invalid email format' })
-    return
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ errorMessage: 'Request Error: Invalid email format' })
+  }
+  const findUser = await User.getUserDetail(email)
+  if (findUser.length !== 0) {
+    return res.status(400).json({ errorMessage: 'Request Error: Email already exist.' })
   }
   /* replace <, >, &, ', " and / with HTML entities */
   name = validator.escape(name)
   const provider = 'native'
 
   password = bcrypt.hashSync(password, salt)
-
   const result = await User.signUp(provider, name, email, password)
   const id = result
   const user = {
@@ -40,7 +40,7 @@ const signUp = async (req, res) => {
     email,
     name
   }
-  user.password = password
+  // user.password = password
 
   const accessToken = jwt.sign(
     user,
@@ -89,41 +89,49 @@ const nativeSignIn = async (req, res) => {
 const fbSignIn = async (req, res) => {
   // 確認是否有fb token
   const token = req.body
-  const accessToken = token.access_token
-  const profile = await User.getFacebookProfile(accessToken)
+  const fbAccessToken = token.access_token
+  const profile = await User.getFacebookProfile(fbAccessToken)
   const { id, name, email } = profile
 
   if (!id || !name || !email) {
     return { error: 'Permissions Error: facebook access token can not get user id, name or email' }
   }
-  const data = await User.fbSignIn(id, name, email)
-  res.status(200).json(data)
+
+  const user = {
+    provider: 'facebook',
+    email,
+    name,
+    picture: 'https://graph.facebook.com/' + id + '/picture?type=large'
+  }
+
+  const data = await User.fbSignIn(email, user)
+  user.id = data
+
+  const accessToken = jwt.sign(
+    user,
+    TOKEN_SECRET
+  )
+
+  res.status(200).json({
+    data: {
+      access_token: accessToken,
+      access_expired: TOKEN_EXPIRE,
+      user
+    }
+  })
 }
 
 const setUserTarget = async (req, res) => {
   const { id: userId } = req.user
-  // const {birthday, height, weight, gender, dietGoal: diet_goal, activity_level: activityLevel, goalCalories: goal_calories, goalCarbs: goal_carbs, goalProtein: goal_protein, goalFat: goal_fat, TDEE} = req.body
-  const userInfo = {
-    birthday: req.body.birthday,
-    height: req.body.height,
-    weight: req.body.weight,
-    gender: req.body.gender,
-    dietGoal: req.body.diet_goal,
-    activityLevel: req.body.activity_level,
-    goalCalories: req.body.goal_calories,
-    goalCarbs: req.body.goal_carbs,
-    goalProtein: req.body.goal_protein,
-    goalFat: req.body.goal_fat,
-    TDEE: req.body.TDEE
-  }
+  const { birthday, height, weight, gender, diet_goal: dietGoal, activity_level: activityLevel, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat, TDEE } = req.body
+
   /* 確認所有項目皆有輸入 */
+  if (!birthday || !height || !weight || !gender || !dietGoal || !activityLevel || !goalCalories || !goalCarbs || !goalProtein || !goalFat || !TDEE) return res.status(400).json({ errorMessage: 'imcomplete info' })
 
-  // FIXME: 可以改用套件驗證 -> 寫得更簡潔
-  // if (!userInfo.birthday || !userInfo.height || !userInfo.weight || !userInfo.gender || !userInfo.dietGoal || !userInfo.activityLevel || !userInfo.goalCalories || !userInfo.goalCarbs || !userInfo.goalProtein || !userInfo.goalFat || !userInfo.TDEE) return res.status(400).json({ errorMessage: 'imcomplete info' })
-
-  // FIXME: 如果postman輸入空的東西沒有成功擋下來
   /* 確認所有數字項之格式皆正確 */
-  // if (isNaN(userInfo.height) || isNaN(userInfo.weight) || isNaN(userInfo.gender) || isNaN(userInfo.dietGoal) || isNaN(userInfo.activityLevel) || isNaN(userInfo.goalCalories) || isNaN(userInfo.goalCarbs) || isNaN(userInfo.goalProtein) || isNaN(userInfo.goalFat) || isNaN(userInfo.TDEE)) return res.status(400).json({ errorMessage: 'incorrect format' })
+  if (Number.isInteger(height) || Number.isInteger(weight) || Number.isInteger(gender) || Number.isInteger(dietGoal) || Number.isInteger(activityLevel) || Number.isInteger(goalCalories) || Number.isInteger(goalCarbs) || Number.isInteger(goalProtein) || Number.isInteger(goalFat) || Number.isInteger(TDEE) || validator.isDate(birthday, moment().format('YYYY-MM-DD'))) return res.status(400).json({ errorMessage: 'incorrect format' })
+
+  const userInfo = { birthday, height, weight, gender, dietGoal, activityLevel, goalCalories, goalCarbs, goalProtein, goalFat, TDEE }
 
   await User.setUserTarget(userId, userInfo)
   res.status(200).json({ message: 'data added successfully' })
@@ -165,7 +173,7 @@ const uploadUserImage = async (req, res) => {
   const img = req.file.path
 
   /* 把使用者照片上傳至S3，並於本機刪除 */
-    // console.log('userPhoto_result:', uploadPhoto)
+  // console.log('userPhoto_result:', uploadPhoto)
   await uploadFile(req.file)
   // console.log('userPhoto_result:', uploadPhoto)
   await unlinkFile(img)
@@ -225,7 +233,6 @@ const updateUserBodyInfo = async (req, res) => {
   if (!weight) weight = originWeight
   if (!birthday) birthday = originBirthday
   if (!gender) gender = originGender
-  // if (!diet_type) diet_type = originDietType
   if (!activity_level) activity_level = originActivityLevel
   if (!diet_goal) diet_goal = originDietGoal
 
@@ -270,26 +277,25 @@ const updateUserBodyInfo = async (req, res) => {
   /* 由系統依照diet goal計算default營養素 */
   switch (diet_goal) {
     case 1: {
-      goal_calories = Math.round(0.85 * TDEE)
-      goal_carbs = Math.round((goal_calories * 0.35) / 4)
-      goal_protein = Math.round((goal_calories * 0.4) / 4)
-      goal_fat = Math.round((goal_calories * 0.25) / 9)
+      calculateDefaultNutrition(0.85, 0.35, 0.4, 0.25)
       break
     }
     case 2: {
-      goal_calories = TDEE
-      goal_carbs = Math.round((goal_calories * 0.35) / 4)
-      goal_protein = Math.round((goal_calories * 0.4) / 4)
-      goal_fat = Math.round((goal_calories * 0.25) / 9)
+      calculateDefaultNutrition(1, 0.35, 0.4, 0.25)
       break
     }
     case 3: {
-      goal_calories = Math.round(1.15 * TDEE)
-      goal_carbs = Math.round((goal_calories * 0.45) / 4)
-      goal_protein = Math.round((goal_calories * 0.3) / 4)
-      goal_fat = Math.round((goal_calories * 0.25) / 9)
+      calculateDefaultNutrition(1.15, 0.45, 0.3, 0.25)
       break
     }
+  }
+
+  function calculateDefaultNutrition(caloriesPercentage, carbsPercentage, proteinPercentage, fatPercentage) {
+    goal_calories = Math.round(caloriesPercentage * TDEE)
+    goal_carbs = Math.round((goal_calories * carbsPercentage) / 4)
+    goal_protein = Math.round((goal_calories * proteinPercentage) / 4)
+    goal_fat = Math.round((goal_calories * fatPercentage) / 9)
+    return { goal_calories, goal_carbs, goal_protein, goal_fat }
   }
 
   const updateData = { birthday, height, weight, gender, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE }
@@ -350,97 +356,41 @@ const getDailyGoal = async (req, res) => {
   const dailyProteinArray = []
   const dailyFatArray = []
 
-  const [startDateObj] = dailyRecords.filter(e => e.date_record === startDate)
-  if (startDateObj === undefined) {
-    dailyCaloriesArray.push(0)
-    dailyCarbsArray.push(0)
-    dailyProteinArray.push(0)
-    dailyFatArray.push(0)
-  } else {
-    dailyCaloriesArray.push(parseInt(startDateObj.calories))
-    dailyCarbsArray.push(parseInt(startDateObj.carbs))
-    dailyProteinArray.push(parseInt(startDateObj.protein))
-    dailyFatArray.push(parseInt(startDateObj.fat))
+  function pushDailyRecords(object) {
+    if (object === undefined) {
+      dailyCaloriesArray.push(0)
+      dailyCarbsArray.push(0)
+      dailyProteinArray.push(0)
+      dailyFatArray.push(0)
+    } else {
+      dailyCaloriesArray.push(parseInt(object.calories))
+      dailyCarbsArray.push(parseInt(object.carbs))
+      dailyProteinArray.push(parseInt(object.protein))
+      dailyFatArray.push(parseInt(object.fat))
+    }
+    return { dailyCaloriesArray, dailyCarbsArray, dailyProteinArray, dailyFatArray }
   }
+
+  const [startDateObj] = dailyRecords.filter(e => e.date_record === startDate)
+  pushDailyRecords(startDateObj)
 
   const [day2Obj] = dailyRecords.filter(e => e.date_record === day2)
-  if (day2Obj === undefined) {
-    dailyCaloriesArray.push(0)
-    dailyCarbsArray.push(0)
-    dailyProteinArray.push(0)
-    dailyFatArray.push(0)
-  } else {
-    dailyCaloriesArray.push(parseInt(day2Obj.calories))
-    dailyCarbsArray.push(parseInt(day2Obj.carbs))
-    dailyProteinArray.push(parseInt(day2Obj.protein))
-    dailyFatArray.push(parseInt(day2Obj.fat))
-  }
+  pushDailyRecords(day2Obj)
 
   const [day3Obj] = dailyRecords.filter(e => e.date_record === day3)
-  if (day3Obj === undefined) {
-    dailyCaloriesArray.push(0)
-    dailyCarbsArray.push(0)
-    dailyProteinArray.push(0)
-    dailyFatArray.push(0)
-  } else {
-    dailyCaloriesArray.push(parseInt(day3Obj.calories))
-    dailyCarbsArray.push(parseInt(day3Obj.carbs))
-    dailyProteinArray.push(parseInt(day3Obj.protein))
-    dailyFatArray.push(parseInt(day3Obj.fat))
-  }
+  pushDailyRecords(day3Obj)
 
   const [day4Obj] = dailyRecords.filter(e => e.date_record === day4)
-  if (day4Obj === undefined) {
-    dailyCaloriesArray.push(0)
-    dailyCarbsArray.push(0)
-    dailyProteinArray.push(0)
-    dailyFatArray.push(0)
-  } else {
-    dailyCaloriesArray.push(parseInt(day4Obj.calories))
-    dailyCarbsArray.push(parseInt(day4Obj.carbs))
-    dailyProteinArray.push(parseInt(day4Obj.protein))
-    dailyFatArray.push(parseInt(day4Obj.fat))
-  }
+  pushDailyRecords(day4Obj)
 
   const [day5Obj] = dailyRecords.filter(e => e.date_record === day5)
-  if (day5Obj === undefined) {
-    dailyCaloriesArray.push(0)
-    dailyCarbsArray.push(0)
-    dailyProteinArray.push(0)
-    dailyFatArray.push(0)
-  } else {
-    dailyCaloriesArray.push(parseInt(day5Obj.calories))
-    dailyCarbsArray.push(parseInt(day5Obj.carbs))
-    dailyProteinArray.push(parseInt(day5Obj.protein))
-    dailyFatArray.push(parseInt(day5Obj.fat))
-  }
+  pushDailyRecords(day5Obj)
 
   const [day6Obj] = dailyRecords.filter(e => e.date_record === day6)
-  if (day6Obj === undefined) {
-    dailyCaloriesArray.push(0)
-    dailyCarbsArray.push(0)
-    dailyProteinArray.push(0)
-    dailyFatArray.push(0)
-  } else {
-    dailyCaloriesArray.push(parseInt(day6Obj.calories))
-    dailyCarbsArray.push(parseInt(day6Obj.carbs))
-    dailyProteinArray.push(parseInt(day6Obj.protein))
-    dailyFatArray.push(parseInt(day6Obj.fat))
-  }
+  pushDailyRecords(day6Obj)
 
   const [day7Obj] = dailyRecords.filter(e => e.date_record === day7)
-  if (day7Obj === undefined) {
-    dailyCaloriesArray.push(0)
-    dailyCarbsArray.push(0)
-    dailyProteinArray.push(0)
-    dailyFatArray.push(0)
-  } else {
-    dailyCaloriesArray.push(parseInt(day7Obj.calories))
-    dailyCarbsArray.push(parseInt(day7Obj.carbs))
-    dailyProteinArray.push(parseInt(day7Obj.protein))
-    dailyFatArray.push(parseInt(day7Obj.fat))
-  }
-  // FIXME: 真的要寫得這麼笨嗎？
+  pushDailyRecords(day7Obj)
   // console.log('dailyCaloriesArray: ', dailyCaloriesArray)
   // console.log('dailyCarbsArray: ', dailyCarbsArray)
   // console.log('dailyProteinArray: ', dailyProteinArray)
@@ -451,96 +401,41 @@ const getDailyGoal = async (req, res) => {
   const goalProteinArray = []
   const goalFatArray = []
 
-  const [startDateGoal] = goalRecords.filter(e => e.date === startDate)
-  if (startDateGoal === undefined) {
-    goalCaloriesArray.push(0)
-    goalCarbsArray.push(0)
-    goalProteinArray.push(0)
-    goalFatArray.push(0)
-  } else {
-    goalCaloriesArray.push(parseInt(startDateGoal.goal_calories))
-    goalCarbsArray.push(parseInt(startDateGoal.goal_carbs))
-    goalProteinArray.push(parseInt(startDateGoal.goal_protein))
-    goalFatArray.push(parseInt(startDateGoal.goal_fat))
+  function pushDailyGoals(object) {
+    if (object === undefined) {
+      goalCaloriesArray.push(0)
+      goalCarbsArray.push(0)
+      goalProteinArray.push(0)
+      goalFatArray.push(0)
+    } else {
+      goalCaloriesArray.push(parseInt(object.goal_calories))
+      goalCarbsArray.push(parseInt(object.goal_carbs))
+      goalProteinArray.push(parseInt(object.goal_protein))
+      goalFatArray.push(parseInt(object.goal_fat))
+    }
+    return { goalCaloriesArray, goalCarbsArray, goalProteinArray, goalFatArray }
   }
+
+  const [startDateGoal] = goalRecords.filter(e => e.date === startDate)
+  pushDailyGoals(startDateGoal)
 
   const [day2Goal] = goalRecords.filter(e => e.date === day2)
-  if (day2Goal === undefined) {
-    goalCaloriesArray.push(0)
-    goalCarbsArray.push(0)
-    goalProteinArray.push(0)
-    goalFatArray.push(0)
-  } else {
-    goalCaloriesArray.push(parseInt(day2Goal.goal_calories))
-    goalCarbsArray.push(parseInt(day2Goal.goal_carbs))
-    goalProteinArray.push(parseInt(day2Goal.goal_protein))
-    goalFatArray.push(parseInt(day2Goal.goal_fat))
-  }
+  pushDailyGoals(day2Goal)
 
   const [day3Goal] = goalRecords.filter(e => e.date === day3)
-  if (day3Goal === undefined) {
-    goalCaloriesArray.push(0)
-    goalCarbsArray.push(0)
-    goalProteinArray.push(0)
-    goalFatArray.push(0)
-  } else {
-    goalCaloriesArray.push(parseInt(day3Goal.goal_calories))
-    goalCarbsArray.push(parseInt(day3Goal.goal_carbs))
-    goalProteinArray.push(parseInt(day3Goal.goal_protein))
-    goalFatArray.push(parseInt(day3Goal.goal_fat))
-  }
+  pushDailyGoals(day3Goal)
 
   const [day4Goal] = goalRecords.filter(e => e.date === day4)
-  if (day4Goal === undefined) {
-    goalCaloriesArray.push(0)
-    goalCarbsArray.push(0)
-    goalProteinArray.push(0)
-    goalFatArray.push(0)
-  } else {
-    goalCaloriesArray.push(parseInt(day4Goal.goal_calories))
-    goalCarbsArray.push(parseInt(day4Goal.goal_carbs))
-    goalProteinArray.push(parseInt(day4Goal.goal_protein))
-    goalFatArray.push(parseInt(day4Goal.goal_fat))
-  }
+  pushDailyGoals(day4Goal)
 
   const [day5Goal] = goalRecords.filter(e => e.date === day5)
-  if (day5Goal === undefined) {
-    goalCaloriesArray.push(0)
-    goalCarbsArray.push(0)
-    goalProteinArray.push(0)
-    goalFatArray.push(0)
-  } else {
-    goalCaloriesArray.push(parseInt(day5Goal.goal_calories))
-    goalCarbsArray.push(parseInt(day5Goal.goal_carbs))
-    goalProteinArray.push(parseInt(day5Goal.goal_protein))
-    goalFatArray.push(parseInt(day5Goal.goal_fat))
-  }
+  pushDailyGoals(day5Goal)
 
   const [day6Goal] = goalRecords.filter(e => e.date === day6)
-  if (day6Goal === undefined) {
-    goalCaloriesArray.push(0)
-    goalCarbsArray.push(0)
-    goalProteinArray.push(0)
-    goalFatArray.push(0)
-  } else {
-    goalCaloriesArray.push(parseInt(day6Goal.goal_calories))
-    goalCarbsArray.push(parseInt(day6Goal.goal_carbs))
-    goalProteinArray.push(parseInt(day6Goal.goal_protein))
-    goalFatArray.push(parseInt(day6Goal.goal_fat))
-  }
+  pushDailyGoals(day6Goal)
 
   const [day7Goal] = goalRecords.filter(e => e.date === day7)
-  if (day7Goal === undefined) {
-    goalCaloriesArray.push(0)
-    goalCarbsArray.push(0)
-    goalProteinArray.push(0)
-    goalFatArray.push(0)
-  } else {
-    goalCaloriesArray.push(parseInt(day7Goal.goal_calories))
-    goalCarbsArray.push(parseInt(day7Goal.goal_carbs))
-    goalProteinArray.push(parseInt(day7Goal.goal_protein))
-    goalFatArray.push(parseInt(day7Goal.goal_fat))
-  }
+  pushDailyGoals(day7Goal)
 
   res.status(200).json({ dailyCaloriesArray, dailyCarbsArray, dailyProteinArray, dailyFatArray, goalCaloriesArray, goalCarbsArray, goalProteinArray, goalFatArray })
 }
