@@ -1,8 +1,6 @@
 require('dotenv').config()
 const axios = require('axios')
 const db = require('../utils/mysqlconf')
-const jwt = require('jsonwebtoken')
-const { TOKEN_EXPIRE, TOKEN_SECRET } = process.env // 30 days by seconds
 
 const setUserTarget = async (userId, userInfo) => {
   try {
@@ -129,26 +127,10 @@ const nativeSignIn = async (email) => {
   }
 }
 
-const fbSignIn = async (id, name, email) => {
+const fbSignIn = async (email, user) => {
   const conn = await db.getConnection()
   try {
     await conn.query('START TRANSACTION')
-    const user = {
-      provider: 'facebook',
-      email,
-      name,
-      picture: 'https://graph.facebook.com/' + id + '/picture?type=large'
-    }
-    const accessToken = jwt.sign(
-      {
-        provider: user.provider,
-        name: user.name,
-        email: user.email,
-        picture: user.picture
-      },
-      TOKEN_SECRET
-    )
-
     const [users] = await conn.query('SELECT id FROM user WHERE email = ? AND provider = \'facebook\'', [email])
     let userId
     if (users.length === 0) {
@@ -158,9 +140,8 @@ const fbSignIn = async (id, name, email) => {
     } else {
       userId = users[0].id
     }
-    user.id = userId
     await conn.query('COMMIT')
-    return { user, access_token: accessToken }
+    return userId
   } catch (err) {
     await conn.query('ROLLBACK')
     return { err }
@@ -169,20 +150,19 @@ const fbSignIn = async (id, name, email) => {
   }
 }
 
-const getFacebookProfile = async function (accessToken) {
+const getFacebookProfile = async function (fbAccessToken) {
   try {
     const { data } = await axios({
       url: 'https://graph.facebook.com/me',
       method: 'post',
       params: {
         fields: ['id', 'email', 'name', 'picture'].join(','),
-        access_token: accessToken
+        access_token: fbAccessToken
       }
     })
     return data
   } catch (err) {
-    console.log(err)
-    throw 'Permissions Error: facebook access token is wrong'
+    throw new Error('Permissions Error: facebook access token is wrong')
   }
 }
 
