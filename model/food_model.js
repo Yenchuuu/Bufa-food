@@ -1,6 +1,4 @@
 const db = require('../utils/mysqlconf')
-
-// FIXME: try catch起來; catch err 可以用throw new Error(err) 並在app.js的500那邊接起來並印出來（可以加上時間）
 const createMealRecord = async (userId, foodId, meal, servingAmount, date) => {
   try {
     const [result] = await db.execute('INSERT INTO `user_meal` (user_id, food_id, meal, serving_amount, date_record) VALUES (?, ?, ?, ?, ?)', [userId, foodId, meal, servingAmount, date])
@@ -32,17 +30,16 @@ const deleteMealRecord = async (recordId) => {
 const getUserRecord = async (userId, date) => {
   const conn = await db.getConnection()
   try {
-    await conn.query('START TRANSACTION')
+    await conn.execute('START TRANSACTION')
     const [mealRecords] = await conn.execute(
       'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, ROUND(food.per_serving * serving_amount, 0) AS amountTotal, ROUND(food.calories * serving_amount, 0) AS calories, ROUND(food.carbs * serving_amount, 0) AS carbs, ROUND(food.protein * serving_amount, 0) AS protein, ROUND(food.fat * serving_amount, 0) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
       [userId, date])
     const [recordSummary] = await conn.execute('SELECT user_meal.meal, ROUND(SUM(food.calories * serving_amount), 0) AS caloriesTotal, ROUND(SUM(food.carbs * serving_amount), 0) AS carbsTotal, ROUND(SUM(food.protein * serving_amount), 0) AS proteinTotal, ROUND(SUM(food.fat * serving_amount), 0) AS fatTotal FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?) GROUP BY user_meal.meal;', [userId, date])
-    // console.log('mealRecords', mealRecords)
-    await conn.query('COMMIT')
+    await conn.execute('COMMIT')
     return { mealRecords, recordSummary }
   } catch (err) {
     console.error(err)
-    await conn.query('ROLL BACK')
+    await conn.execute('ROLL BACK')
     throw err
   } finally {
     await conn.release()
@@ -57,14 +54,14 @@ const getFoodDetail = async (foodId) => {
 const createFoodDetail = async (name, calories, carbs, protein, fat, perServing, userId) => {
   const conn = await db.getConnection()
   try {
-    await conn.query('START TRANSACTION')
+    await conn.execute('START TRANSACTION')
     const [food] = await conn.execute('INSERT INTO `food` (name, calories, carbs, protein, fat, per_serving, creator_user_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [name, calories, carbs, protein, fat, perServing, userId])
     const foodId = food.insertId
     const [preference] = await conn.execute('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (4, 0, 0, 1, 0, 0, ?, ?)', [foodId, userId])
-    await conn.query('COMMIT')
+    await conn.execute('COMMIT')
     return preference
   } catch (err) {
-    await conn.query('ROLLBACK')
+    await conn.execute('ROLLBACK')
     console.error(err)
     throw err
   } finally {
@@ -90,15 +87,15 @@ const setRecommendSingleMeal = async (userId, meal, recommendMeal, date) => {
   const conn = await db.getConnection()
   const writeRecommendMeals = []
   try {
-    await conn.query('START TRANSACTION')
+    await conn.execute('START TRANSACTION')
     for (let i = 0; i < recommendMeal.length; i++) {
-      const [writeRecommendMeal] = await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, meal, recommendMeal[i].per_serving / 100, recommendMeal[i].id, date])
+      const [writeRecommendMeal] = await conn.execute('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, meal, recommendMeal[i].per_serving / 100, recommendMeal[i].id, date])
       writeRecommendMeals.push(writeRecommendMeal)
     }
-    await conn.query('COMMIT')
+    await conn.execute('COMMIT')
     return writeRecommendMeals
   } catch (err) {
-    await conn.query('ROLLBACK')
+    await conn.execute('ROLLBACK')
     throw new Error(err)
   } finally {
     await conn.release()
@@ -109,20 +106,20 @@ const setRecommendMultipleMeals = async (userId, recommendBreakfast, recommendLu
   // console.log('Info', userId, recommendBreakfast, recommendLunch, recommendDinner, date)
   const conn = await db.getConnection()
   try {
-    await conn.query('START TRANSACTION')
+    await conn.execute('START TRANSACTION')
     for (let i = 0; i < recommendBreakfast.length; i++) {
-      await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 1, recommendBreakfast[i].per_serving / 100, recommendBreakfast[i].id, date])
+      await conn.execute('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 1, recommendBreakfast[i].per_serving / 100, recommendBreakfast[i].id, date])
     }
     for (let i = 0; i < recommendLunch.length; i++) {
-      await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 2, recommendLunch[i].per_serving / 100, recommendLunch[i].id, date])
+      await conn.execute('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 2, recommendLunch[i].per_serving / 100, recommendLunch[i].id, date])
     }
     for (let i = 0; i < recommendDinner.length; i++) {
-      await conn.query('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 3, recommendDinner[i].per_serving / 100, recommendDinner[i].id, date])
+      await conn.execute('INSERT INTO `user_meal` (user_id, meal, serving_amount, food_id, date_record) VALUES (?, ?, ?, ?, ?)', [userId, 3, recommendDinner[i].per_serving / 100, recommendDinner[i].id, date])
     }
-    await conn.query('COMMIT')
+    await conn.execute('COMMIT')
     return
   } catch (err) {
-    await conn.query('ROLLBACK')
+    await conn.execute('ROLLBACK')
     throw new Error(err)
   } finally {
     await conn.release()
@@ -228,7 +225,7 @@ const getFoodNutritionInfo = async (recommendFood) => {
 const updateFoodPreference = async (userId, foodId, clickedBtn) => {
   const conn = await db.getConnection()
   try {
-    await conn.query('START TRANSACTION')
+    await conn.execute('START TRANSACTION')
     const [getUserPreference] = await conn.execute('SELECT * FROM `user_preference` WHERE food_id = ? AND user_id = ?', [foodId, userId])
     // console.log('getUserPreference', getUserPreference)
 
@@ -240,8 +237,8 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
       /* 如果尚未對此食物表達過喜好，則建立 */
       if (getUserPreference.length === 0) {
         preferenceScore = 16
-        const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 1, 0, 0, 0, 0, foodId, userId])
-        await conn.query('COMMIT')
+        const [result] = await conn.execute('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 1, 0, 0, 0, 0, foodId, userId])
+        await conn.execute('COMMIT')
         return result
       }
       if (getUserPreference[0].collection === 1) {
@@ -254,8 +251,8 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
     } else if (clickedBtn === 'thumb_up') {
       if (getUserPreference.length === 0) {
         preferenceScore = 8
-        const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 1, 0, 0, 0, foodId, userId])
-        await conn.query('COMMIT')
+        const [result] = await conn.execute('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 1, 0, 0, 0, foodId, userId])
+        await conn.execute('COMMIT')
         return result
       }
       if (getUserPreference[0].likeIt === 1) {
@@ -280,8 +277,8 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
     } else if (clickedBtn === 'thumb_down') {
       if (getUserPreference.length === 0) {
         preferenceScore = 2
-        const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 0, 0, 1, 0, foodId, userId])
-        await conn.query('COMMIT')
+        const [result] = await conn.execute('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 0, 0, 1, 0, foodId, userId])
+        await conn.execute('COMMIT')
         return result
       }
       if (getUserPreference[0].dislikeIt === 1) {
@@ -298,8 +295,8 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
     } else if (clickedBtn === 'add_exclusiion') {
       if (getUserPreference.length === 0) {
         preferenceScore = 1
-        const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 0, 0, 0, 1, foodId, userId])
-        await conn.query('COMMIT')
+        const [result] = await conn.execute('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 0, 0, 0, 1, foodId, userId])
+        await conn.execute('COMMIT')
         return result
       }
       if (getUserPreference[0].exclusion === 1) {
@@ -319,10 +316,10 @@ const updateFoodPreference = async (userId, foodId, clickedBtn) => {
     const recommendMealQuery =
       'UPDATE `user_preference` ' + condition.sql
     const [result] = await db.query(recommendMealQuery, condition.binding)
-    await conn.query('COMMIT')
+    await conn.execute('COMMIT')
     return result
   } catch (err) {
-    await conn.query('ROLLBACK')
+    await conn.execute('ROLLBACK')
     throw new Error(err)
   } finally {
     await conn.release()
