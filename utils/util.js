@@ -16,7 +16,7 @@ const wrapAsync = (fn) => {
   }
 }
 
-async function authentication (req, res, next) {
+async function authentication(req, res, next) {
   let accessToken = req.get('Authorization')
   if (!accessToken) {
     res.status(401).json({ error: 'Unauthenticated' })
@@ -50,7 +50,7 @@ const upload = multer({
     /* 限制上傳檔案的大小為 1MB */
     fileSize: 1000000
   },
-  fileFilter (req, file, cb) {
+  fileFilter(req, file, cb) {
     /* 只接受三種圖片格式 */
     const imageType = ['image/jpg', 'image/jpeg', 'image/png']
     if (!imageType.includes(file.mimetype)) {
@@ -69,4 +69,9 @@ const upload = multer({
   })
 })
 
-module.exports = { wrapAsync, authentication, upload }
+const isValidDate = (dateString) => {
+  const regEx = /^\d{4}-\d{2}-\d{2}$/
+  return dateString.match(regEx) != null
+}
+
+module.exports = { wrapAsync, authentication, upload, isValidDate }

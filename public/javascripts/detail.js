@@ -273,11 +273,18 @@ $('#addMealRecord').click(async function () {
       'question'
     )
   } else {
-    await axios.post(`/api/1.0/food/mealrecord?id=${foodId}`, { userId, foodId, meal, servingAmount, date }, { headers: { Authorization: `Bearer ${accessToken}` } })
-    Swal.fire({
-      icon: 'success',
-      title: '新增成功',
-      footer: `<a href="/diary.html?date=${date}" class="text-secondary">前往${date}飲食紀錄</a>`
-    })
+    try {
+      await axios.post(`/api/1.0/food/mealrecord?id=${foodId}`, { userId, foodId, meal, servingAmount, date }, { headers: { Authorization: `Bearer ${accessToken}` } })
+      Swal.fire({
+        icon: 'success',
+        title: '新增成功',
+        footer: `<a href="/diary.html?date=${date}" class="text-secondary">前往${date}飲食紀錄</a>`
+      })
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: '新增失敗，請再試一次'
+      })
+    }
   }
 })

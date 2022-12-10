@@ -3,7 +3,9 @@ const User = require('../model/user_model')
 const Euc = require('../utils/euclidean_distance')
 const Cache = require('../utils/cache')
 const validator = require('validator')
+const util = require('../utils/util')
 const moment = require('moment')
+const { number } = require('joi')
 // FIXME: date是倫敦時間
 const CACHE_TRENDFOOD_KEY = 'cacheTrendFood'
 
@@ -11,7 +13,7 @@ const addMealRecord = async (req, res) => {
   const { id: userId } = req.user
   let foodId = req.query.id
   let { meal, servingAmount, date } = req.body
-  if (!meal || !servingAmount || !date || !validator.isInt(meal) || !validator.isInt(servingAmount)) {
+  if (!meal || !servingAmount || !date || !Number.isInteger(meal) || !Number.isInteger(servingAmount) || !util.isValidDate(date)) {
     return res.status(400).json({ errorMessage: 'Incorrect format.' })
   }
   meal = parseInt(meal)
@@ -122,7 +124,7 @@ const createFoodDetail = async (req, res) => {
   const { id: userId } = req.user
   let { name, calories, carbs, protein, fat, perServing } = req.body
 
-  if (!name || !calories || !carbs || !protein || !fat || !perServing || !validator.isInt(calories, { min: 1 }) || !validator.isInt(perServing, { min: 1 }) || !validator.isInt(carbs, { min: 0 }) || !validator.isInt(protein, { min: 0 }) || !validator.isInt(fat, { min: 0 }) || (carbs + protein + fat) > perServing || (carbs * 4 + protein * 4 + fat * 9) > calories || calories > perServing * 9) {
+  if (!name || !calories || !carbs || !protein || !fat || !perServing || !Number.isInteger(calories, { min: 1 }) || !Number.isInteger(perServing, { min: 1 }) || !Number.isInteger(carbs, { min: 0 }) || !Number.isInteger(protein, { min: 0 }) || !Number.isInteger(fat, { min: 0 }) || (carbs + protein + fat) > perServing || (carbs * 4 + protein * 4 + fat * 9) > calories || calories > perServing * 9) {
     return res.status(400).json({ errorMessage: 'Incorrect format.' })
   }
 
@@ -246,6 +248,9 @@ const generateSingleMeal = async (req, res) => {
 const generateMultipleMeals = async (req, res) => {
   const { email } = req.user
   const { date } = req.body
+  if (!date || date === null || !util.isValidDate(date)) {
+    return res.status(400).json({ errorMessage: 'Incorrect format.' })
+  }
   const userDetail = await User.getUserDetail(email)
   const [{ id: userId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
   // console.log('userInfo', userId, goalCalories, goalCarbs, goalProtein, goalFat)
