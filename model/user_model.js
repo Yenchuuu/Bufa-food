@@ -119,7 +119,7 @@ const signUp = async (provider, name, email, password) => {
 
 const nativeSignIn = async (email) => {
   try {
-    const [user] = await db.query('SELECT * FROM user WHERE email = ?', [email])
+    const [user] = await db.execute('SELECT * FROM user WHERE email = ?', [email])
     // console.log('user: ', user)
     return user
   } catch (err) {
@@ -131,11 +131,11 @@ const fbSignIn = async (email, user) => {
   const conn = await db.getConnection()
   try {
     await conn.query('START TRANSACTION')
-    const [users] = await conn.query('SELECT id FROM user WHERE email = ? AND provider = \'facebook\'', [email])
+    const [users] = await conn.execute('SELECT id FROM user WHERE email = ? AND provider = \'facebook\'', [email])
     let userId
     if (users.length === 0) {
       const queryStr = 'INSERT INTO user set ?'
-      const [result] = await conn.query(queryStr, user)
+      const [result] = await conn.execute(queryStr, user)
       userId = result.insertId
     } else {
       userId = users[0].id
