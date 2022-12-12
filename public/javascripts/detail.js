@@ -127,7 +127,7 @@ async function updateInfo(iconBtn) {
       const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
       // console.log('data', data);
       const collection = data.data.preference.filter(e => e.food_id == foodId)
-      console.log('collection', collection)
+      // console.log('collection', collection)
       if (collection.length === 0 || collection[0].collection === 0) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
         $('#add_collection').replaceWith('<i class="click_icon fa-solid fa-heart" title="取消收藏"></i>')
@@ -150,7 +150,7 @@ async function updateInfo(iconBtn) {
     case 'thumb_up': {
       const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
       const likedItem = data.data.preference.filter(e => e.food_id == foodId)
-      console.log('likedItem', likedItem)
+      // console.log('likedItem', likedItem)
       if (likedItem.length === 0 || likedItem[0].likeIt === 0) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
         $('#thumb_up').replaceWith('<i class="click_icon fa-solid fa-thumbs-up" title="收回喜歡"></i>')
@@ -173,7 +173,7 @@ async function updateInfo(iconBtn) {
     case 'thumb_down': {
       const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
       const dislikedItem = data.data.preference.filter(e => e.food_id == foodId)
-      console.log('dislikedItem', dislikedItem)
+      // console.log('dislikedItem', dislikedItem)
       if (dislikedItem.length === 0 || dislikedItem[0].dislikeIt === 0) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
         $('#thumb_down').replaceWith('<i class="click_icon fa-solid fa-thumbs-down" title="收回不喜歡"></i>')
@@ -195,7 +195,7 @@ async function updateInfo(iconBtn) {
     case 'add_exclusiion': {
       const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
       const exclusion = data.data.preference.filter(e => e.food_id == foodId)
-      console.log('exclusion', exclusion)
+      // console.log('exclusion', exclusion)
       if (exclusion.length === 0 || exclusion[0].exclusion === 0) {
         const setPreference = await axios.patch(`/api/1.0/food/detail?id=${foodId}`, { clickedBtn: btnVal }, { headers: { Authorization: `Bearer ${accessToken}` } })
         $('#add_exclusiion').replaceWith('<i class="click_icon fa-solid fa-circle-xmark" title="取消挑食"></i>')

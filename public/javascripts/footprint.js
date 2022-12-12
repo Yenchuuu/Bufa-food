@@ -29,9 +29,7 @@ if (!accessToken) {
         endDate = moment(today).format('YYYY-MM-DD')
       } else {
         startDate = moment(today).add(-(dayOfweek - 1), 'days').format('YYYY-MM-DD')
-        console.log('startDate: ', startDate);
         endDate = moment(today).add((7 - dayOfweek), 'days').format('YYYY-MM-DD')
-        console.log('endDate: ', endDate);
       }
 
       const data = await axios.get(`/api/1.0/user/footprint?date=${startDate}`, { headers: { Authorization: `Bearer ${accessToken}` } })

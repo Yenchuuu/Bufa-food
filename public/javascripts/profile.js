@@ -93,28 +93,6 @@ if (!accessToken) {
     })
   })
 
-  // async function upload() {
-  //   // TODO: 待理解，consloe.log 出來的是 FormData{ }
-  //   const formData = new FormData(form)
-  //   // console.log('formData: ', formData)
-  //   const data = await axios.patch(`/api/1.0/user/profile/image/${userId}`, formData, { headers: { Authorization: `Bearer ${accessToken}` } })
-  //   if (data.data.message) {
-  //     Swal.fire({
-  //       icon: 'seccess',
-  //       text: '上傳成功'
-  //     }).then(() => {
-  //       window.location.href = 'profile.html'
-  //     })
-  //   } else {
-  //     Swal.fire({
-  //       icon: 'error',
-  //       text: '上傳失敗，請再試一次'
-  //     }).then(() => {
-  //       window.location.href = 'profile.html'
-  //     })
-  //   }
-  // }
-
   function checkUsername() {
     const reg = new RegExp('^[A-Za-z0-9\u4e00-\u9fa5]+$')
     const name = $('#name').val().trim()

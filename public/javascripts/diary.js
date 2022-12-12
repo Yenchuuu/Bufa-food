@@ -140,7 +140,6 @@ if (!accessToken) {
     const dateA = new Date(currenDate)
     const dateB = new Date(dateA.getTime() + (1000 * 60 * 60 * 24))
     const followingDate = dateB.toISOString().split('T')[0]
-    console.log('dateB', dateB, 'followingDate', followingDate)
     const date = followingDate
     window.location.href = `/diary.html?date=${date}`
   })

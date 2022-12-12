@@ -96,7 +96,7 @@ const getUserPreference = async (currentUserId) => {
       })
       // console.log('usersRecord', usersRecord)
       recommendFood = recommendFood.splice(0, 3)
-      console.log('recommendFood: ', recommendFood);
+      // console.log('recommendFood: ', recommendFood);
       return recommendFood
     } else if (usersRecordLen < 3) {
       for (let i = 0; i < 3 - usersRecordLen; i++) {

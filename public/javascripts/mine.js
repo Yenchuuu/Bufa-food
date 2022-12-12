@@ -22,7 +22,7 @@ if (!accessToken) {
 
     /* 用for of 遍歷array */
     for (const foodObject of collectionRecord) {
-      console.log('foodObject: ', foodObject);
+      // console.log('foodObject: ', foodObject);
       const newDom = $('.collection-card').first().clone()
       newDom.children('.mine-card-body')
       newDom.children('.mine-card-body').children('.food-link').attr('href', `/detail.html?id=${foodObject.food_id}`)
