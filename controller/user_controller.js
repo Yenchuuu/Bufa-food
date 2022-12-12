@@ -2,16 +2,17 @@
 const User = require('../model/user_model')
 const moment = require('moment')
 const validator = require('validator')
-const joi = require('joi')
+const service = require('../service/service')
+const util = require('../utils/util')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const salt = parseInt(process.env.BCRYPT_SALT)
 const { TOKEN_EXPIRE, TOKEN_SECRET } = process.env // 30 days by seconds
 /* 圖片上傳--S3相關 */
 const { uploadFile } = require('../utils/s3')
-const util = require('util')
+const Util = require('util')
 const fs = require('fs')
-const unlinkFile = util.promisify(fs.unlink)
+const unlinkFile = Util.promisify(fs.unlink)
 require('dotenv').config({ path: '../.env' })
 
 const signUp = async (req, res) => {
@@ -129,7 +130,7 @@ const setUserTarget = async (req, res) => {
   if (!birthday || !height || !weight || !gender || !dietGoal || !activityLevel || !goalCalories || !goalCarbs || !goalProtein || !goalFat || !TDEE) return res.status(400).json({ errorMessage: 'imcomplete info' })
 
   /* 確認所有數字項之格式皆正確 */
-  if (Number.isInteger(height) || Number.isInteger(weight) || Number.isInteger(gender) || Number.isInteger(dietGoal) || Number.isInteger(activityLevel) || Number.isInteger(goalCalories) || Number.isInteger(goalCarbs) || Number.isInteger(goalProtein) || Number.isInteger(goalFat) || Number.isInteger(TDEE) || validator.isDate(birthday, moment().format('YYYY-MM-DD'))) return res.status(400).json({ errorMessage: 'incorrect format' })
+  if (!Number.isInteger(height) || !Number.isInteger(weight) || !Number.isInteger(gender) || !Number.isInteger(dietGoal) || !Number.isInteger(activityLevel) || !Number.isInteger(goalCalories) || !Number.isInteger(goalCarbs) || !Number.isInteger(goalProtein) || !Number.isInteger(goalFat) || !Number.isInteger(TDEE) || !util.isValidDate(birthday)) return res.status(400).json({ errorMessage: 'incorrect format' })
 
   const userInfo = { birthday, height, weight, gender, dietGoal, activityLevel, goalCalories, goalCarbs, goalProtein, goalFat, TDEE }
 
@@ -224,10 +225,9 @@ const updateUserBodyInfo = async (req, res) => {
     diet_goal: originDietGoal,
     activity_level: originActivityLevel
   }] = data
-  // console.log('userDetail', userId, originBirthday, originHeight, originWeight, originGender, originDietType, originDietGoal, originActivityLevel, originGoalCalories, originGoalCarbs, originGoalProtein, originGoalFat, originTDEE)
 
   if (id !== userId) return res.status(401).json({ errorMessage: 'Authentication failed to do any updates.' })
-  let BMR, goal_carbs, goal_protein, goal_fat, goal_calories
+  // let goal_carbs, goal_protein, goal_fat, goal_calories
 
   if (!height) height = originHeight
   if (!weight) weight = originWeight
@@ -236,67 +236,21 @@ const updateUserBodyInfo = async (req, res) => {
   if (!activity_level) activity_level = originActivityLevel
   if (!diet_goal) diet_goal = originDietGoal
 
-  const date = new Date()
-  const today = date.toISOString().split('T')[0]
+  const today = util.dateOfToday
   const age = parseInt(today) - parseInt(birthday)
   if (age <= 0) return res.status(400).json({ errorMessage: 'age should not less than one' })
 
-  switch (gender) {
-    case 1: {
-      BMR = Math.round(10 * weight + 6.25 * height - 5 * age - 161)
-      break
-    }
-    case 2: {
-      BMR = Math.round(10 * weight + 6.25 * height - 5 * age + 5)
-    }
-  }
+  const BMR = service.calculateBMR(gender, weight, height, age)
 
-  switch (activity_level) {
-    case 1: {
-      TDEE = Math.round(1.2 * BMR)
-      break
-    }
-    case 2: {
-      TDEE = Math.round(1.375 * BMR)
-      break
-    }
-    case 3: {
-      TDEE = Math.round(1.55 * BMR)
-      break
-    }
-    case 4: {
-      TDEE = Math.round(1.725 * BMR)
-      break
-    }
-    case 5: {
-      TDEE = Math.round(1.9 * BMR)
-      break
-    }
-  }
+  TDEE = service.calculateTDEE(activity_level, BMR)
 
   /* 由系統依照diet goal計算default營養素 */
-  switch (diet_goal) {
-    case 1: {
-      calculateDefaultNutrition(0.85, 0.35, 0.4, 0.25)
-      break
-    }
-    case 2: {
-      calculateDefaultNutrition(1, 0.35, 0.4, 0.25)
-      break
-    }
-    case 3: {
-      calculateDefaultNutrition(1.15, 0.45, 0.3, 0.25)
-      break
-    }
-  }
+  const goalNutrition = service.calculateDefaultNutritionByDietGoal(diet_goal, TDEE)
 
-  function calculateDefaultNutrition(caloriesPercentage, carbsPercentage, proteinPercentage, fatPercentage) {
-    goal_calories = Math.round(caloriesPercentage * TDEE)
-    goal_carbs = Math.round((goal_calories * carbsPercentage) / 4)
-    goal_protein = Math.round((goal_calories * proteinPercentage) / 4)
-    goal_fat = Math.round((goal_calories * fatPercentage) / 9)
-    return { goal_calories, goal_carbs, goal_protein, goal_fat }
-  }
+  const goal_calories = goalNutrition.goalCalories
+  const goal_carbs = goalNutrition.goalCarbs
+  const goal_protein = goalNutrition.goalProtein
+  const goal_fat = goalNutrition.goalFat
 
   const updateData = { birthday, height, weight, gender, diet_goal, activity_level, goal_calories, goal_carbs, goal_protein, goal_fat, TDEE }
   await User.updateUserBodyInfo(updateData, userId)
@@ -344,98 +298,51 @@ const getDailyGoal = async (req, res) => {
 
   const dailyRecords = await User.getDailySummary(userId, startDate, endDate)
 
-  const day2 = moment(startDate, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-  const day3 = moment(day2, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-  const day4 = moment(day3, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-  const day5 = moment(day4, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-  const day6 = moment(day5, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-  const day7 = moment(day6, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD')
-
-  const dailyCaloriesArray = []
-  const dailyCarbsArray = []
-  const dailyProteinArray = []
-  const dailyFatArray = []
-
-  function pushDailyRecords(object) {
-    if (object === undefined) {
-      dailyCaloriesArray.push(0)
-      dailyCarbsArray.push(0)
-      dailyProteinArray.push(0)
-      dailyFatArray.push(0)
-    } else {
-      dailyCaloriesArray.push(parseInt(object.calories))
-      dailyCarbsArray.push(parseInt(object.carbs))
-      dailyProteinArray.push(parseInt(object.protein))
-      dailyFatArray.push(parseInt(object.fat))
-    }
-    return { dailyCaloriesArray, dailyCarbsArray, dailyProteinArray, dailyFatArray }
+  const dateArray = [startDate]
+  for (let i = 1; i < 7; i++) {
+    dateArray.push(moment(dateArray[i - 1], 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD'))
   }
 
-  const [startDateObj] = dailyRecords.filter(e => e.date_record === startDate)
-  pushDailyRecords(startDateObj)
+  const goalRecordsItem = {
+    calories: [],
+    carbs: [],
+    protein: [],
+    fat: []
+  }
 
-  const [day2Obj] = dailyRecords.filter(e => e.date_record === day2)
-  pushDailyRecords(day2Obj)
-
-  const [day3Obj] = dailyRecords.filter(e => e.date_record === day3)
-  pushDailyRecords(day3Obj)
-
-  const [day4Obj] = dailyRecords.filter(e => e.date_record === day4)
-  pushDailyRecords(day4Obj)
-
-  const [day5Obj] = dailyRecords.filter(e => e.date_record === day5)
-  pushDailyRecords(day5Obj)
-
-  const [day6Obj] = dailyRecords.filter(e => e.date_record === day6)
-  pushDailyRecords(day6Obj)
-
-  const [day7Obj] = dailyRecords.filter(e => e.date_record === day7)
-  pushDailyRecords(day7Obj)
-  // console.log('dailyCaloriesArray: ', dailyCaloriesArray)
-  // console.log('dailyCarbsArray: ', dailyCarbsArray)
-  // console.log('dailyProteinArray: ', dailyProteinArray)
-  // console.log('dailyFatArray: ', dailyFatArray)
-
-  const goalCaloriesArray = []
-  const goalCarbsArray = []
-  const goalProteinArray = []
-  const goalFatArray = []
+  const dailyRecordsItem = {
+    calories: [],
+    carbs: [],
+    protein: [],
+    fat: []
+  }
 
   function pushDailyGoals(object) {
-    if (object === undefined) {
-      goalCaloriesArray.push(0)
-      goalCarbsArray.push(0)
-      goalProteinArray.push(0)
-      goalFatArray.push(0)
-    } else {
-      goalCaloriesArray.push(parseInt(object.goal_calories))
-      goalCarbsArray.push(parseInt(object.goal_carbs))
-      goalProteinArray.push(parseInt(object.goal_protein))
-      goalFatArray.push(parseInt(object.goal_fat))
-    }
-    return { goalCaloriesArray, goalCarbsArray, goalProteinArray, goalFatArray }
+    return service.pushRecord(goalRecordsItem, object)
   }
 
-  const [startDateGoal] = goalRecords.filter(e => e.date === startDate)
-  pushDailyGoals(startDateGoal)
+  function pushDailyRecords(object) {
+    return service.pushRecord(dailyRecordsItem, object)
+  }
 
-  const [day2Goal] = goalRecords.filter(e => e.date === day2)
-  pushDailyGoals(day2Goal)
+  dateArray.forEach(day => {
+    const [dayRecord] = dailyRecords.filter(e => e.date_record === day)
+    pushDailyRecords(dayRecord)
+  })
 
-  const [day3Goal] = goalRecords.filter(e => e.date === day3)
-  pushDailyGoals(day3Goal)
+  dateArray.forEach(day => {
+    const [dayGoal] = goalRecords.filter(e => e.date === day)
+    pushDailyGoals(dayGoal)
+  })
 
-  const [day4Goal] = goalRecords.filter(e => e.date === day4)
-  pushDailyGoals(day4Goal)
-
-  const [day5Goal] = goalRecords.filter(e => e.date === day5)
-  pushDailyGoals(day5Goal)
-
-  const [day6Goal] = goalRecords.filter(e => e.date === day6)
-  pushDailyGoals(day6Goal)
-
-  const [day7Goal] = goalRecords.filter(e => e.date === day7)
-  pushDailyGoals(day7Goal)
+  const dailyCaloriesArray = dailyRecordsItem.calories
+  const dailyCarbsArray = dailyRecordsItem.carbs
+  const dailyProteinArray = dailyRecordsItem.protein
+  const dailyFatArray = dailyRecordsItem.fat
+  const goalCaloriesArray = goalRecordsItem.calories
+  const goalCarbsArray = goalRecordsItem.carbs
+  const goalProteinArray = goalRecordsItem.protein
+  const goalFatArray = goalRecordsItem.fat
 
   res.status(200).json({ dailyCaloriesArray, dailyCarbsArray, dailyProteinArray, dailyFatArray, goalCaloriesArray, goalCarbsArray, goalProteinArray, goalFatArray })
 }

@@ -4,6 +4,7 @@ const Euc = require('../utils/euclidean_distance')
 const Cache = require('../utils/cache')
 const validator = require('validator')
 const util = require('../utils/util')
+const service = require('../service/service')
 const moment = require('moment')
 const { number } = require('joi')
 // FIXME: date是倫敦時間
@@ -41,21 +42,25 @@ const updateMealRecord = async (req, res) => {
   const { id: userId } = req.user
   let date = req.query.id
   if (!date || date === 'undefined') {
-    date = moment().format('YYYY-MM-DD')
+    date = util.dateOfToday
   }
 
   /* 用修改克數乘上食物之原始營養素渲染至前端 */
   const data = req.body
-  const foodId = data.foodId
+  parseInt(data.calories)
+  parseInt(data.carbs)
+  parseInt(data.protein)
+  parseInt(data.fat)
+
+  const foodId = data.food_id
   // console.log('data: ', data);
   const [foodDetail] = await Food.getFoodDetail(foodId)
   const perServing = foodDetail.per_serving
-  const servingAmount = parseFloat(data.servingAmount / perServing).toFixed(2)
+  const servingAmount = parseFloat((data.amountTotal / perServing).toFixed(2))
   data.calories = Math.round(foodDetail.calories * servingAmount)
   data.carbs = parseInt(foodDetail.carbs * servingAmount)
   data.protein = parseInt(foodDetail.protein * servingAmount)
   data.fat = parseInt(foodDetail.fat * servingAmount)
-  // console.log('data: ', data);
 
   const meal = data.meal
   await Food.updateMealRecord(userId, foodId, meal, servingAmount, date)
@@ -66,7 +71,7 @@ const updateMealRecord = async (req, res) => {
 const deleteMealRecord = async (req, res) => {
   let date = req.query.id
   if (!date || date === 'undefined') {
-    date = moment().format('YYYY-MM-DD')
+    date = util.dateOfToday
   }
   const data = req.body
   const recordId = data.record_id
@@ -74,12 +79,11 @@ const deleteMealRecord = async (req, res) => {
   res.status(200).json(data)
 }
 
-// FIXME: 重構失敗
 const getDiaryRecord = async (req, res) => {
   const { id: userId } = req.user
   const getDate = req.query.date
   let date
-  const today = moment().format('YYYY-MM-DD')
+  const today = util.dateOfToday
   if (!getDate || typeof getDate === 'undefined') {
     date = today
   } else {
@@ -87,31 +91,20 @@ const getDiaryRecord = async (req, res) => {
   }
   // console.log('date', date)
   const mealRecords = await Food.getUserRecord(userId, date)
+  const totals = mealRecords.recordSummary.reduce((totals, item) => {
+    totals.caloriesTotal += parseInt(item.caloriesTotal)
+    totals.carbsTotal += parseInt(item.carbsTotal)
+    totals.proteinTotal += parseInt(item.proteinTotal)
+    totals.fatTotal += parseInt(item.fatTotal)
+    return totals
+  }, {
+    caloriesTotal: 0,
+    carbsTotal: 0,
+    proteinTotal: 0,
+    fatTotal: 0
+  })
 
-  // function calculateNutritionTotal(nutritionTotal) {
-  //   nutritionTotal = mealRecords.recordSummary.reduce((acc, item) => {
-  //     return acc + parseInt(item.nutritionTotal)
-  //   }, 0)
-  // }
-  // let caloriesTotal, carbsTotal, proteinTotal, fatTotal
-  // calculateNutritionTotal(caloriesTotal)
-  // calculateNutritionTotal(carbsTotal)
-  // calculateNutritionTotal(proteinTotal)
-  // calculateNutritionTotal(fatTotal)
-
-  const caloriesTotal = mealRecords.recordSummary.reduce((acc, item) => {
-    return acc + parseInt(item.caloriesTotal)
-  }, 0)
-  const carbsTotal = mealRecords.recordSummary.reduce((acc, item) => {
-    return acc + parseInt(item.carbsTotal)
-  }, 0)
-  const proteinTotal = mealRecords.recordSummary.reduce((acc, item) => {
-    return acc + parseInt(item.proteinTotal)
-  }, 0)
-  const fatTotal = mealRecords.recordSummary.reduce((acc, item) => {
-    return acc + parseInt(item.fatTotal)
-  }, 0)
-  res.status(200).json({ mealRecords, caloriesTotal, carbsTotal, proteinTotal, fatTotal })
+  res.status(200).json({ mealRecords, ...totals })
 }
 
 const getFoodDetail = async (req, res) => {
@@ -138,14 +131,6 @@ const createFoodDetail = async (req, res) => {
   res.status(200).json({ message: 'Food created successfully.' })
 }
 
-function calculateNutritionOfServingAmount(nutrition, servingAmout) {
-  nutrition.per_serving = servingAmout
-  nutrition.calories = Math.round(nutrition.calories * (servingAmout / 100))
-  nutrition.carbs = Math.round(nutrition.carbs * servingAmout / 100)
-  nutrition.protein = Math.round(nutrition.protein * servingAmout / 100)
-  nutrition.fat = Math.round(nutrition.fat * servingAmout / 100)
-}
-
 // complexity reduce from 43 to 26
 const generateSingleMeal = async (req, res) => {
   const { target, meal, value, date } = req.body
@@ -154,11 +139,22 @@ const generateSingleMeal = async (req, res) => {
   const [{ id: userId, goal_calories: goalCalories, goal_carbs: goalCarbs, goal_protein: goalProtein, goal_fat: goalFat }] = userDetail
 
   /* 一餐熱量不應低於TDEE 10% */
-  if (target === 'calories' && value < (goalCalories * 0.1)) return res.status(400).json({ errorMessage: 'lowCalories' })
+  if (target === 'calories' && value < (goalCalories * 0.1)) {
+    return res.status(400).json({ errorMessage: 'lowCalories' })
+  }
+
   /* 輸入過高之熱量 */
-  if (target === 'calories' && value > (goalCalories * 0.7)) return res.status(400).json({ errorMessage: 'highCalories' })
+  if (target === 'calories' && value > (goalCalories * 0.7)) {
+    return res.status(400).json({ errorMessage: 'highCalories' })
+  }
+
   /* 不建議營養素過度集中在某一餐攝取 */
-  if ((target === 'carbs' && value > goalCarbs * 0.7) || (target === 'protein' && value > goalProtein * 0.7) || (target === 'fat' && value > goalFat * 0.7)) return res.status(400).json({ errorMessage: 'outOfRange' })
+  if ((target === 'carbs' && value > goalCarbs * 0.7) ||
+    (target === 'protein' && value > goalProtein * 0.7) ||
+    (target === 'fat' && value > goalFat * 0.7)) {
+    return res.status(400).json({ errorMessage: 'outOfRange' })
+  }
+
   /* 計算使用者C P的目標營養素分別對總熱量佔比為多少 */
   const userCarbsPercentage = Math.round((goalCarbs * 4) / goalCalories * 100) / 100
   const userProteinPercentage = Math.round((goalProtein * 4) / goalCalories * 100) / 100
@@ -177,8 +173,8 @@ const generateSingleMeal = async (req, res) => {
       (food) => food.recommend_categories_id === nutritionLookup[target]
     )
     const selectFood = FoodList[Math.floor(Math.random() * FoodList.length)]
-    const servingAmountProtein = Math.round(value / selectFood[`${target}`] * 100)
-    calculateNutritionOfServingAmount(selectFood, servingAmountProtein)
+    const servingAmountNutrition = Math.round(value / selectFood[`${target}`] * selectFood.per_serving)
+    service.calculateNutritionOfServingAmount(selectFood, servingAmountNutrition, selectFood.per_serving)
     recommendMeal.push(selectFood)
   }
 
@@ -192,9 +188,9 @@ const generateSingleMeal = async (req, res) => {
     const carbs = carbsList[Math.floor(Math.random() * carbsList.length)]
     /* 依目標碳水比例乘以總熱量，計算碳水應攝取幾份 */
     const carbsCalories = Math.round(value * userCarbsPercentage * 0.8) // 留 20% buffer
-    const servingAmountCarbs = Math.round(carbsCalories / carbs.calories * 100)
+    const servingAmountCarbs = Math.round(carbsCalories / carbs.calories * carbs.per_serving)
     // console.log('carbsCalories', carbsCalories, 'servingAmountCarbs', servingAmountCarbs)
-    calculateNutritionOfServingAmount(carbs, servingAmountCarbs)
+    service.calculateNutritionOfServingAmount(carbs, servingAmountCarbs, carbs.per_serving)
     carbs.calories = carbsCalories
     recommendMeal.push(carbs)
 
@@ -203,8 +199,8 @@ const generateSingleMeal = async (req, res) => {
     )
     const protein = ProteinList[Math.floor(Math.random() * ProteinList.length)]
     const proteinCalories = Math.round(value * userProteinPercentage * 0.8) // 留 20% buffer
-    const servingAmountProtein = Math.round(proteinCalories / protein.calories * 100)
-    calculateNutritionOfServingAmount(protein, servingAmountProtein)
+    const servingAmountProtein = Math.round(proteinCalories / protein.calories * protein.per_serving)
+    service.calculateNutritionOfServingAmount(protein, servingAmountProtein, protein.per_serving)
     protein.calories = proteinCalories
     recommendMeal.push(protein)
 
@@ -213,8 +209,8 @@ const generateSingleMeal = async (req, res) => {
     )
     const veg = vegList[Math.floor(Math.random() * vegList.length)]
     if (veg.calories > value * 0.2) {
-      const servingAmountVeg = Math.round(veg.calories * 0.5 / veg.calories * 100)
-      calculateNutritionOfServingAmount(veg, servingAmountVeg)
+      const servingAmountVeg = Math.round(veg.calories * 0.5 / veg.calories * veg.per_serving)
+      service.calculateNutritionOfServingAmount(veg, servingAmountVeg, veg.per_serving)
     }
     recommendMeal.push(veg)
 
@@ -224,7 +220,7 @@ const generateSingleMeal = async (req, res) => {
     }, 0)
 
     const remainCalories = value - caloriesSubtotal
-    console.log('remainCalories: ', remainCalories)
+    // console.log('remainCalories: ', remainCalories)
     if (remainCalories > 0) {
       const fatList = recommendMealList.filter(
         (e) => e.recommend_categories_id === 3
@@ -232,8 +228,8 @@ const generateSingleMeal = async (req, res) => {
       const fat = fatList[Math.floor(Math.random() * fatList.length)]
       // console.log('nutrition', recommendMeal)
 
-      const servingOfFat = Math.round((remainCalories / fat.calories) * 100)
-      calculateNutritionOfServingAmount(fat, servingOfFat)
+      const servingOfFat = Math.round((remainCalories / fat.calories) * fat.per_serving)
+      service.calculateNutritionOfServingAmount(fat, servingOfFat, fat.per_serving)
       fat.calories = remainCalories
       recommendMeal.push(fat)
     }
@@ -290,8 +286,8 @@ const generateMultipleMeals = async (req, res) => {
   const carbsCaloriesLunch = Math.round(carbsCalories * 0.45)
   const carbsLunch = suffleCarbsArray.pop()
   const carbsDinner = suffleCarbsArray.pop()
-  const servingAmountCarbsLunch = Math.round(carbsCaloriesLunch / carbsLunch.calories * 100)
-  calculateNutritionOfServingAmount(carbsLunch, servingAmountCarbsLunch)
+  const servingAmountCarbsLunch = Math.round(carbsCaloriesLunch / carbsLunch.calories * carbsLunch.per_serving)
+  service.calculateNutritionOfServingAmount(carbsLunch, servingAmountCarbsLunch, carbsLunch.per_serving)
   /* 把第一個碳水塞進午餐 */
   recommendLunch.push(carbsLunch)
 
@@ -306,14 +302,14 @@ const generateMultipleMeals = async (req, res) => {
   const proteinDinner = suffleProteinArray.pop()
   /* 若將蛋白質集中於午晚餐攝取將造成蛋白質來源過於單一，故分散於三餐中 */
   const proteinCaloriesBreakfast = Math.round(proteinCalories * 0.15)
-  const servingAmountProteinBreakfast = Math.round(proteinCaloriesBreakfast / proteinBreakfast.calories * 100)
-  calculateNutritionOfServingAmount(proteinBreakfast, servingAmountProteinBreakfast)
+  const servingAmountProteinBreakfast = Math.round(proteinCaloriesBreakfast / proteinBreakfast.calories * proteinBreakfast.per_serving)
+  service.calculateNutritionOfServingAmount(proteinBreakfast, servingAmountProteinBreakfast, proteinBreakfast.per_serving)
   /* 把蛋白質塞進早餐 */
   recommendBreakfast.push(proteinBreakfast)
 
   const proteinCaloriesLunch = Math.round(proteinCalories * 0.40)
-  const servingAmountProteinLunch = Math.round(proteinCaloriesLunch / proteinLunch.calories * 100)
-  calculateNutritionOfServingAmount(proteinLunch, servingAmountProteinLunch)
+  const servingAmountProteinLunch = Math.round(proteinCaloriesLunch / proteinLunch.calories * proteinLunch.per_serving)
+  service.calculateNutritionOfServingAmount(proteinLunch, servingAmountProteinLunch, proteinLunch.per_serving)
   /* 把蛋白質塞進午餐 */
   recommendLunch.push(proteinLunch)
 
@@ -325,8 +321,8 @@ const generateMultipleMeals = async (req, res) => {
   const fatCaloriesLunch = Math.round(fatCalories * 0.5)
   const fatLunch = suffleFatArray.pop()
   const fatDinner = suffleFatArray.pop()
-  const servingAmountFatLunch = Math.round(fatCaloriesLunch / fatLunch.calories * 100)
-  calculateNutritionOfServingAmount(fatLunch, servingAmountFatLunch)
+  const servingAmountFatLunch = Math.round(fatCaloriesLunch / fatLunch.calories * fatLunch.per_serving)
+  service.calculateNutritionOfServingAmount(fatLunch, servingAmountFatLunch, fatLunch.per_serving)
   /* 把第一個脂肪塞進午餐 */
   recommendLunch.push(fatLunch)
 
@@ -358,8 +354,8 @@ const generateMultipleMeals = async (req, res) => {
 
   /* 因推薦食物類別中的脂肪食品營養素較多元，故設定先將脂肪克數逼近達標之後再看其餘營養素剩下多少 */
   const fatGramDinner = Math.round((goalFat - fatSubtotal) * 0.9) // 暫時抓90%，留一些buffer
-  const servingAmountFatDinner = Math.round(fatGramDinner / fatDinner.fat * 100)
-  calculateNutritionOfServingAmount(fatDinner, servingAmountFatDinner)
+  const servingAmountFatDinner = Math.round(fatGramDinner / fatDinner.fat * fatDinner.per_serving)
+  service.calculateNutritionOfServingAmount(fatDinner, servingAmountFatDinner, fatDinner.per_serving)
   recommendDinner.push(fatDinner)
 
   // => check 扣掉脂肪之後剩餘的熱量與營養素
@@ -367,8 +363,8 @@ const generateMultipleMeals = async (req, res) => {
   const remainProteinV1 = goalProtein - (proteinSubtotal + fatDinner.protein)
 
   const proteinGramDinner = Math.round(remainProteinV1 * 0.9) // 暫時抓90%，留一些buffer
-  const servingAmountProteinDinner = Math.round(proteinGramDinner / proteinDinner.protein * 100)
-  calculateNutritionOfServingAmount(proteinDinner, servingAmountProteinDinner)
+  const servingAmountProteinDinner = Math.round(proteinGramDinner / proteinDinner.protein * proteinDinner.per_serving)
+  service.calculateNutritionOfServingAmount(proteinDinner, servingAmountProteinDinner, proteinDinner.per_serving)
   /* 把第三個蛋白質塞進晚餐 */
   recommendDinner.push(proteinDinner)
 
@@ -378,8 +374,8 @@ const generateMultipleMeals = async (req, res) => {
 
   if (remainCarbsV2 > 0) {
     const carbsGramDinner = Math.round(remainCarbsV2 * 0.9) // 暫時抓90%，留一些buffer
-    const servingAmountCarbsDinner = Math.round(carbsGramDinner / carbsDinner.carbs * 100)
-    calculateNutritionOfServingAmount(carbsDinner, servingAmountCarbsDinner)
+    const servingAmountCarbsDinner = Math.round(carbsGramDinner / carbsDinner.carbs * carbsDinner.per_serving)
+    service.calculateNutritionOfServingAmount(carbsDinner, servingAmountCarbsDinner, carbsDinner.per_serving)
     /* 把第二個碳水塞進晚餐 */
     recommendDinner.push(carbsDinner)
     // console.log('carbsDinner', carbsDinner.calories, carbsDinner.carbs, carbsDinner.protein, carbsDinner.fat)
@@ -399,7 +395,7 @@ const getFoodFromKeyword = async (req, res) => {
 const getFoodTrend = async (req, res) => {
   /* 設定撈取熱門食物之區間 */
   const periodStart = moment().add(-6, 'days').format('YYYY-MM-DD')
-  const periodEnd = moment().format('YYYY-MM-DD')
+  const periodEnd = util.dateOfToday
   let trendFood
   try {
     if (Cache.ready) {
