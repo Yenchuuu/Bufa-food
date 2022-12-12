@@ -168,7 +168,7 @@ const getFacebookProfile = async function (fbAccessToken) {
 
 const getDailyGoal = async function (userId, startDate, endDate) {
   try {
-    const [goalData] = await db.execute('SELECT * FROM `user_goal` WHERE user_id = ? AND date BETWEEN ? AND ?', [userId, startDate, endDate])
+    const [goalData] = await db.execute('SELECT goal_calories AS calories, goal_carbs AS carbs, goal_protein AS protein, goal_fat AS fat, date FROM `user_goal` WHERE user_id = ? AND date BETWEEN ? AND ?', [userId, startDate, endDate])
     return goalData
   } catch (err) {
     throw new Error(err)
