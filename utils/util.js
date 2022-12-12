@@ -1,12 +1,9 @@
-const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const User = require('../model/user_model')
-const port = process.env.PORT
+const moment = require('moment')
 const { TOKEN_SECRET } = process.env
-const { promisify } = require('util')
 /* 圖片上傳--S3相關 */
 const multer = require('multer')
-const { uploadFile } = require('./s3')
 
 const wrapAsync = (fn) => {
   return function (req, res, next) {
@@ -74,4 +71,7 @@ const isValidDate = (dateString) => {
   return dateString.match(regEx) != null
 }
 
-module.exports = { wrapAsync, authentication, upload, isValidDate }
+/* 日期設定為台灣時區 */
+const dateOfToday = moment().utc().format('YYYY-MM-DD')
+
+module.exports = { wrapAsync, authentication, upload, isValidDate, dateOfToday }
