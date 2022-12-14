@@ -1,0 +1,71 @@
+.profile-container{
+  margin: 0 2em 0 3em;
+}
+
+.text-color{
+  color: #7BB08A;
+}
+
+.self-photo{
+  width: 180px;
+  height: 200px;
+  border: solid #7BB08A 1px;
+}
+
+table, td, th {  
+  text-align: left;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+ td{
+  padding: 0 0 1em 0;
+  font-size: 16px;
+ }
+
+ tbody{
+  color: #6c757d;
+ }
+
+ .section-title {
+  display: flex; 
+  justify-content:space-between;
+ }
+
+ .pop-background{
+  display: none;
+  position: fixed;
+  width:100%;
+  height:100%;
+  background:#000;
+  z-index:2;
+  top:0;
+  left:0;
+  opacity:0.7;
+}
+
+.pop-window{
+  display:none;
+  border-radius: 1em;
+  width:600px;
+  height:550px;
+  position:fixed;
+  top:25%;
+  margin-top:-100px; 
+  background:ghostwhite;
+  z-index:3;
+  left:50%;
+  margin-left:-250px;
+  padding: 2rem 6rem;
+}
+
+.pop-content{
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0;
+  justify-content: center;
+  align-content: center;
+}

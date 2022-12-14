@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BUFA FOOD</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/diary.css">
+  <script src="https://cdn.plot.ly/plotly-2.14.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css" />
+  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css" />
+  <link href="/icons/favicon.ico" rel="shortcut icon" type="image/ico" />
+  <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/validator@13.7.0/validator.min.js"></script>
+</head>
+<body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+  <script type="text/javascript" src="/javascripts/jsgrid.min.js"></script>
+  <script src="https://rawgit.com/moment/moment/2.2.1/min/moment.min.js"></script>
+
+  <nav style="background-color: #495464; padding: 8px 0;" class="navbar navbar-expand-md navbar-dark" aria-label="Fourth navbar example">
+    <div class="container-fluid" style="padding:0 12px;">
+      <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logo.png" class="brand-logo">  BUFA FOOD | 不發福</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- 把div的 class="collapse navbar-collapse justify-content-md-end" 拿掉，就可以達到置右對齊了 -->
+      <div id="navbarsExample04">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link active" href="/search.html">食物庫</a>
+          </li>
+          <!-- <li>
+            <a class="nav-link disabled">|</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/mine.html">我的食物</a>
+          </li> -->
+          <li>
+            <a class="nav-link disabled">|</a>
+          </li>
+          <li class="nav-item" id="nav-profile-change">
+            <a class="nav-link active" href="/login.html" id="profile-icon">登入</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <main class="d-flex flex-nowrap container-color">
+    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
+      <div class="sidebar mt-3">
+        <a href="/diary.html">飲食紀錄</a>
+        <a href="/footprint.html">每週摘要</a>
+        <a href="/mine.html">喜好清單</a>
+        <a href="/profile.html">個人資訊</a>
+      </div>
+    </div>
+  
+  <div style="border: 2px #495464 solid; border-radius: 1em;" class="container col-lg-6 p-3 mt-5 mb-5">
+    <div style="justify-content: center;" class="col-12 diary-head">
+      <div style="justify-content: center;" class="center-box">
+        <h4 class="text-secondary">飲食紀錄</h4>
+      </div> 
+      <div id="date_controls" class="center-box">
+        <form>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="previousDay">前一天</button>
+        </form>
+          <div id="showDate">
+            <input type="date" id="datepicker" class="text-secondary" style="display:none; border: none;background-color: transparent;" onblur="chooseDate()">
+          </div>  
+        <form>
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="followingDay">後一天</button>
+        </form>
+    </div>
+  </div>
+    <div class="container d-grid gap-3">
+      <!-- <div class="col-12"></div> -->
+      <!-- <div class="row gap-3"> -->
+        <div style="justify-content: center;" class="input-group mb-4">
+          <select style="background-color: transparent;" class="custom-select col-3 text-secondary" id="inputGroupSelectMeal">
+            <option selected>選餐</option>
+            <option value="1">早餐</option>
+            <option value="2">午餐</option>
+            <option value="3">晚餐</option>
+            <option value="4">點心</option>
+          </select>
+          <select style="background-color: transparent;" class="custom-select col-lg-4 text-secondary" id="inputGroupSelectTarget">
+            <option selected>選目標</option>
+            <option value="calories">熱量(kcal)</option>
+            <option value="carbs">碳水化合物(g)</option>
+            <option value="protein">蛋白質(g)</option>
+            <option value="fat">脂肪(g)</option>
+          </select>
+          <div class="input-group-append">
+            <input style="background-color: transparent;" type="number" class="form-control" id="inputTargetValue" placeholder="請輸入數字">
+            <button class="btn btn-outline-secondary col-4" type="button" id="generateOneMeal">建立</button>
+          </div>
+        </div>
+      <!-- </div> -->
+      <div style="justify-content: space-around; align-items: center; padding: 0;" class="center-box">
+        <!-- <div style="padding: 0;" class="col-4"> -->
+          <a href="/search.html">
+            <!-- <img src="/icons/add_green.png" style="width: 35px;" id="add_diary"> -->
+            <button class="btn btn-outline-secondary justify-content-md-center" type="button" id="add_diary">新增紀錄</button>
+          </a>
+          <button class="btn btn-outline-secondary justify-content-md-center" type="button" id="generateDayMeals" title="不知道要吃什麼嗎？讓我們為你推薦一日菜單吧！">一日菜單</button>
+      </div>
+    </div>
+    <div class="container d-grid gap-3">
+      
+      
+      <div id="jsGrid"></div>
+
+
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="row card-body-title">
+            <div class="col-4"><h4 class="text-secondary">早餐</h4></div>
+            <div class="col-8">
+            <ul class="nav nav-pills">
+              <li class="nav-card-title">
+                <p class="text-secondary">份量<br>g</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">熱量<br>kcal</br></p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">碳水化合物</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">蛋白質</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">脂肪</p>
+              </li>
+            </ul>
+            </div>
+          </div>
+          <div class="row card-body-title" id="breakfastRecord"></div>
+          <div class="row" id="breakfastTotal" style="display: none;">
+            <div class="col-4 text-secondary card-body-text">總計</div>
+            <div class="col-8">
+              <ul class="nav nav-pills">
+                <li class="nav-card-title"><p class="text-secondary"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastCaloriesTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastCarbsTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastProteinTotal"></p></li>
+                <li class="nav-card-title"><p class="text-secondary" id="breakfastFatTotal"></p></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="row card-body-title">
+            <div class="col-4"><h4 class="text-secondary">午餐</h4></div>
+            <div class="col-8">
+            <ul class="nav nav-pills">
+              <li class="nav-card-title">
+                <p class="text-secondary">份量<br>g</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">熱量<br>kcal</br></p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">碳水化合物</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">蛋白質</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">脂肪</p>
+              </li>
+            </ul>
+            </div>
+          </div>
+            <div class="row card-body-title" id="lunchRecord">
+            </div>
+            <div class="row" id="lunchTotal" style="display: none;">
+              <div class="col-4 text-secondary card-body-text">總計</div>
+              <div class="col-8">
+                <ul class="nav nav-pills">
+                  <li class="nav-card-title"><p class="text-secondary"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchCaloriesTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchCarbsTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchProteinTotal"></p></li>
+                  <li class="nav-card-title"><p class="text-secondary" id="lunchFatTotal"></p></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="row card-body-title">
+              <div class="col-4"><h4 class="text-secondary">晚餐</h4></div>
+              <div class="col-8">
+              <ul class="nav nav-pills">
+                <li class="nav-card-title">
+                  <p class="text-secondary">份量<br>g</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">熱量<br>kcal</br></p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">碳水化合物</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">蛋白質</p>
+                </li>
+                <li class="nav-card-title">
+                  <p class="text-secondary">脂肪</p>
+                </li>
+              </ul>
+              </div>
+            </div>
+              <div class="row card-body-title" id="dinnerRecord"></div>
+              <div class="row" id="dinnerTotal" style="display: none;">
+                <div class="col-4 text-secondary card-body-text">總計</div>
+                <div class="col-8">
+                  <ul class="nav nav-pills">
+                    <li class="nav-card-title"><p class="text-secondary"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerCaloriesTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerCarbsTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerProteinTotal"></p></li>
+                    <li class="nav-card-title"><p class="text-secondary" id="dinnerFatTotal"></p></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card text-center">
+            <div class="card-body">
+              <div class="row card-body-title">
+                <div class="col-4"><h4 class="text-secondary">點心</h4></div>
+                <div class="col-8">
+                <ul class="nav nav-pills">
+                  <li class="nav-card-title">
+                    <p class="text-secondary">份量<br>g</p>
+                  </li>
+                  <li class="nav-card-title">
+                    <p class="text-secondary">熱量<br>kcal</br></p>
+                  </li>
+                  <li class="nav-card-title">
+                    <p class="text-secondary">碳水化合物</p>
+                  </li>
+                  <li class="nav-card-title">
+                    <p class="text-secondary">蛋白質</p>
+                  </li>
+                  <li class="nav-card-title">
+                    <p class="text-secondary">脂肪</p>
+                  </li>
+                </ul>
+                </div>
+              </div>
+                <div class="row card-body-title" id="snackRecord"></div>
+                <div class="row" id="snackTotal" style="display: none;">
+                  <div class="col-4 text-secondary card-body-text">總計</div>
+                  <div class="col-8">
+                    <ul class="nav nav-pills">
+                      <li class="nav-card-title"><p class="text-secondary"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackCaloriesTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackCarbsTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackProteinTotal"></p></li>
+                      <li class="nav-card-title"><p class="text-secondary" id="snackFatTotal"></p></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card text-center">
+              <div class="card-body">
+                <div class="row card-body-title">
+                  <div class="col-4"><h4 class="text-secondary"></h4></div>
+                  <div class="col-8">
+                  <ul class="nav nav-pills">
+                    <li class="nav-card-title">
+                      <p class="text-secondary"></p>
+                    </li>
+                    <li class="nav-card-title">
+                      <p class="text-secondary">熱量<br>kcal</br></p>
+                    </li>
+                    <li class="nav-card-title">
+                      <p class="text-secondary">碳水化合物</p>
+                    </li>
+                    <li class="nav-card-title">
+                      <p class="text-secondary">蛋白質</p>
+                    </li>
+                    <li class="nav-card-title">
+                      <p class="text-secondary">脂肪</p>
+                    </li>
+                  </ul>
+                  </div>
+                </div>
+                  <div class="row" id="dailyTotal">
+                    <div class="col-4 text-secondary card-body-text">當日總計</div>
+                      <div class="col-8">
+                        <ul class="nav nav-pills">
+                          <li class="nav-card-title text-secondary"><p class="text-secondary"></p></li>
+                          <li class="nav-card-title text-secondary" id="dailyCaloriesTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyCarbsTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyProteinTotal"></li>
+                          <li class="nav-card-title text-secondary" id="dailyFatTotal"></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                </div>
+              </div>
+
+      </div>
+    </div>
+    <div class="flex-shrink-0 sidebar-custom pt-3" style="width: 24EM;">
+      <div class="sidebar mt-2" id="pieChartContainer">
+        <div id="pieChart"  style="width:100%; height:350px;"></div>
+      </div>
+      <div class="reference_table mt-4">
+        <div class="reference_column col-4">
+          <div style="text-align: start;" class="col">
+            <div class="reference_div text-secondary">項目</div>
+            <div class="reference_div text-secondary">熱量</div>
+            <div class="reference_div text-secondary">碳水化合物</div>
+            <div class="reference_div text-secondary">蛋白質</div>
+            <div class="reference_div text-secondary">脂肪</div>
+          </div>
+        </div>
+        <div class="reference_column col-4">
+          <div class="col">
+            <div class="table-title text-secondary font-weight-bold">設定目標</div>
+            <div id="goalCalories" class="reference_div text-secondary"></div>
+            <div id="goalCarbs" class="reference_div text-secondary"></div>
+            <div id="goalProtein" class="reference_div text-secondary"></div>
+            <div id="goalFat" class="reference_div text-secondary"></div>
+          </div>
+        </div>
+        <div class="reference_column col-4">
+          <div class="col">
+            <div class="table-title text-secondary font-weight-bold">差異</div>
+            <div id="diffCalories" class="reference_div text-secondary"></div>
+            <div id="diffCarbs" class="reference_div text-secondary"></div>
+            <div id="diffProtein" class="reference_div text-secondary"></div>
+            <div id="diffFat" class="reference_div text-secondary"></div>
+          </div>
+        </div>
+    </div>
+  </div>
+</main>
+
+<div class="footer-dark">
+<!-- <div style="background-color: #9D9D9D;" class="footer-dark"> -->
+    <footer>
+      <div class="container">
+          <div class="row">
+              <div class="col-sm-6 col-md-4 item">
+                  <h3>關於我們</h3>
+                  <ul>
+                      <li><a target="_blank" href="https://school.appworks.tw/">從何發跡</a></li>
+                      <li><a target="_blank" href="/privacy.html">隱私政策</a></li>
+                  </ul>
+              </div>
+              <div class="col-sm-6 col-md-4 item">
+                  <h3>參考資料</h3>
+                  <ul>
+                      <li><a target="_blank" href="https://consumer.fda.gov.tw/Food/TFND.aspx?nodeID=178&rand=1470733090">食品藥物管理署</a></li>
+                      <li><a target="_blank" href="https://www.peeta.tw/">Peeta Fitness</a></li>
+                  </ul>
+              </div>
+              <div class="col-md-4 item text">
+                  <h3>進一步了解 BUFA FOOD</h3>
+                  <a href="mailto:shin180555@gmail.com" class="link">聯絡信箱：shin180555@gmail.com</a>
+              </div>
+          </div>
+          <p class="copyright">BUFA FOOD © 2022</p>
+      </div>
+  </footer>
+</div>
+
+<script src="/javascripts/diary.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+</body>
+</html>

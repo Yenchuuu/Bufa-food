@@ -1,0 +1,22 @@
+.button {
+  display: inline-block;
+  border-radius: 4px;
+  background-color: #7BB08A;
+  border: none;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 14px;
+  padding: 5px;
+  width: 50px;
+  margin: 5px;
+}
+
+#weekPicker{
+  background-color: #E8E8E8;
+  color: #6c757d;
+  width: 220px;
+  height: 35px;
+  border: none;
+  border-radius: 4px;
+  padding: 0 10px;
+}

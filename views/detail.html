@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BUFA FOOD</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/detail.css">
+  <link href="/icons/favicon.ico" rel="shortcut icon" type="image/ico" />
+  <script src="https://kit.fontawesome.com/9d89bb6e53.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <script src="https://cdn.plot.ly/plotly-2.14.0.min.js"></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <nav style="background-color: #495464;" class="navbar navbar-expand-xl navbar-dark" aria-label="Fourth navbar example">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/index.html"><img src="/images/bufafood_logo.png" class="brand-logo">  BUFA FOOD | 不發福</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- 把div的 class="collapse navbar-collapse justify-content-md-end" 拿掉，就可以達到置右對齊了 -->
+      <div id="navbarsExample04">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link active" href="/search.html">食物庫</a>
+          </li>
+          <!-- <li>
+            <a class="nav-link disabled">|</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/mine.html">我的食物</a>
+          </li> -->
+          <li>
+            <a class="nav-link disabled">|</a>
+          </li>
+          <li class="nav-item" id="nav-profile-change">
+            <a class="nav-link active" href="/login.html" id="profile-icon">登入</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <main class="d-flex flex-nowrap container-color">
+    <div class="flex-shrink-0 p-3 sidebar-custom sidebar-color" style="width: 13EM;">
+    <div class="sidebar mt-3">
+      <a href="/diary.html">飲食紀錄</a>
+      <a href="/footprint.html">每週摘要</a>
+     <a href="/mine.html">喜好清單</a>
+      <a href="/profile.html">個人資訊</a>
+    </div>
+  </div>
+  
+  <div class="pop-background"></div>
+  <div class="pop-window">
+    <div class="pop-content">
+      <p class="text-secondary">新增至</p>
+      <select style="margin: 5px 0;" class="custom-select col-8 text-secondary" id="inputGroupSelectMeal">
+        <option selected>選餐</option>
+        <option value="1">早餐</option>
+        <option value="2">午餐</option>
+        <option value="3">晚餐</option>
+        <option value="4">點心</option>
+      </select>
+      <!-- <input class="datepicker"></input> -->
+      <input style="margin: 5px 0 20px 0;" type="text" id="datepicker" class="form-control col-8 datepicker" placeholder="選日期">
+      <p class="text-secondary">份量(g)</p>
+      <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <div class="col-xs-2">
+             <input type="number" id="serving_amount" min="1" class="form-control col-8" placeholder="請輸入數字">
+             <!-- TODO: 是否該設置上限？-->
+            </div>
+          </div>
+      </form>
+      <button type="button" class="btn btn-outline-secondary col-8" id="addMealRecord">新增</button>
+    </div>
+  </div>
+
+  <div class="container col-6 mt-4 mb-4">
+      <div class="col-12 text-center mt-3" id="foodName"></div>
+      <div class="card text-center">
+        <div style="padding:5px" class="card-header">
+          <ul style="justify-content: end; align-items: center;" class="nav nav-pills">
+              <li class="nav-item" id="add_collection" onclick="updateInfo(this)">
+                <!-- <img src="/icons/empty_heart.webp" class="click_icon" id="add_collection" onclick="updateInfo(this)"> -->
+                <!-- <i onclick="updateInfo(this)" class="click_icon fa-regular fa-heart"></i> -->
+              </li>
+              <li class="nav-item" id="thumb_up" onclick="updateInfo(this)" >
+                <!-- <img src="/icons/thumb_up.png" class="click_icon" onclick="updateInfo(this)"> -->
+              </li>
+            <li class="nav-item" id="thumb_down" onclick="updateInfo(this)" >
+              <!-- <img src="/icons/thumb_down.png" class="click_icon"  onclick="updateInfo(this)"> -->
+            </li>
+            <li class="nav-item" id="add_exclusiion" onclick="updateInfo(this)" >
+              <!-- <img src="/icons/nono.png" class="click_icon"  onclick="updateInfo(this)"> -->
+            </li>
+            <li class="nav-item" id="add_diary" onclick="updateInfo(this)" >
+              <!-- <img src="/icons/add.png" class="click_icon" > -->
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="row card-body-title">
+            <!-- <div class="col-4"></div> -->
+            <div class="col-12">
+            <ul class="nav nav-pills detail-card-body">
+              <li class="nav-card-title">
+                <p class="text-secondary">每份量</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">熱量<br>kcal</br></p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">碳水化合物</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">蛋白質</p>
+              </li>
+              <li class="nav-card-title">
+                <p class="text-secondary">脂肪</p>
+              </li>
+            </ul>
+            </div>
+          </div>
+          <div class="row card-body-title">
+            <!-- <div class="col-4 text-secondary card-body-text"></div> -->
+            <div class="col-12">
+              <ul class="nav nav-pills detail-card-body">
+                <li class="nav-card-title" id="foodServing">
+                </li>
+                <li class="nav-card-title" id="foodCalories">
+                </li>
+                <li class="nav-card-title" id="foodCarbs">
+                </li>
+                <li class="nav-card-title" id="foodProtein">
+                </li>
+                <li class="nav-card-title" id="foodFat">
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="row card-body-title">
+            <div id="nutritionPie" style="width:100%; height:350px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</main>
+
+<div class="footer-dark">
+  <footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6 col-md-4 item">
+                <h3>關於我們</h3>
+                <ul>
+                    <li><a target="_blank" href="https://school.appworks.tw/">從何發跡</a></li>
+                    <li><a target="_blank" href="/privacy.html">隱私政策</a></li>
+                </ul>
+            </div>
+            <div class="col-sm-6 col-md-4 item">
+                <h3>參考資料</h3>
+                <ul>
+                    <li><a target="_blank" href="https://consumer.fda.gov.tw/Food/TFND.aspx?nodeID=178&rand=1470733090">食品藥物管理署</a></li>
+                    <li><a target="_blank" href="https://www.peeta.tw/">Peeta Fitness</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 item text">
+                <h3>進一步了解 BUFA FOOD</h3>
+                <a href="mailto:shin180555@gmail.com" class="link">聯絡信箱：shin180555@gmail.com</a>
+            </div>
+        </div>
+        <p class="copyright">BUFA FOOD © 2022</p>
+    </div>
+</footer>
+</div>
+<script src="/javascripts/detail.js"></script>
+
+</body>
+</html>

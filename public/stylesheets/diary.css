@@ -1,0 +1,80 @@
+.diary-head {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.center-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+}
+
+#inputGroupSelectMeal {
+  border-style:solid none solid solid;
+} 
+#inputGroupSelectTarget, #inputTargetValue {
+  border-style:solid none solid none;
+}
+
+.title-name {
+  width: 250px;
+}
+
+.title-item {
+  width: 80px;
+}
+
+table, td, th {  
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 15px 5px;
+}
+
+.hidden-serving{
+  width:3em;
+  border: none none solid none;
+}
+
+.reference_table{
+  width: 80%;
+  height: 190px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  /* align-items: center; */
+  align-content: center;
+  text-align: center;
+  margin: 0 2rem;
+  border: 1.5px dotted grey;
+  border-radius: 1em;
+}
+
+.reference_column{
+  padding: 1em 0;
+
+}
+
+.reference_div{
+  padding: 5px 0;
+  font-size: 14px;
+}
+
+.table-title{
+  padding: 5px 0;
+}
+
+.card-body-text p{
+  margin: 10px 0;
+}

@@ -1,0 +1,26 @@
+.column-style {
+  border: 2px #495464 solid; 
+  border-radius: 1em;
+  margin: 1.5em;
+  padding: 1em 2em;
+}
+
+.display-collection, .display-createdFood, .display-exclusion{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.collection-card{
+  margin: 1em 2em;
+  border: 1px #7BB08A solid;
+}
+
+.mine-card-body {
+  width: 12rem;
+  flex: 1 1 auto;
+  padding: 1rem 1rem;
+}
+
+.mine-card-body h6 {
+  margin: 0;
+}
