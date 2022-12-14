@@ -1,4 +1,6 @@
-// 測試 function
+// const multer = require('multer')
+const { calculateNutritionOfServingAmount, pushRecord, calculateBMR, calculateTDEE, calculateDefaultNutrition, calculateDefaultNutritionByDietGoal } = require('../service/service')
+const { dateOfToday, isValidDate, upload } = require('../utils/util')
 
 describe('test function calculateNutritionOfServingAmount', () => {
   test('calculateNutritionOfServingAmount', () => {
@@ -19,8 +21,6 @@ describe('test function calculateNutritionOfServingAmount', () => {
     expect(calculateNutritionOfServingAmount(carbs, 180, carbs.per_serving)).toEqual(output)
   })
 })
-
-const { calculateNutritionOfServingAmount, pushRecord, calculateBMR, calculateTDEE, calculateDefaultNutrition, calculateDefaultNutritionByDietGoal } = require('../service/service')
 
 describe('test function pushRecord', () => {
   test('pushRecord array should be 0', () => {
@@ -137,7 +137,6 @@ describe('test function calculateDefaultNutrition', () => {
   })
 })
 
-const { dateOfToday, isValidDate } = require('../utils/util')
 
 describe('test function dateOfToday', () => {
   test('date of today should be today', () => {
@@ -159,3 +158,22 @@ describe('test function isValidDate', () => {
     expect(isValidDate(date)).not.toBeFalsy()
   })
 })
+
+// describe('test function upload', () => {
+//   test('should be valid format of picture', () => {
+//     const file = 'cute_pic.gif'
+//     const multerRes = multer({
+//       storage: upload,
+//       fileFilter: file
+//     });
+
+//     // 2 - Perform all calls in order to reach the code you want to cover.
+//     //
+//     expect(multerRes).toBeTruthy();
+//     const diskStorageRes = multerRes.storage.storage
+//     expect(diskStorageRes).toBeTruthy();
+//     const getDestinationRes = diskStorageRes.getDestination()
+//     expect(getDestinationRes).toBeTruthy();
+
+//   })
+// })

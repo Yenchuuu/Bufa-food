@@ -1,6 +1,5 @@
 const db = require('../utils/mysqlconf')
 
-// FIXME: try catch起來; catch err 可以用throw new Error(err) 並在app.js的500那邊接起來並印出來（可以加上時間）
 const createMealRecord = async (userId, foodId, meal, servingAmount, date) => {
   try {
     const [result] = await db.execute('INSERT INTO `user_meal` (user_id, food_id, meal, serving_amount, date_record) VALUES (?, ?, ?, ?, ?)', [userId, foodId, meal, servingAmount, date])
