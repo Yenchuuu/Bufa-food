@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "coverage": "jest --coverage"
   },
   "dependencies": {
     "aws-sdk": "^2.1260.0",
@@ -15,6 +16,7 @@
     "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
+    "eslint-plugin-jest": "^27.1.6",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "joi": "^17.7.0",
