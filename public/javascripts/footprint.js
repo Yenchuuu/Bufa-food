@@ -18,13 +18,21 @@ if (!accessToken) {
   $(document).ready(async function () {
     const webUrl = window.location.search
     const splitUrl = webUrl.split('=')[1]
-    console.log('splitUrl: ', splitUrl);
+    // console.log('splitUrl: ', splitUrl)
     // const weekVal = $('#weekPicker').val()
     if (splitUrl === undefined) {
       const today = moment().format('YYYY-MM-DD')
       const dayOfweek = moment(today).day()
-      const startDate = moment(today).add(-(dayOfweek - 1), 'day').format('YYYY-MM-DD')
-      const endDate = moment(today).add((7 - dayOfweek), 'day').format('YYYY-MM-DD')
+      let startDate, endDate
+      if (dayOfweek === 0) {
+        startDate = moment(today).day(-6).format('YYYY-MM-DD')
+        endDate = moment(today).format('YYYY-MM-DD')
+      } else {
+        startDate = moment(today).add(-(dayOfweek - 1), 'days').format('YYYY-MM-DD')
+        console.log('startDate: ', startDate);
+        endDate = moment(today).add((7 - dayOfweek), 'days').format('YYYY-MM-DD')
+        console.log('endDate: ', endDate);
+      }
 
       const data = await axios.get(`/api/1.0/user/footprint?date=${startDate}`, { headers: { Authorization: `Bearer ${accessToken}` } })
       chart(data)

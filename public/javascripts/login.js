@@ -32,51 +32,64 @@ if (accessToken) {
     }
   }
 
-  $('#signupBtn').click(async function () {
-    const name = $('#name').val()
-    const email = $('#register_email').val()
-    const password = $('#register_password').val()
-    // console.log('info: ', name, email, password);
+  $(document).ready(() => {
+    $('#confirm_password').keyup((event) => {
+      if (event.which === 13) {
+        $('#signupBtn').click()
+      }
+    })
+    $('#signupBtn').click(async function () {
+      const name = $('#name').val()
+      const email = $('#register_email').val()
+      const password = $('#register_password').val()
+      // console.log('info: ', name, email, password);
 
-    const confirmPassword = $('#confirm_password').val()
-    if (!name || !email || !password || !confirmPassword) {
-      Swal.fire({
-        icon: 'error',
-        text: '請確認資訊皆填寫完整'
-      })
-    } else if (password !== confirmPassword) {
-      Swal.fire({
-        icon: 'error',
-        text: '請再次確認密碼輸入正確'
-      })
-    } else {
-      const data = await axios.post('/api/1.0/user/signup', { name, email, password })
-      // console.log('data: ', data)
-      const userInfo = data.data.data
-      if (data.data.error) {
+      const confirmPassword = $('#confirm_password').val()
+      if (!name || !email || !password || !confirmPassword) {
         Swal.fire({
           icon: 'error',
-          text: '帳號格式錯誤或已被註冊'
+          text: '請確認資訊皆填寫完整'
         })
-      } else if (userInfo) {
-        /* 註冊即登入 */
-        const accessToken = userInfo.access_token
-        window.localStorage.setItem('accessToken', accessToken)
-        window.localStorage.setItem('userName', userInfo.user.name)
-        window.localStorage.setItem('userId', userInfo.user.id)
-        window.localStorage.setItem('userEmail', userInfo.user.email)
+      } else if (password !== confirmPassword) {
         Swal.fire({
-          icon: 'success',
-          title: '註冊成功',
-          footer: '<a href="/target.html" class="text-secondary">前往填寫體態與設定目標💪🏼</a>'
-        }).then((result) => {
-          window.location.href = '/target.html'
+          icon: 'error',
+          text: '請再次確認密碼輸入正確'
         })
+      } else {
+        const data = await axios.post('/api/1.0/user/signup', { name, email, password })
+        // console.log('data: ', data)
+        const userInfo = data.data.data
+        if (data.data.error) {
+          Swal.fire({
+            icon: 'error',
+            text: '帳號格式錯誤或已被註冊'
+          })
+        } else if (userInfo) {
+          /* 註冊即登入 */
+          const accessToken = userInfo.access_token
+          window.localStorage.setItem('accessToken', accessToken)
+          window.localStorage.setItem('userName', userInfo.user.name)
+          window.localStorage.setItem('userId', userInfo.user.id)
+          window.localStorage.setItem('userEmail', userInfo.user.email)
+          Swal.fire({
+            icon: 'success',
+            title: '註冊成功',
+            footer: '<a href="/target.html" class="text-secondary">前往填寫體態與設定目標💪🏼</a>'
+          }).then((result) => {
+            window.location.href = '/target.html'
+          })
+        }
       }
-    }
+    })
   })
 
   $(document).ready(function () {
+    $('#password').keyup((event) => {
+      if (event.which === 13) {
+        $('#signinBtn').click()
+      }
+    })
+
     $('#signinBtn').click(async function () {
       const email = $('#email').val()
       // console.log('email: ', email);

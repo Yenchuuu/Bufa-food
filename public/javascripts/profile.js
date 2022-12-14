@@ -190,63 +190,70 @@ if (!accessToken) {
     $('#nutririon-input').show()
   })
 
-  $('#submit_nutritionInfo').click(async function () {
-    const userInfo = await axios.get('/api/1.0/user/profile/', { headers: { Authorization: `Bearer ${accessToken}` } })
-    const TDEE = userInfo.data.data.TDEE
-    let goal_calories = $('#calories').val()
-    goal_calories = parseInt(goal_calories)
-    let goal_carbs_percantage = $('#carbs').val()
-    goal_carbs_percantage = parseInt(goal_carbs_percantage)
-    let goal_protein_percantage = $('#protein').val()
-    goal_protein_percantage = parseInt(goal_protein_percantage)
-    let goal_fat_percantage = $('#fat').val()
-    goal_fat_percantage = parseInt(goal_fat_percantage)
+  $(document).ready(function () {
+    $('#fat').keyup((event) => {
+      if (event.which === 13) {
+        $('#submit_nutritionInfo').click()
+      }
+    })
+    $('#submit_nutritionInfo').click(async function () {
+      const userInfo = await axios.get('/api/1.0/user/profile/', { headers: { Authorization: `Bearer ${accessToken}` } })
+      const TDEE = userInfo.data.data.TDEE
+      let goal_calories = $('#calories').val()
+      goal_calories = parseInt(goal_calories)
+      let goal_carbs_percantage = $('#carbs').val()
+      goal_carbs_percantage = parseInt(goal_carbs_percantage)
+      let goal_protein_percantage = $('#protein').val()
+      goal_protein_percantage = parseInt(goal_protein_percantage)
+      let goal_fat_percantage = $('#fat').val()
+      goal_fat_percantage = parseInt(goal_fat_percantage)
 
-    if (!goal_carbs_percantage || !goal_protein_percantage || !goal_fat_percantage) {
-      Swal.fire({
-        icon: 'warning',
-        text: '碳水化合物、蛋白質與脂肪之資訊不完整或不正確'
-      })
-      return
-    } else if (goal_carbs_percantage < 0 || goal_protein_percantage < 0 || goal_fat_percantage < 0 || goal_carbs_percantage > 100 || goal_protein_percantage > 100 || goal_fat_percantage > 100) {
-      Swal.fire({
-        icon: 'warning',
-        text: '碳水化合物、蛋白質與脂肪之比例應為正整數'
-      })
-      return
-    } else if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) {
-      Swal.fire({
-        icon: 'warning',
-        text: '碳水化合物、蛋白質與脂肪之比例加總應為100(%)'
-      })
-      return
-    } else if (goal_calories < 0.5 * TDEE) {
-      Swal.fire({
-        icon: 'warning',
-        text: '一日熱量攝取量過低，請調整！'
-      })
-      return
-    } else if (goal_calories > 2 * TDEE) {
-      Swal.fire({
-        icon: 'warning',
-        text: '一日熱量攝取量過高，請調整！'
-      })
-      return
-    }
+      if (!goal_carbs_percantage || !goal_protein_percantage || !goal_fat_percantage) {
+        Swal.fire({
+          icon: 'warning',
+          text: '碳水化合物、蛋白質與脂肪之資訊不完整或不正確'
+        })
+        return
+      } else if (goal_carbs_percantage < 0 || goal_protein_percantage < 0 || goal_fat_percantage < 0 || goal_carbs_percantage > 100 || goal_protein_percantage > 100 || goal_fat_percantage > 100) {
+        Swal.fire({
+          icon: 'warning',
+          text: '碳水化合物、蛋白質與脂肪之比例應為正整數'
+        })
+        return
+      } else if ((goal_carbs_percantage + goal_protein_percantage + goal_fat_percantage) !== 100) {
+        Swal.fire({
+          icon: 'warning',
+          text: '碳水化合物、蛋白質與脂肪之比例加總應為100(%)'
+        })
+        return
+      } else if (goal_calories < 0.5 * TDEE) {
+        Swal.fire({
+          icon: 'warning',
+          text: '一日熱量攝取量過低，請調整！'
+        })
+        return
+      } else if (goal_calories > 2 * TDEE) {
+        Swal.fire({
+          icon: 'warning',
+          text: '一日熱量攝取量過高，請調整！'
+        })
+        return
+      }
 
-    const data = await axios.patch(`/api/1.0/user/profile/nutritiontarget/${userId}`, { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage }, { headers: { Authorization: `Bearer ${accessToken}` } })
-    if (data.data.message) {
-      Swal.fire({
-        icon: 'success',
-        text: '設定成功'
-      }).then(() => {
-        window.location.href = '/profile.html'
-      })
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        text: '請再試一次'
-      })
-    }
+      const data = await axios.patch(`/api/1.0/user/profile/nutritiontarget/${userId}`, { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage }, { headers: { Authorization: `Bearer ${accessToken}` } })
+      if (data.data.message) {
+        Swal.fire({
+          icon: 'success',
+          text: '設定成功'
+        }).then(() => {
+          window.location.href = '/profile.html'
+        })
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          text: '請再試一次'
+        })
+      }
+    })
   })
 }

@@ -20,10 +20,11 @@ const addMealRecord = async (req, res) => {
   const userDetail = await User.getUserDetail(email)
   const userId = userDetail[0].id
   const mealRecords = await Food.getUserRecord(userId, date)
+  // console.log('mealRecords: ', mealRecords);
   // console.log(userId, foodId, meal, servingAmount, date)
   try {
     /* 若當天飲食紀錄已有此餐點 -> 調整份數；若無則建立 */
-    const findItem = mealRecords.filter(e => e.meal === meal).filter(e => e.food_id === foodId)
+    const findItem = mealRecords.mealRecords.filter(e => e.meal === meal).filter(e => e.food_id === foodId)
     // console.log('findItem', findItem)
     if (findItem.length !== 0) {
       servingAmount += parseFloat((findItem[0].serving_amount))
@@ -155,6 +156,7 @@ const createFoodDetail = async (req, res) => {
     res.json({ message: 'Food created successfully.' })
   } catch (err) {
     console.error(err)
+    // FIXME: error or errorMessage統一用法
     res.json({ error: 'Food cannot be created.' })
   }
 }
@@ -182,6 +184,7 @@ const generateSingleMeal = async (req, res) => {
     const len = recommendMealList.length
     const recommendMeal = []
     switch (target) {
+      // FIXME: 計算份數拆成fn
       case 'calories': {
         /* 若目標為calories，先將C P F分別變成三個array再從中抓取random index作為推薦項目 */
         const carbsList = recommendMealList.filter(
@@ -191,7 +194,7 @@ const generateSingleMeal = async (req, res) => {
         /* 依目標碳水比例乘以總熱量，計算碳水應攝取幾份 */
         const carbsCalories = Math.round(value * userCarbsPercentage * 0.9) // 留 10% buffer
         const servingAmountCarbs = Math.round(carbsCalories / carbs.calories * 100)
-        console.log('carbsCalories', carbsCalories, 'servingAmountCarbs', servingAmountCarbs)
+        // console.log('carbsCalories', carbsCalories, 'servingAmountCarbs', servingAmountCarbs)
         carbs.per_serving = servingAmountCarbs
         carbs.calories = carbsCalories
         carbs.carbs = Math.round(carbs.carbs * (servingAmountCarbs / 100))
@@ -318,7 +321,7 @@ const generateMultipleMeals = async (req, res) => {
   console.log('userInfo', userId, goalCalories, goalCarbs, goalProtein, goalFat)
 
   const mealRecords = await Food.getUserRecord(userId, date)
-  if (mealRecords.length !== 0) {
+  if (mealRecords.mealRecords.length !== 0) {
     return res.json({ errorMessage: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！' })
   } else {
     const multipleMealsList = await Food.getRecommendMultipleMeals(userId)
@@ -566,6 +569,7 @@ const getUserRecommendation = async (req, res) => {
 }
 
 const updateFoodPreference = async (req, res) => {
+  // TODO: 不用try catch>> wrapasync
   try {
     const { email } = req.user
     const userDetail = await User.getUserDetail(email)

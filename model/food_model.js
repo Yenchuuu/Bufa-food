@@ -1,5 +1,6 @@
 const db = require('../utils/mysqlconf')
 
+// FIXME: try catch起來; catch err 可以用throw new Error(err) 並在app.js的500那邊接起來並印出來（可以加上時間）
 const createMealRecord = async (userId, foodId, meal, servingAmount, date) => {
   const [result] = await db.execute('INSERT INTO `user_meal` (user_id, food_id, meal, serving_amount, date_record) VALUES (?, ?, ?, ?, ?)', [userId, foodId, meal, servingAmount, date])
   return result
@@ -20,7 +21,10 @@ const getUserRecord = async (userId, date) => {
   try {
     await conn.query('START TRANSACTION')
     const [mealRecords] = await conn.execute(
-      'SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount, ROUND(food.per_serving * serving_amount, 0) AS amountTotal, ROUND(food.calories * serving_amount, 0) AS calories, ROUND(food.carbs * serving_amount, 0) AS carbs, ROUND(food.protein * serving_amount, 0) AS protein, ROUND(food.fat * serving_amount, 0) AS fat FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?);',
+      `SELECT user_meal.id AS record_id, user_meal.meal, food.id AS food_id, food.name, user_meal.serving_amount,
+      ROUND(food.per_serving * serving_amount, 0) AS amountTotal, ROUND(food.calories * serving_amount, 0) AS calories, ROUND(food.carbs * serving_amount, 0) AS carbs, ROUND(food.protein * serving_amount, 0) AS protein, ROUND(food.fat * serving_amount, 0) AS fat 
+      FROM \`food\` INNER JOIN \`user_meal\` ON user_meal.food_id = food.id 
+      WHERE user_id = (?) AND date_record = (?);`,
       [userId, date])
     const [recordSummary] = await conn.execute('SELECT user_meal.meal, ROUND(SUM(food.calories * serving_amount), 0) AS caloriesTotal, ROUND(SUM(food.carbs * serving_amount), 0) AS carbsTotal, ROUND(SUM(food.protein * serving_amount), 0) AS proteinTotal, ROUND(SUM(food.fat * serving_amount), 0) AS fatTotal FROM `food` INNER JOIN `user_meal` ON user_meal.food_id = food.id WHERE user_id = (?) AND date_record = (?) GROUP BY user_meal.meal;', [userId, date])
     // console.log('mealRecords', mealRecords)
@@ -176,6 +180,7 @@ const getFoodNutritionInfo = async (recommendFood) => {
   return foodNutritionInfo
 }
 
+// FIXME: 邏輯判斷拆去controller
 const updateFoodPreference = async (userId, foodId, clickedBtn) => {
   const conn = await db.getConnection()
   try {
