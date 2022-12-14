@@ -1,5 +1,3 @@
-// FIXME: jsGrid更新時總計不會跟著更新
-
 const accessToken = window.localStorage.getItem('accessToken')
 if (!accessToken) {
   Swal.fire({
