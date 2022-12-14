@@ -117,7 +117,7 @@ const createFoodDetail = async (req, res) => {
   const { id: userId } = req.user
   let { name, calories, carbs, protein, fat, perServing } = req.body
 
-  if (!name || !calories || !carbs || !protein || !fat || !perServing || !Number.isInteger(calories, { min: 1 }) || !Number.isInteger(perServing, { min: 1 }) || !Number.isInteger(carbs, { min: 0 }) || !Number.isInteger(protein, { min: 0 }) || !Number.isInteger(fat, { min: 0 }) || (carbs + protein + fat) > perServing || (carbs * 4 + protein * 4 + fat * 9) > calories || calories > perServing * 9) {
+  if (!name || !calories || carbs === null || protein === null || fat === null || !perServing || !Number.isInteger(calories) || !Number.isInteger(perServing) || !Number.isInteger(carbs) || !Number.isInteger(protein) || !Number.isInteger(fat) || (carbs + protein + fat) > perServing || (carbs * 4 + protein * 4 + fat * 9) > calories || calories > perServing * 9) {
     return res.status(400).json({ errorMessage: 'Incorrect format.' })
   }
 

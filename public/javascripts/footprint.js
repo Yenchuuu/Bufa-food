@@ -49,8 +49,7 @@ if (!accessToken) {
     const weekVal = $('#weekPicker').val()
     const year = weekVal.split('-')[0]
     const week = parseInt(weekVal.split('-')[1].split('W')[1])
-    // FIXME: 不知道為什麼2022年的週數都會少一，但+1週後2023的日期又會錯
-    const dayInChosenWeek = moment().year(year).week((week + 1)).format('YYYY-MM-DD')
+    const dayInChosenWeek = moment().year(year).isoWeek(week).format('YYYY-MM-DD')
     /* 選取某週取到的日期會因為今天星期幾而有所不同，所以先辨識出今天星期幾，再分別推斷星期一與星期日作為start and end date */
     const dayOfweek = moment(dayInChosenWeek).day()
     const startDate = moment(dayInChosenWeek).add(-(dayOfweek - 1), 'day').format('YYYY-MM-DD')
