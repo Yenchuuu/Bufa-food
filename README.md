@@ -6,15 +6,15 @@ Aim to solve the problem which people usually don’t know what to eat, how to e
 
 ### Website
 
-[https://bufafood.click/](https://bufafood.click/)
+<a href="https://bufafood.click/" target="_blank">BUDA FOOD</a>
 
-Recommend screen width: 1470px
+- Recommend screen width: 1470px
 
-Test account **(Please login the test account to access the user-only function, such as meal diary and food recommendation.
+- Test account **(Please login the test account to access the user-only function, such as meal diary and food recommendation.
 )**
 
-> Account: bufafood@test.com  
-Password: test
+    > Account: bufafood@test.com  
+    Password: test1234
 
 
 ### Features
