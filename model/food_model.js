@@ -1,4 +1,5 @@
 const db = require('../utils/mysqlconf')
+const { calculateUserPreference } = require('../service/service')
 
 const createMealRecord = async (userId, foodId, meal, servingAmount, date) => {
   try {
@@ -223,109 +224,38 @@ const getFoodNutritionInfo = async (recommendFood) => {
   }
 }
 
-// FIXME: 邏輯判斷拆去controller
 const updateFoodPreference = async (userId, foodId, clickedBtn) => {
   const conn = await db.getConnection()
   try {
     await conn.query('START TRANSACTION')
-    const [getUserPreference] = await conn.execute('SELECT * FROM `user_preference` WHERE food_id = ? AND user_id = ?', [foodId, userId])
-    // console.log('getUserPreference', getUserPreference)
-
-    // const score = { collection: 16, likeIt: 8, createdIt: 4, dislikeIt: 2, exclusion: 1 }
-    let preferenceScore
-
-    const condition = { sql: '', binding: [] }
-    if (clickedBtn === 'add_collection') {
-      /* 如果尚未對此食物表達過喜好，則建立 */
-      if (getUserPreference.length === 0) {
-        preferenceScore = 16
-        const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 1, 0, 0, 0, 0, foodId, userId])
-        await conn.query('COMMIT')
-        return result
-      }
-      if (getUserPreference[0].collection === 1) {
-        preferenceScore = getUserPreference[0].preference - 16
-        condition.sql = 'SET preference = ?, collection = 0 WHERE food_id = ? AND user_id = ?;'
-      } else {
-        preferenceScore = getUserPreference[0].preference + 16
-        condition.sql = 'SET preference = ?, collection = 1 WHERE food_id = ? AND user_id = ?;'
-      }
-    } else if (clickedBtn === 'thumb_up') {
-      if (getUserPreference.length === 0) {
-        preferenceScore = 8
-        const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 1, 0, 0, 0, foodId, userId])
-        await conn.query('COMMIT')
-        return result
-      }
-      if (getUserPreference[0].likeIt === 1) {
-        preferenceScore = getUserPreference[0].preference - 8
-        condition.sql = 'SET preference = ?, likeIt = 0 WHERE food_id = ? AND user_id = ?;'
-      } else if (getUserPreference[0].likeIt === 0 && getUserPreference[0].dislikeIt === 1 && getUserPreference[0].exclusion === 1) {
-        /* 因為喜歡、不喜歡、不吃是獨立事件，第一項與後兩項只能有一個是1 */
-        preferenceScore = getUserPreference[0].preference + 5
-        condition.sql = 'SET preference = ?, likeIt = 1, dislike = 0, exclusion = 0 WHERE food_id = ? AND user_id = ?;'
-      } else if (getUserPreference[0].likeIt === 0 && getUserPreference[0].dislikeIt === 1) {
-        /* 因為喜歡、不喜歡、不吃是獨立事件，第一項與後兩項只能有一個是1 */
-        preferenceScore = getUserPreference[0].preference + 6
-        condition.sql = 'SET preference = ?, likeIt = 1, dislikeIt = 0 WHERE food_id = ? AND user_id = ?;'
-      } else if (getUserPreference[0].likeIt === 0 && getUserPreference[0].exclusion === 1) {
-        /* 因為喜歡、不喜歡、不吃是獨立事件，第一項與後兩項只能有一個是1 */
-        preferenceScore = getUserPreference[0].preference + 7
-        condition.sql = 'SET preference = ?, likeIt = 1, exclusion = 0 WHERE food_id = ? AND user_id = ?;'
-      } else {
-        preferenceScore = getUserPreference[0].preference + 8
-        condition.sql = 'SET preference = ?, likeIt = 1 WHERE food_id = ? AND user_id = ?;'
-      }
-    } else if (clickedBtn === 'thumb_down') {
-      if (getUserPreference.length === 0) {
-        preferenceScore = 2
-        const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 0, 0, 1, 0, foodId, userId])
-        await conn.query('COMMIT')
-        return result
-      }
-      if (getUserPreference[0].dislikeIt === 1) {
-        preferenceScore = getUserPreference[0].preference - 2
-        condition.sql = 'SET preference = ?, dislikeIt = 0 WHERE food_id = ? AND user_id = ?;'
-      } else if (getUserPreference[0].dislikeIt === 0 && getUserPreference[0].likeIt === 1) {
-        /* 因為喜歡、不喜歡是獨立事件，兩者只能有一個是1 */
-        preferenceScore = getUserPreference[0].preference - 6
-        condition.sql = 'SET preference = ?, dislikeIt = 1, likeIt = 0 WHERE food_id = ? AND user_id = ?;'
-      } else {
-        preferenceScore = getUserPreference[0].preference + 2
-        condition.sql = 'SET preference = ?, dislikeIt = 1 WHERE food_id = ? AND user_id = ?;'
-      }
-    } else if (clickedBtn === 'add_exclusiion') {
-      if (getUserPreference.length === 0) {
-        preferenceScore = 1
-        const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, 0, 0, 0, 0, 1, foodId, userId])
-        await conn.query('COMMIT')
-        return result
-      }
-      if (getUserPreference[0].exclusion === 1) {
-        preferenceScore = getUserPreference[0].preference - 1
-        condition.sql = 'SET preference = ?, exclusion = 0 WHERE food_id = ? AND user_id = ?;'
-      } else if (getUserPreference[0].exclusion === 0 && getUserPreference[0].likeIt === 1) {
-        /* 因為喜歡、不吃是獨立事件，兩者只能有一個是1 */
-        preferenceScore = getUserPreference[0].preference - 7
-        condition.sql = 'SET preference = ?, exclusion = 1, likeIt = 0 WHERE food_id = ? AND user_id = ?;'
-      } else {
-        preferenceScore = getUserPreference[0].preference - 1
-        condition.sql = 'SET preference = ?, exclusion = 1 WHERE food_id = ? AND user_id = ?;'
-      }
-    }
-    condition.binding = [preferenceScore, foodId, userId]
-    // console.log('preferenceScore', preferenceScore)
-    const recommendMealQuery =
-      'UPDATE `user_preference` ' + condition.sql
-    const [result] = await db.query(recommendMealQuery, condition.binding)
-    await conn.query('COMMIT')
-    return result
+    calculateUserPreference(conn, userId, foodId, clickedBtn)
   } catch (err) {
     await conn.query('ROLLBACK')
     throw new Error(err)
   } finally {
     await conn.release()
   }
+}
+
+const getUserPreference = async (conn, foodId, userId) => {
+  const [result] = await conn.execute('SELECT * FROM `user_preference` WHERE food_id = ? AND user_id = ?', [foodId, userId])
+  if (result.length === 1) {
+    return result[0]
+  } else {
+    return null
+  }
+}
+
+const insertUserPreference = async (conn, userId, foodId, preferenceScore, collection, likeIt, createdIt, dislikeIt, exclusion) => {
+  const [result] = await conn.query('INSERT INTO `user_preference` (preference, collection, likeIt, createdIt, dislikeIt, exclusion, food_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [preferenceScore, collection, likeIt, createdIt, dislikeIt, exclusion, foodId, userId])
+  await conn.query('COMMIT')
+  return result
+}
+
+const updateUserPreference = async (conn, userId, foodId, preferenceScore, collection, likeIt, createdIt, dislikeIt, exclusion) => {
+  const [result] = await conn.query('UPDATE `user_preference` SET preference = ?, collection = ?, likeIt = ?, createdIt = ?, dislikeIt = ?, exclusion = ? WHERE food_id = ? AND user_id = ?;', [preferenceScore, collection, likeIt, createdIt, dislikeIt, exclusion, foodId, userId])
+  await conn.query('COMMIT')
+  return result
 }
 
 module.exports = {
@@ -348,3 +278,7 @@ module.exports = {
   getFoodNutritionInfo,
   updateFoodPreference
 }
+
+exports.getUserPreference = getUserPreference
+exports.insertUserPreference = insertUserPreference
+exports.updateUserPreference = updateUserPreference

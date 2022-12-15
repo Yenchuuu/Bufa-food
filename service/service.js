@@ -1,3 +1,5 @@
+const model = require('../model/food_model')
+
 function calculateNutritionOfServingAmount(nutrition, servingAmout, perServing) {
   nutrition.per_serving = servingAmout
   nutrition.calories = Math.round(nutrition.calories * (servingAmout / perServing))
@@ -85,4 +87,87 @@ function calculateDefaultNutrition(caloriesPercentage, carbsPercentage, proteinP
   return { goalCalories, goalCarbs, goalProtein, goalFat }
 }
 
-module.exports = { calculateNutritionOfServingAmount, pushRecord, calculateBMR, calculateTDEE, calculateDefaultNutrition, calculateDefaultNutritionByDietGoal }
+async function calculateUserPreference(conn, userId, foodId, clickedBtn) {
+  const userPreference = await model.getUserPreference(conn, foodId, userId)
+
+  const score = { collection: 16, likeIt: 8, createdIt: 4, dislikeIt: 2, exclusion: 1 }
+  let preferenceScore
+
+  if (clickedBtn === 'add_collection') {
+    /* 如果尚未對此食物表達過喜好，則建立 */
+    if (userPreference === null) {
+      preferenceScore = score.collection
+      model.insertUserPreference(conn, userId, foodId, preferenceScore, 1, 0, 0, 0, 0)
+      return
+    }
+    if (userPreference.collection === 1) {
+      preferenceScore = userPreference.preference - score.collection
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, 0, userPreference.likeIt, userPreference.createdIt, userPreference.dislikeIt, userPreference.exclusion)
+    } else {
+      preferenceScore = userPreference.preference + score.collection
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, 1, userPreference.likeIt, userPreference.createdIt, userPreference.dislikeIt, userPreference.exclusion)
+    }
+  } else if (clickedBtn === 'thumb_up') {
+    if (userPreference === null) {
+      preferenceScore = score.likeIt
+      model.insertUserPreference(conn, userId, foodId, preferenceScore, 0, 1, 0, 0, 0)
+      return
+    }
+    if (userPreference.likeIt === 1) {
+      preferenceScore = userPreference.preference - score.likeIt
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, 0, userPreference.createdIt, userPreference.dislikeIt, userPreference.exclusion)
+    } else if (userPreference.likeIt === 0 && userPreference.dislikeIt === 1 && userPreference.exclusion === 1) {
+      /* 因為喜歡、不喜歡、不吃是獨立事件，第一項與後兩項只能有一個是1 */
+      preferenceScore = userPreference.preference + (score.likeIt - score.dislikeIt - score.exclusion)
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, 1, userPreference.createdIt, 0, 0)
+    } else if (userPreference.likeIt === 0 && userPreference.dislikeIt === 1) {
+      /* 因為喜歡、不喜歡、不吃是獨立事件，第一項與後兩項只能有一個是1 */
+      preferenceScore = userPreference.preference + (score.likeIt - score.dislikeIt)
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, 1, userPreference.createdIt, 0, userPreference.exclusion)
+
+    } else if (userPreference.likeIt === 0 && userPreference.exclusion === 1) {
+      /* 因為喜歡、不喜歡、不吃是獨立事件，第一項與後兩項只能有一個是1 */
+      preferenceScore = userPreference.preference + (score.likeIt - score.exclusion)
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, 1, userPreference.createdIt, userPreference.dislikeIt, 0)
+    } else {
+      preferenceScore = userPreference.preference + score.likeIt
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, 1, userPreference.createdIt, userPreference.dislikeIt, userPreference.exclusion)
+    }
+  } else if (clickedBtn === 'thumb_down') {
+    if (userPreference === null) {
+      preferenceScore = score.dislikeIt
+      model.insertUserPreference(conn, userId, foodId, preferenceScore, 0, 0, 0, 1, 0)
+      return
+    }
+    if (userPreference.dislikeIt === 1) {
+      preferenceScore = userPreference.preference - score.dislikeIt
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, userPreference.likeIt, userPreference.createdIt, 0, userPreference.exclusion)
+    } else if (userPreference.dislikeIt === 0 && userPreference.likeIt === 1) {
+      /* 因為喜歡、不喜歡是獨立事件，兩者只能有一個是1 */
+      preferenceScore = userPreference.preference - (score.likeIt - score.dislikeIt)
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, 0, userPreference.createdIt, 1, userPreference.exclusion)
+    } else {
+      preferenceScore = userPreference.preference + score.dislikeIt
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, userPreference.likeIt, userPreference.createdIt, 1, userPreference.exclusion)
+    }
+  } else if (clickedBtn === 'add_exclusiion') {
+    if (userPreference === null) {
+      preferenceScore = score.exclusion
+      model.insertUserPreference(conn, userId, foodId, preferenceScore, 0, 0, 0, 0, 1)
+      return
+    }
+    if (userPreference.exclusion === 1) {
+      preferenceScore = userPreference.preference - score.exclusion
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, userPreference.likeIt, userPreference.createdIt, userPreference.dislikeIt, 0)
+    } else if (userPreference.exclusion === 0 && userPreference.likeIt === 1) {
+      /* 因為喜歡、不吃是獨立事件，兩者只能有一個是1 */
+      preferenceScore = userPreference.preference - (score.likeIt - score.exclusion)
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, 0, userPreference.createdIt, userPreference.dislikeIt, 1)
+    } else {
+      preferenceScore = userPreference.preference + score.exclusion
+      model.updateUserPreference(conn, userId, foodId, preferenceScore, userPreference.collection, userPreference.likeIt, userPreference.createdIt, userPreference.dislikeIt, 1)
+    }
+  }
+}
+
+module.exports = { calculateNutritionOfServingAmount, pushRecord, calculateBMR, calculateTDEE, calculateDefaultNutrition, calculateDefaultNutritionByDietGoal, calculateUserPreference }
