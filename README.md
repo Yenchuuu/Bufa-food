@@ -4,11 +4,11 @@
 
 Aim to solve the problem which people usually don’t know what to eat, how to eat healthy and  have a balanced diet in daily basis. Now people can easily get nutritious meal plans recommended by BUFA FOOD once setting up the body goal and information.
 
-### Website
-
-<a target="_blank" href="https://bufafood.click/">BUDA FOOD</a>
+### Website 
 
 - Recommend screen width: 1470px
+
+- URL: https://bufafood.click/
 
 - Test account **(Please login the test account to access the user-only function, such as meal diary and food recommendation.
 )**
