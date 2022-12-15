@@ -6,7 +6,7 @@ Aim to solve the problem which people usually don’t know what to eat, how to e
 
 ### Website
 
-<a href="https://bufafood.click/" target="_blank">BUDA FOOD</a>
+<a target="_blank" href="https://bufafood.click/">BUDA FOOD</a>
 
 - Recommend screen width: 1470px
 
