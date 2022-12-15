@@ -335,14 +335,8 @@ const getDailyGoal = async (req, res) => {
     pushDailyGoals(dayGoal)
   })
 
-  const dailyCaloriesArray = dailyRecordsItem.calories
-  const dailyCarbsArray = dailyRecordsItem.carbs
-  const dailyProteinArray = dailyRecordsItem.protein
-  const dailyFatArray = dailyRecordsItem.fat
-  const goalCaloriesArray = goalRecordsItem.calories
-  const goalCarbsArray = goalRecordsItem.carbs
-  const goalProteinArray = goalRecordsItem.protein
-  const goalFatArray = goalRecordsItem.fat
+  const { calories: dailyCaloriesArray, carbs: dailyCarbsArray, protein: dailyProteinArray, fat: dailyFatArray } = dailyRecordsItem
+  const { calories: goalCaloriesArray, carbs: goalCarbsArray, protein: goalProteinArray, fat: goalFatArray } = goalRecordsItem
 
   res.status(200).json({ dailyCaloriesArray, dailyCarbsArray, dailyProteinArray, dailyFatArray, goalCaloriesArray, goalCarbsArray, goalProteinArray, goalFatArray })
 }
