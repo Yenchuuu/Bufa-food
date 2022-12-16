@@ -1,11 +1,12 @@
 const express = require('express')
-const { object } = require('joi')
 const request = require('supertest')
 const Food = require('../controller/food_controller')
+const User = require('../controller/user_controller')
 const app = express()
 app.use('/food/search', Food.getFoodFromKeyword)
 app.use('/food/trend', Food.getFoodTrend)
 app.use('/food/diary', Food.getDiaryRecord)
+app.use('/user/nativesignin', User.nativeSignIn)
 
 /* search page */
 describe('test getFoodFromKeyword', () => {
@@ -35,30 +36,3 @@ describe('test getFoodTrend', () => {
     )
   })
 })
-
-// FIXME: 沒辦法讀到authentication?
-// describe('test getFoodTrend', () => {
-//   test('should response 5 items of trend food', async () => {
-//     const userId = 20
-//     const date = '2022-11-19'
-//     const res = await request(app).get('/food/diary').query({ date })
-//     expect(res.body.mealRecords).toEqual(
-//       expect.arrayContaining([
-//         expect.objectContaining(
-//           {
-//             record_id: expect.any(Number),
-//             meal: expect.any(Number),
-//             food_id: expect.any(Number),
-//             name: expect.any(String),
-//             serving_amount: expect.any(String),
-//             amountTotal: expect.any(String),
-//             calories: expect.any(String),
-//             carbs: expect.any(String),
-//             protein: expect.any(String),
-//             fat: expect.any(String)
-//           }
-//         )
-//       ])
-//     )
-//   })
-// })
