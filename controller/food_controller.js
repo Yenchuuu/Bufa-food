@@ -2,12 +2,9 @@ const Food = require('../model/food_model')
 const User = require('../model/user_model')
 const Euc = require('../utils/euclidean_distance')
 const Cache = require('../utils/cache')
-const validator = require('validator')
 const util = require('../utils/util')
 const service = require('../service/service')
 const moment = require('moment')
-const { number } = require('joi')
-// FIXME: date是倫敦時間
 const CACHE_TRENDFOOD_KEY = 'cacheTrendFood'
 
 const addMealRecord = async (req, res) => {
@@ -405,8 +402,8 @@ const getFoodTrend = async (req, res) => {
     console.error(`Get trend food cache error: ${err}`)
   }
   if (trendFood) {
-    console.log('Get trend food from cache')
-    res.json(JSON.parse(trendFood))
+    // console.log('Get trend food from cache')
+    res.status(200).json(JSON.parse(trendFood))
     return
   }
 
@@ -423,7 +420,7 @@ const getFoodTrend = async (req, res) => {
   } catch (err) {
     console.error(`Set trend food cache error: ${err}`)
   }
-  res.json(trendFood)
+  res.status(200).json(trendFood)
 }
 
 const getUserRecommendation = async (req, res) => {
