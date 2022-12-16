@@ -47,8 +47,9 @@ async function getFoodDetail(foodId) {
       colors: ['#607D8B', '#9E9E9E', '#EF9A9A']
     }
   }]
+  const layout = { showlegend: false }
   pie = document.querySelector('#nutritionPie')
-  Plotly.newPlot(pie, pieData)
+  Plotly.newPlot(pie, pieData, layout, { displaylogo: false })
 }
 
 $(document).ready(async function () {
