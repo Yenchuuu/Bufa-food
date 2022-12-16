@@ -1,10 +1,9 @@
 require('dotenv').config()
 const express = require('express')
 const path = require('path')
-const axios = require('axios')
-const moment = require('moment')
 const Cache = require('./utils/cache')
-const { PORT, API_VERSION } = process.env
+const { PORT, API_VERSION, NODE_ENV, PORT_TEST } = process.env
+const port = NODE_ENV == 'test' ? PORT_TEST : PORT
 
 const app = express()
 
@@ -31,9 +30,11 @@ app.use(function (err, req, res, next) {
   res.status(500).send('Something broke!')
 })
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-  Cache.connect()
-})
+if (NODE_ENV === 'development') {
+  app.listen(port, async () => {
+    console.log(`Listening on port: ${port}`)
+    Cache.connect()
+  })
+}
 
 module.exports = app

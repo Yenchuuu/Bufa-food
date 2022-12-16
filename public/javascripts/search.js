@@ -183,23 +183,23 @@ $('#submit_foodInfo').click(async function () {
     return
   }
 
-  const data = await axios.post('/api/1.0/food/detail', { name, calories, carbs, protein, fat, perServing }, { headers: { Authorization: `Bearer ${accessToken}` } })
-  // console.log('data: ', data)
-  if (data.data.error) {
-    Swal.fire({
-      icon: 'warning',
-      text: '建立失敗，請再試一次'
-    })
-  } else if (data.data.message) {
+  try {
+    const data = await axios.post('/api/1.0/food/detail', { name, calories, carbs, protein, fat, perServing }, { headers: { Authorization: `Bearer ${accessToken}` } })
+    // console.log('data: ', data)
     Swal.fire({
       icon: 'success',
       title: '建立成功',
       footer: '<a href="/mine.html" class="text-secondary">前往我的食物</a>'
+    })
+  } catch {
+    Swal.fire({
+      icon: 'warning',
+      text: '建立失敗，請再試一次'
     })
   }
 })
 
 $('#nav-profile-change').click(() => {
   localStorage.clear()
-  window.location.href = '/index.html'
+  window.location.href = '/'
 })

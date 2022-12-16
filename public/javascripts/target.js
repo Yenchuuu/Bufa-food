@@ -4,14 +4,14 @@ if (!accessToken) {
   Swal.fire({
     icon: 'warning',
     text: '請先登入'
-  }).then((result) => { window.location.href = '/index.html' })
+  }).then((result) => { window.location.href = '/login.html' })
 } else {
   $('#nav-profile-change').children().hide()
   $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
 
   $('#nav-profile-change').click(() => {
     localStorage.clear()
-    window.location.href = '/index.html'
+    window.location.href = '/'
   })
 
   async function checkUserInfo() {
@@ -144,23 +144,22 @@ if (!accessToken) {
           icon: 'warning',
           text: '資訊輸入不完全'
         })
-      } else {
+      }
+
+      try {
         const data = await axios.post('/api/1.0/user/target', { birthday, height, weight, gender, activity_level, TDEE, diet_goal, goal_carbs, goal_protein, goal_fat, goal_calories }, { headers: { Authorization: `Bearer ${accessToken}` } })
-        // console.log('data: ', data)
-        if (data.data.error) {
-          Swal.fire({
-            icon: 'warning',
-            text: '資訊格式有誤'
-          })
-        } else if (data.data.message) {
-          Swal.fire({
-            icon: 'success',
-            title: '設定成功',
-            footer: '<a href="/diary.html" class="text-secondary">前往紀錄飲食</a>'
-          }).then(()=>{
-            window.location.href = '/diary.html'
-          })
-        }
+        Swal.fire({
+          icon: 'success',
+          title: '設定成功',
+          footer: '<a href="/diary.html" class="text-secondary">前往紀錄飲食</a>'
+        }).then(() => {
+          window.location.href = '/diary.html'
+        })
+      } catch (err) {
+        Swal.fire({
+          icon: 'warning',
+          text: '資訊格式有誤'
+        })
       }
     })
   }

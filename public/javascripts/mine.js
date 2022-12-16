@@ -3,7 +3,7 @@ if (!accessToken) {
   Swal.fire({
     icon: 'warning',
     text: '請先登入'
-  }).then((result) => { window.location.href = '/index.html' })
+  }).then((result) => { window.location.href = '/login.html' })
   //  return
 } else {
   $('#nav-profile-change').children().hide()
@@ -22,7 +22,7 @@ if (!accessToken) {
 
     /* 用for of 遍歷array */
     for (const foodObject of collectionRecord) {
-      console.log('foodObject: ', foodObject);
+      // console.log('foodObject: ', foodObject);
       const newDom = $('.collection-card').first().clone()
       newDom.children('.mine-card-body')
       newDom.children('.mine-card-body').children('.food-link').attr('href', `/detail.html?id=${foodObject.food_id}`)
@@ -54,5 +54,5 @@ if (!accessToken) {
 
 $('#nav-profile-change').click(() => {
   localStorage.clear()
-  window.location.href = '/index.html'
+  window.location.href = '/'
 })

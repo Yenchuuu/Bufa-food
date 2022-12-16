@@ -94,7 +94,7 @@ th, td {
 .pop-window{
   display:none;
   border-radius: 1em;
-  width:500px;
+  width:800px;
   height:700px;
   position:fixed;
   top:50%;
@@ -102,8 +102,9 @@ th, td {
   background:ghostwhite;
   z-index:3;
   left:50%;
-  margin-left:-250px;
-  padding: 10px 80px 30px 150px;
+  margin-left:-350px;
+  padding: 10px 50px 30px 50px;
+  overflow-y: scroll;
 }
 
 .pop-content{
@@ -112,4 +113,27 @@ th, td {
   margin: 20px 0;
   justify-content: center;
   align-content: center;
+}
+
+#showDate:hover, #datepicker:hover, 
+#inputGroupSelectMeal:hover,
+#inputGroupSelectTarget:hover{
+  cursor: pointer; 
+}
+
+.pop-content img{
+  margin-bottom: 20px;
+}
+
+#hint{
+  width: 25px;
+  margin: 0 10px;
+  cursor: pointer; 
+  -webkit-transition-property: all; 
+  -webkit-transition-duration: 0.3s; 
+  -webkit-transition-timing-function: ease; 
+}
+
+#hint:hover{
+  transform: scale(2); 
 }

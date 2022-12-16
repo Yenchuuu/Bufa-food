@@ -7,14 +7,14 @@ if (!accessToken) {
   Swal.fire({
     icon: 'warning',
     text: '請先登入'
-  }).then((result) => { window.location.href = '/index.html' })
+  }).then((result) => { window.location.href = '/login.html' })
 } else {
   $('#nav-profile-change').children().hide()
   $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
 
   $('#nav-profile-change').click(() => {
     localStorage.clear()
-    window.location.href = '/index.html'
+    window.location.href = '/'
   })
 
   $(document).ready(async function () {
@@ -92,28 +92,6 @@ if (!accessToken) {
       }
     })
   })
-
-  // async function upload() {
-  //   // TODO: 待理解，consloe.log 出來的是 FormData{ }
-  //   const formData = new FormData(form)
-  //   // console.log('formData: ', formData)
-  //   const data = await axios.patch(`/api/1.0/user/profile/image/${userId}`, formData, { headers: { Authorization: `Bearer ${accessToken}` } })
-  //   if (data.data.message) {
-  //     Swal.fire({
-  //       icon: 'seccess',
-  //       text: '上傳成功'
-  //     }).then(() => {
-  //       window.location.href = 'profile.html'
-  //     })
-  //   } else {
-  //     Swal.fire({
-  //       icon: 'error',
-  //       text: '上傳失敗，請再試一次'
-  //     }).then(() => {
-  //       window.location.href = 'profile.html'
-  //     })
-  //   }
-  // }
 
   function checkUsername() {
     const reg = new RegExp('^[A-Za-z0-9\u4e00-\u9fa5]+$')
@@ -239,16 +217,16 @@ if (!accessToken) {
         })
         return
       }
+      try {
+        const data = await axios.patch(`/api/1.0/user/profile/nutritiontarget/${userId}`, { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage }, { headers: { Authorization: `Bearer ${accessToken}` } })
 
-      const data = await axios.patch(`/api/1.0/user/profile/nutritiontarget/${userId}`, { goal_calories, goal_carbs_percantage, goal_protein_percantage, goal_fat_percantage }, { headers: { Authorization: `Bearer ${accessToken}` } })
-      if (data.data.message) {
         Swal.fire({
           icon: 'success',
           text: '設定成功'
         }).then(() => {
           window.location.href = '/profile.html'
         })
-      } else {
+      } catch (err) {
         Swal.fire({
           icon: 'warning',
           text: '請再試一次'
