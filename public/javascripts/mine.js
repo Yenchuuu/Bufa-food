@@ -3,7 +3,7 @@ if (!accessToken) {
   Swal.fire({
     icon: 'warning',
     text: '請先登入'
-  }).then((result) => { window.location.href = '/index.html' })
+  }).then((result) => { window.location.href = '/login.html' })
   //  return
 } else {
   $('#nav-profile-change').children().hide()
@@ -54,5 +54,5 @@ if (!accessToken) {
 
 $('#nav-profile-change').click(() => {
   localStorage.clear()
-  window.location.href = '/index.html'
+  window.location.href = '/'
 })

@@ -4,14 +4,14 @@ if (!accessToken) {
   Swal.fire({
     icon: 'warning',
     text: '請先登入'
-  }).then((result) => { window.location.href = '/index.html' })
+  }).then((result) => { window.location.href = '/login.html' })
 } else {
   $('#nav-profile-change').children().hide()
   $('#nav-profile-change').append('<a class="nav-link active" href="#" id="logout-btn">登出</a>')
 
   $('#nav-profile-change').click(() => {
     localStorage.clear()
-    window.location.href = '/index.html'
+    window.location.href = '/'
   })
 
   async function checkUserInfo() {
@@ -162,5 +162,5 @@ if (!accessToken) {
         })
       }
     })
-}
+  }
 }

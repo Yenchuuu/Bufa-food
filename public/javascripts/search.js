@@ -201,5 +201,5 @@ $('#submit_foodInfo').click(async function () {
 
 $('#nav-profile-change').click(() => {
   localStorage.clear()
-  window.location.href = '/index.html'
+  window.location.href = '/'
 })

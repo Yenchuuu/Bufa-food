@@ -207,6 +207,6 @@ if (accessToken) {
 
   $('#nav-profile-change').click(() => {
     localStorage.clear()
-    window.location.href = '/index.html'
+    window.location.href = '/'
   })
 }
