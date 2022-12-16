@@ -130,7 +130,7 @@ const setUserTarget = async (req, res) => {
   if (!birthday || !height || !weight || !gender || !dietGoal || !activityLevel || !goalCalories || !goalCarbs || !goalProtein || !goalFat || !TDEE) return res.status(400).json({ errorMessage: 'imcomplete info' })
 
   /* 確認所有數字項之格式皆正確 */
-  if (!Number.isInteger(height) || !Number.isInteger(weight) || !Number.isInteger(gender) || !Number.isInteger(dietGoal) || !Number.isInteger(activityLevel) || !Number.isInteger(goalCalories) || !Number.isInteger(goalCarbs) || !Number.isInteger(goalProtein) || !Number.isInteger(goalFat) || !Number.isInteger(TDEE) || !util.isValidDate(birthday)) return res.status(400).json({ errorMessage: 'incorrect format' })
+  if (!Number.isInteger(parseInt(height)) || !Number.isInteger(parseInt(weight)) || !Number.isInteger(gender) || !Number.isInteger(dietGoal) || !Number.isInteger(activityLevel) || !Number.isInteger(goalCalories) || !Number.isInteger(goalCarbs) || !Number.isInteger(goalProtein) || !Number.isInteger(goalFat) || !Number.isInteger(TDEE) || !util.isValidDate(birthday)) return res.status(400).json({ errorMessage: 'incorrect format' })
 
   const userInfo = { birthday, height, weight, gender, dietGoal, activityLevel, goalCalories, goalCarbs, goalProtein, goalFat, TDEE }
 
