@@ -1,4 +1,4 @@
-# BUFA FOOD
+# <img width="35px" src="https://user-images.githubusercontent.com/108877977/208165619-9ac79e89-8c6e-4916-bb92-22b5960efdad.png"> BUFA FOOD 
 
 ### Description
 
@@ -86,10 +86,12 @@ Aim to solve the problem which people usually don’t know what to eat, how to e
     
 - Others
     
+    `Jest/ run unit test & integration test`
+    
     `Web Crawling with Node.js` 
     
     `user-based collaborative filtering algorithm`
     
     > Calculate the Euclidean distance to find out the most related user with similar preferences for food recommendation.  
-      <img width="300px" src="https://user-images.githubusercontent.com/108877977/207765886-43ab1f2b-8612-426e-9804-0c6013c50c43.jpeg" /> <img width="300px" src="https://user-images.githubusercontent.com/108877977/207765856-9a132a74-ceb6-4df4-bb15-f3cd5b1ef876.jpeg" /> 
+      <img width="300px" height="200px" src="https://user-images.githubusercontent.com/108877977/207765886-43ab1f2b-8612-426e-9804-0c6013c50c43.jpeg" /> <img width="300px" height="200px" src="https://user-images.githubusercontent.com/108877977/207765856-9a132a74-ceb6-4df4-bb15-f3cd5b1ef876.jpeg" /> 
 
