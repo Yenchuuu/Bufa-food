@@ -1,12 +1,9 @@
-const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const User = require('../model/user_model')
-const port = process.env.PORT
+const moment = require('moment')
 const { TOKEN_SECRET } = process.env
-const { promisify } = require('util')
 /* 圖片上傳--S3相關 */
 const multer = require('multer')
-const { uploadFile } = require('./s3')
 
 const wrapAsync = (fn) => {
   return function (req, res, next) {
@@ -16,37 +13,32 @@ const wrapAsync = (fn) => {
   }
 }
 
-// FIXME: 不用多包一層fn、.send應該改成.JSON
-const authentication = () => {
-  return async function (req, res, next) {
-    let accessToken = req.get('Authorization')
-    if (!accessToken) {
-      res.status(401).send({ error: 'Unauthenticated' })
-      return
-    }
+async function authentication(req, res, next) {
+  let accessToken = req.get('Authorization')
+  if (!accessToken) {
+    res.status(401).json({ error: 'Unauthenticated' })
+    return
+  }
 
-    accessToken = accessToken.replace('Bearer ', '')
-    if (accessToken === 'null') {
-      res.status(401).send({ error: 'Unauthenticated' })
+  accessToken = accessToken.replace('Bearer ', '')
+  if (accessToken === 'null') {
+    res.status(401).json({ error: 'Unauthenticated' })
+  }
+  try {
+    const user = jwt.verify(accessToken, TOKEN_SECRET)
+    req.user = user
+    // console.log('user', user)
+    const [userDetail] = await User.getUserDetail(user.email)
+    if (!userDetail) {
+      res.status(401).json({ error: 'Invalid token' })
+      // } else {
+      // req.user.id = userDetail.id
     }
-    try {
-      // 為何要await promisify？因為他本身就是同步啊 cb才需要這樣包
-      const user = await promisify(jwt.verify)(accessToken, TOKEN_SECRET)
-      req.user = user
-      // console.log('user', user)
-      const userDetail = await User.getUserDetail(user.email)
-      if (!userDetail) {
-        // FIXME: 應該也是401
-        res.status(400).send({ error: 'Invalid token' })
-      } else {
-        req.user.id = userDetail.id
-        next()
-      }
-      return
-    } catch (err) {
-      console.error(err)
-      res.status(403).send({ error: 'Forbidden' })
-    }
+    next()
+    // return
+  } catch (err) {
+    console.error(err)
+    res.status(403).json({ error: 'Forbidden' })
   }
 }
 
@@ -57,9 +49,9 @@ const upload = multer({
   },
   fileFilter(req, file, cb) {
     /* 只接受三種圖片格式 */
-    // FIXME: 格式錯誤要用error handler接起來
-    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-      cb(new Error('請上傳圖片格式'))
+    const imageType = ['image/jpg', 'image/jpeg', 'image/png']
+    if (!imageType.includes(file.mimetype)) {
+      return cb(null, false, new Error('請上傳圖片格式'))
     }
     cb(null, true)
   },
@@ -74,4 +66,12 @@ const upload = multer({
   })
 })
 
-module.exports = { wrapAsync, authentication, upload }
+const isValidDate = (dateString) => {
+  const regEx = /^\d{4}-\d{2}-\d{2}$/
+  return dateString.match(regEx) != null
+}
+
+/* 日期設定為台灣時區 */
+const dateOfToday = moment().utc().format('YYYY-MM-DD')
+
+module.exports = { wrapAsync, authentication, upload, isValidDate, dateOfToday }
