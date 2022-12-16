@@ -104,8 +104,8 @@ if (!accessToken) {
       date = moment().format('YYYY-MM-DD')
     }
     const getDailyRecord = await axios.get(`/api/1.0/food/diary?date=${date}`, { headers: { Authorization: `Bearer ${accessToken}` } })
-    // console.log('getDailyRecord', getDailyRecord)
-    if (getDailyRecord.data.mealRecords.length !== 0) {
+    console.log('getDailyRecord', getDailyRecord)
+    if (getDailyRecord.data.caloriesTotal !== 0) {
       Swal.fire({
         icon: 'warning',
         text: '當日已有飲食紀錄，請使用上方列表選擇推薦單餐喔！'
@@ -487,4 +487,14 @@ if (!accessToken) {
     $('#diffProtein').append(diffProtein)
     $('#diffFat').append(diffFat)
   }
+
+  /* 頁面導覽 */
+  $('#hint').click(function () {
+    $('.pop-background').fadeIn(100)
+    $('.pop-window').fadeIn(100)
+  })
+  $('.pop-background').click(function () {
+    $('.pop-background').fadeOut(200)
+    $('.pop-window').fadeOut(200)
+  })
 }

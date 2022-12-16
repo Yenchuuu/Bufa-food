@@ -16,6 +16,7 @@ const wrapAsync = (fn) => {
   }
 }
 
+// FIXME: 不用多包一層fn、.send應該改成.JSON
 const authentication = () => {
   return async function (req, res, next) {
     let accessToken = req.get('Authorization')
@@ -29,11 +30,13 @@ const authentication = () => {
       res.status(401).send({ error: 'Unauthenticated' })
     }
     try {
+      // 為何要await promisify？因為他本身就是同步啊 cb才需要這樣包
       const user = await promisify(jwt.verify)(accessToken, TOKEN_SECRET)
       req.user = user
       // console.log('user', user)
       const userDetail = await User.getUserDetail(user.email)
       if (!userDetail) {
+        // FIXME: 應該也是401
         res.status(400).send({ error: 'Invalid token' })
       } else {
         req.user.id = userDetail.id
@@ -54,6 +57,7 @@ const upload = multer({
   },
   fileFilter(req, file, cb) {
     /* 只接受三種圖片格式 */
+    // FIXME: 格式錯誤要用error handler接起來
     if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
       cb(new Error('請上傳圖片格式'))
     }

@@ -91,6 +91,7 @@ const signUp = async (provider, name, email, password) => {
       access_expired: TOKEN_EXPIRE,
       login_at: loginAt
     }
+    // FIXME: 應該不需要
     const accessToken = jwt.sign(
       {
         provider: user.provider,

@@ -4,6 +4,7 @@ const { wrapAsync, authentication } = require('../utils/util')
 const { addMealRecord, updateMealRecord, deleteMealRecord, getDiaryRecord, generateSingleMeal, generateMultipleMeals, getFoodFromKeyword, getFoodTrend, getUserRecommendation, getFoodDetail, createFoodDetail, updateFoodPreference } = require('../controller/food_controller')
 
 /* Diet plan page */
+// TODO: 相同開頭可以刪減
 router.route('/food/diary').get(authentication(), wrapAsync(getDiaryRecord))
 router.route('/food/diary').patch(authentication(), wrapAsync(updateMealRecord))
 router.route('/food/diary').delete(authentication(), wrapAsync(deleteMealRecord))
