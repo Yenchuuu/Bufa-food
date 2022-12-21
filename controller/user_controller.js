@@ -171,13 +171,13 @@ const getUserProfile = async (req, res) => {
 const uploadUserImage = async (req, res) => {
   const id = parseInt(req.params.id)
   const { id: userId } = req.user
-  const img = req.file.path
+  const img = req.file.filename
 
   /* 把使用者照片上傳至S3，並於本機刪除 */
   // console.log('userPhoto_result:', uploadPhoto)
   await uploadFile(req.file)
   // console.log('userPhoto_result:', uploadPhoto)
-  await unlinkFile(img)
+  await unlinkFile(req.file.path)
   if (id === userId) {
     await User.uploadUserImage(img, userId)
     return res.status(200).json({ message: 'User image uploaded successfully.' })
