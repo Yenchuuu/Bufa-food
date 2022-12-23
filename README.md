@@ -60,7 +60,7 @@ Aim to solve the problem which people usually don’t know what to eat, how to e
     
 - #### Table schema
 
-    <img width="900px" src="https://user-images.githubusercontent.com/108877977/207765437-380284a4-9cd4-49e7-b7e0-2a8a97fedcb3.png" />
+    <img width="900px" src="https://user-images.githubusercontent.com/108877977/209272323-2e4fd837-d2f4-43d0-9553-1b761af4ce66.png" />
 
 
 ### Technologies
