@@ -19,15 +19,69 @@
 </head>
 <body>
   <script>
-  window.fbAsyncInit = function () {
-    FB.init({
-      appId: '1510461219452107',
-      cookie: true,
-      xfbml: true,
-      version: 'v15.0'
-    })
-  }
+    window.fbAsyncInit = function () {
+      FB.init({
+        appId: '1510461219452107',
+        cookie: true,
+        xfbml: true,
+        version: 'v15.0'
+      })
+    }
+    async function statusChangeCallback(response) {
+      // Called with the results from FB.getLoginStatus().
+      // console.log('statusChangeCallback')
+      // console.log(response) // The current login status of the person.
+      if (response.status === 'connected') {
+        // Logged into your webpage and Facebook.
+        testAPI()
+        const fbAccessToken = response.authResponse.accessToken
+        const data = await axios({
+          method: 'post',
+          url: '/api/1.0/user/fbsignin',
+          data: { provider: 'facebook', access_token: fbAccessToken }
+        })
+        // console.log('data: ', data);
+        const userInfo = data.data.data
+        const accessToken = userInfo.access_token
+        /* 輸入正確資訊時產生jwt token，進入user diary page */
+        window.localStorage.setItem('accessToken', accessToken)
+        window.localStorage.setItem('userName', userInfo.user.name)
+        window.localStorage.setItem('userId', userInfo.user.id)
+        window.localStorage.setItem('userEmail', userInfo.user.email)
+        const bodyInfo = await axios.get('/api/1.0/user/profile', { headers: { Authorization: `Bearer ${accessToken}` } })
+        Swal.fire({
+          icon: 'success',
+          text: '登入成功'
+        }).then((result) => {
+          if (!bodyInfo.data.data.TDEE) return window.location.href = '/target.html'
+          return window.location.href = '/diary.html'
+        })
+      } else {
+        // Not logged into your webpage or we are unable to tell.
+        document.getElementById('status').innerHTML =
+          'Please log ' + 'into this webpage.'
+      }
+    }
+
+    function checkLoginState() {
+      // Called when a person is finished with the Login Button.
+      FB.getLoginStatus(function (response) {
+        // See the onlogin handler
+        statusChangeCallback(response)
+      })
+    }
+
+    function testAPI() {
+      // Testing Graph API after login.  See statusChangeCallback() for when this call is made.
+      // console.log('Welcome!  Fetching your information.... ')
+      FB.api('/me', function (response) {
+        // console.log('Successful login for: ' + response.name)
+        document.getElementById('status').innerHTML =
+          'Thanks for logging in, ' + response.name + '!'
+      })
+    }
   </script>
+    
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
