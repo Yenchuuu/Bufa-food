@@ -176,7 +176,7 @@ const uploadUserImage = async (req, res) => {
 
   /* 把使用者照片上傳至S3，並於本機刪除 */
   await uploadFile(req.file)
-  // await unlinkFile(imgPath)
+  await unlinkFile(imgPath)
   if (id === userId) {
     await User.uploadUserImage(img, userId)
     return res.status(200).json({ message: 'User image uploaded successfully.' })
