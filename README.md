@@ -21,19 +21,20 @@ Aim to solve the problem which people usually don’t know what to eat, how to e
 
 - [x] Record daily meals.
 - [x] Recommend customized healthy meal plans.
-- [x] Weekly statistical diet.
+- [x] Weekly statistical summary of diet records.
 
 ### Instructions
 
 - Get single meal plan recommendation
-    - Set target  as nutrition
+    - Set nutrition as target
+
       
       BUFA FOOD would generate a recommended food which fit the nutrition value input by the user.
       
         <img src="https://user-images.githubusercontent.com/108877977/207764174-ea0a8596-9e2f-422c-bfbf-7278845caefd.gif" width="900px" />
         
     
-    - Set target as calories
+    - Set calories as target
         
       BUFA FOOD would generate a recommended meal which fit the calories value input by the user.
         
@@ -49,7 +50,7 @@ Aim to solve the problem which people usually don’t know what to eat, how to e
     
     Click the place outside menu to change date once the date has been chosen.
     
-    <img src="https://user-images.githubusercontent.com/108877977/207764150-9110e1f8-8ca1-4e05-8dff-b2e00820b231.gif" width="900px" />
+    <img src="https://user-images.githubusercontent.com/108877977/208287440-5ad03b6e-6ab4-42d9-8c40-4a2fc4c10927.gif" width="900px" />
         
 ### Architecture
 
@@ -59,7 +60,7 @@ Aim to solve the problem which people usually don’t know what to eat, how to e
     
 - #### Table schema
 
-    <img width="900px" src="https://user-images.githubusercontent.com/108877977/207765437-380284a4-9cd4-49e7-b7e0-2a8a97fedcb3.png" />
+    <img width="900px" src="https://user-images.githubusercontent.com/108877977/209272323-2e4fd837-d2f4-43d0-9553-1b761af4ce66.png" />
 
 
 ### Technologies
