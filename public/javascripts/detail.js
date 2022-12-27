@@ -49,7 +49,7 @@ async function getFoodDetail(foodId) {
   }]
   const layout = { showlegend: false }
   pie = document.querySelector('#nutritionPie')
-  Plotly.newPlot(pie, pieData, layout, { displaylogo: false })
+  Plotly.newPlot(pie, pieData, layout, { displayModeBar: false })
 }
 
 $(document).ready(async function () {
@@ -121,8 +121,7 @@ async function updateInfo(iconBtn) {
     })
     return
   }
-  // console.log('foodName', foodName)
-  // if(btnVal === 'add_collection'){
+
   switch (btnVal) {
     case 'add_collection': {
       const data = await axios.get(`/api/1.0/user/preference?id=${userId}`, { headers: { Authorization: `Bearer ${accessToken}` } })
@@ -220,15 +219,6 @@ async function updateInfo(iconBtn) {
   }
 }
 
-// function updateInfo(iconBtn){
-// alert($(iconBtn).attr('id'))
-// }
-
-// $('#thumb_up').click(function() {
-//   const btn = $('#thumb_up').attr('id')
-//   alert('trigger worked!')
-// })
-
 /* 點選 + 時跳出的彈窗 */
 $('#add_diary').click(function () {
   if (!accessToken) {
@@ -268,11 +258,11 @@ $('#addMealRecord').click(async function () {
       icon: 'error',
       title: '請輸入有效數字'
     })
-  } else if (servingAmount > 500) {
-    Swal.fire(
-      '真的要吃這麼多嗎？請注意營養均衡喔～',
-      'question'
-    )
+  } else if (servingAmount > 5000) {
+    Swal.fire({
+      icon: 'question',
+      title: '真的要吃這麼多嗎？請注意營養均衡喔～'
+    })
   } else {
     try {
       await axios.post(`/api/1.0/food/mealrecord?id=${foodId}`, { userId, foodId, meal, servingAmount, date }, { headers: { Authorization: `Bearer ${accessToken}` } })
